@@ -113,7 +113,7 @@ function createLessonCard(lesson) {
   action.className = 'module-action';
   const time = document.createElement('span');
   time.className = 'module-time';
-  time.textContent = lesson.unavailable ? 'Segera hadir' : '4 jam';
+  time.textContent = lesson.unavailable ? 'Segera hadir' : `${lesson.durationHours || 4} jam`;
   action.append(time);
   if (!lesson.unavailable) {
     const open = document.createElement('span');

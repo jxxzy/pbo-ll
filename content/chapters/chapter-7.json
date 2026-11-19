@@ -1,123 +1,227 @@
 {
-  "introduction": "Data inventaris lebih berguna ketika dapat disaring, diurutkan, dan diproyeksikan secara ringkas. LINQ menyediakan operasi tersebut; async/await membantu operasi I/O tidak memblokir thread ketika aplikasi mulai berinteraksi dengan file, database, atau API.",
+  "introduction": "Bab ini merapikan aplikasi gudang dengan memisahkan tanggung jawab class, mengenalkan Factory Pattern sederhana untuk membuat barang, dan melakukan refactoring agar kode lebih mudah dikembangkan.",
   "objectives": [
-    "Memakai Where, OrderBy, Select, dan GroupBy pada koleksi.",
-    "Memahami deferred execution dan kapan query dimaterialisasi.",
-    "Menerapkan async/await pada operasi I/O berbasis Task."
+    "Menerapkan Single Responsibility Principle dan memahami Open-Closed Principle.",
+    "Memisahkan logika input, pencetakan, dan pembuatan object barang.",
+    "Melakukan refactoring tanpa mengubah perilaku program serta memakai interface."
   ],
   "sections": [
     {
-      "title": "Saring dan urutkan dengan LINQ",
-      "body": "Query LINQ dapat ditulis dengan method chaining. Where memilih elemen yang cocok, OrderBy mengurutkan, lalu ToList menjalankan query dan menghasilkan daftar baru.",
-      "codeTitle": "Daftar stok rendah",
+      "title": "Pisahkan class berdasarkan tanggung jawab",
+      "body": "Single Responsibility Principle (SRP) mendorong satu class memiliki satu tanggung jawab utama. Open-Closed Principle (OCP) menganjurkan desain yang dapat diperluas tanpa terus mengubah kode yang sudah stabil.",
+      "codeTitle": "Pembagian tanggung jawab",
       "code": [
-        "var stokRendah = daftarBarang",
-        "    .Where(barang => barang.JumlahStok < 20)",
-        "    .OrderBy(barang => barang.JumlahStok)",
-        "    .ToList();",
-        "",
-        "foreach (var barang in stokRendah)",
-        "    Console.WriteLine($\"{barang.KodeBarang}: {barang.JumlahStok}\");"
-      ]
+        "InputBarang       // membaca dan memvalidasi data input",
+        "PencetakBarang    // menampilkan informasi barang",
+        "BarangFactory    // membuat object berdasarkan jenis",
+        "Barang           // menyimpan data dan aturan domain"
+      ],
+      "note": "Memisahkan class membuat perubahan dan pengujian lebih terarah; jangan mencampur input, pencetakan, dan pembuatan object dalam Main()."
     },
     {
-      "title": "Pilih bentuk data yang diperlukan",
-      "body": "Select memproyeksikan entity menjadi bentuk ringkas. GroupBy dapat merangkum data per kategori. Query LINQ sering dievaluasi saat hasil benar-benar dibaca; ToList membuat snapshot saat itu.",
-      "codeTitle": "Ringkasan per kategori",
+      "title": "Pisahkan pembuatan object dengan Factory",
+      "body": "Factory menempatkan logika instansiasi di satu tempat. Main() cukup meminta barang berdasarkan tipe, sementara detail constructor tidak perlu tersebar di berbagai bagian program.",
+      "codeTitle": "Factories/BarangFactory.cs",
       "code": [
-        "var ringkasan = daftarBarang",
-        "    .GroupBy(barang => barang.Kategori)",
-        "    .Select(grup => new",
-        "    {",
-        "        Kategori = grup.Key,",
-        "        JumlahJenis = grup.Count(),",
-        "        TotalStok = grup.Sum(barang => barang.JumlahStok)",
-        "    })",
-        "    .OrderBy(item => item.Kategori)",
-        "    .ToList();"
-      ]
-    },
-    {
-      "title": "Tunggu operasi I/O dengan async/await",
-      "body": "Operasi seperti membaca file atau database dapat memerlukan waktu. API async mengembalikan Task; await menunggu hasil tanpa memblokir thread pemanggil. Jangan memakai async hanya untuk pekerjaan CPU yang tidak membutuhkan I/O.",
-      "codeTitle": "Membaca JSON secara async",
-      "code": [
-        "public static async Task<List<Barang>> MuatAsync(",
-        "    string path, CancellationToken cancellationToken = default)",
+        "public static class BarangFactory",
         "{",
-        "    if (!File.Exists(path)) return new List<Barang>();",
-        "    var json = await File.ReadAllTextAsync(path, cancellationToken);",
-        "    return JsonSerializer.Deserialize<List<Barang>>(json)",
-        "        ?? throw new InvalidDataException(\"Data JSON bukan daftar barang.\");",
+        "    public static Barang BuatBarang(string tipe)",
+        "    {",
+        "        if (tipe == \"Elektronik\")",
+        "            return new Barang(\"ELK001\", \"Scanner\", 10, \"Elektronik\");",
+        "        if (tipe == \"Makanan\")",
+        "            return new Barang(\"MAK001\", \"Susu\", 50, \"Makanan\");",
+        "        return new Barang(\"GEN001\", \"Barang Umum\", 20, \"Umum\");",
+        "    }",
         "}"
       ],
-      "note": "Gunakan ToListAsync pada query EF Core di Bab 9; jangan memanggil ToList() sinkron pada request web untuk query database."
+      "note": "Ini Factory sederhana sesuai modul. Jika tipe terus bertambah, pertimbangkan registrasi creator atau factory per tipe agar logika inti tidak terus dimodifikasi."
+    },
+    {
+      "title": "Refactor validasi input ke helper",
+      "body": "Memindahkan parsing dan validasi stok dari Main() ke InputHelper mengurangi tanggung jawab Program.cs. Method helper dapat mengulang input sampai mendapat angka yang valid dan tidak negatif.",
+      "codeTitle": "Helpers/InputHelper.cs",
+      "code": [
+        "public static class InputHelper",
+        "{",
+        "    public static int AmbilStokValid()",
+        "    {",
+        "        while (true)",
+        "        {",
+        "            Console.Write(\"Jumlah Stok: \");",
+        "            string input = Console.ReadLine() ?? string.Empty;",
+        "            if (int.TryParse(input, out int stok) && stok >= 0)",
+        "                return stok;",
+        "            Console.WriteLine(\"Masukkan angka nol atau lebih.\");",
+        "        }",
+        "    }",
+        "}"
+      ],
+      "note": "Refactoring mengubah struktur internal tanpa mengubah hasil yang diharapkan dari program."
+    },
+    {
+      "title": "Gunakan interface untuk pencetakan",
+      "body": "Interface IBarangPrinter menetapkan kontrak Cetak. Program dapat memakai implementasi console sekarang dan menggantinya dengan pencetak file atau format lain tanpa bergantung langsung pada kelas implementasi.",
+      "codeTitle": "Interfaces/IBarangPrinter.cs",
+      "code": [
+        "public interface IBarangPrinter",
+        "{",
+        "    void Cetak(Barang barang);",
+        "}",
+        "",
+        "public class PencetakBarang : IBarangPrinter",
+        "{",
+        "    public void Cetak(Barang barang)",
+        "    {",
+        "        Console.WriteLine($\"Kode: {barang.KodeBarang}\");",
+        "        Console.WriteLine($\"Nama: {barang.NamaBarang}\");",
+        "        Console.WriteLine($\"Stok: {barang.JumlahStok}\");",
+        "        Console.WriteLine($\"Kategori: {barang.Kategori}\");",
+        "    }",
+        "}"
+      ]
     }
   ],
   "practice": {
-    "title": "Praktikum: laporan inventaris yang responsif",
+    "title": "Praktikum: modularisasi sistem gudang",
     "steps": [
-      "Siapkan List<Barang> dengan beberapa kategori dan nilai stok yang bervariasi.",
-      "Buat query stok rendah dengan Where dan urutkan dengan OrderBy.",
-      "Buat ringkasan jumlah jenis dan total stok per kategori dengan GroupBy dan Select.",
-      "Materialisasikan hasil saat dibutuhkan dengan ToList dan tampilkan melalui foreach.",
-      "Baca file JSON dengan File.ReadAllTextAsync dan await; terapkan CancellationToken.",
-      "Uji daftar kosong dan data JSON rusak agar keduanya tidak tertukar."
+      "Salin project Modul6_GudangOOP menjadi Modul7_GudangOOP.",
+      "Pisahkan logika input ke InputBarang dan tampilan barang ke PencetakBarang.",
+      "Buat BarangFactory.BuatBarang(tipe) untuk menghasilkan barang Elektronik, Makanan, atau Umum.",
+      "Pindahkan validasi jumlah stok dari Program.cs ke InputHelper.AmbilStokValid().",
+      "Buat interface IBarangPrinter dan implementasikan pada PencetakBarang.",
+      "Gunakan factory dan interface dari Program.cs, lalu uji setiap jenis barang."
     ],
-    "deliverable": "Program yang menghasilkan laporan stok/kategori dan membaca data JSON secara asynchronous.",
+    "deliverable": "Aplikasi gudang modular dengan factory, helper validasi, serta pencetak yang dapat diganti melalui interface.",
     "solutions": [
       {
-        "title": "Laporan menggunakan LINQ",
-        "explanation": "Where memfilter, OrderBy mengurutkan, Select membentuk DTO laporan, dan GroupBy merangkum data per kategori.",
-        "codeTitle": "Program.cs",
+        "title": "Helpers/InputHelper.cs",
+        "explanation": "Helper mengulang permintaan sampai input dapat diparse menjadi angka stok nol atau lebih.",
+        "codeTitle": "InputHelper.cs",
         "code": [
-          "var stokRendah = daftarBarang",
-          "    .Where(b => b.JumlahStok < 20)",
-          "    .OrderBy(b => b.JumlahStok)",
-          "    .Select(b => new { b.KodeBarang, b.NamaBarang, b.JumlahStok })",
-          "    .ToList();",
+          "using System;",
           "",
-          "var perKategori = daftarBarang",
-          "    .GroupBy(b => b.Kategori)",
-          "    .Select(g => new { Kategori = g.Key, Jenis = g.Count(), Stok = g.Sum(b => b.JumlahStok) })",
-          "    .OrderBy(x => x.Kategori)",
-          "    .ToList();",
-          "",
-          "foreach (var b in stokRendah)",
-          "    Console.WriteLine($\"{b.KodeBarang} {b.NamaBarang}: {b.JumlahStok}\");",
-          "foreach (var g in perKategori)",
-          "    Console.WriteLine($\"{g.Kategori}: {g.Jenis} jenis, stok {g.Stok}\");"
-        ]
-      },
-      {
-        "title": "Membaca file JSON secara asynchronous",
-        "explanation": "CancellationToken diteruskan ke API I/O sehingga pemanggil dapat membatalkan operasi yang sudah tidak diperlukan.",
-        "codeTitle": "Services/PenyimpananBarang.cs",
-        "code": [
-          "using System.Text.Json;",
-          "",
-          "public static class PenyimpananBarang",
+          "public static class InputHelper",
           "{",
-          "    public static async Task<List<Barang>> MuatAsync(",
-          "        string path, CancellationToken cancellationToken = default)",
+          "    public static int AmbilStokValid()",
           "    {",
-          "        if (!File.Exists(path)) return new List<Barang>();",
-          "        var json = await File.ReadAllTextAsync(path, cancellationToken);",
-          "        return JsonSerializer.Deserialize<List<Barang>>(json)",
-          "            ?? throw new InvalidDataException(\"Data JSON bukan daftar barang.\");",
+          "        while (true)",
+          "        {",
+          "            Console.Write(\"Jumlah Stok: \");",
+          "            string input = Console.ReadLine() ?? string.Empty;",
+          "            if (int.TryParse(input, out int stok) && stok >= 0)",
+          "                return stok;",
+          "            Console.WriteLine(\"Input harus berupa angka nol atau lebih.\");",
+          "        }",
           "    }",
           "}"
         ]
       },
       {
-        "title": "Jalankan service dan query di Program.cs",
-        "explanation": "Top-level statements memanggil helper asynchronous lalu memproses data yang sudah dibaca dengan LINQ.",
+        "title": "Services/InputBarang.cs",
+        "explanation": "InputBarang hanya bertanggung jawab membaca data, sedangkan aturan parsing stok digunakan kembali dari InputHelper.",
+        "codeTitle": "InputBarang.cs",
+        "code": [
+          "using System;",
+          "",
+          "public class InputBarang",
+          "{",
+          "    public Barang AmbilInput()",
+          "    {",
+          "        Console.Write(\"Kode: \");",
+          "        string kode = Console.ReadLine()?.Trim() ?? string.Empty;",
+          "        Console.Write(\"Nama: \");",
+          "        string nama = Console.ReadLine()?.Trim() ?? string.Empty;",
+          "        int stok = InputHelper.AmbilStokValid();",
+          "        Console.Write(\"Kategori: \");",
+          "        string kategori = Console.ReadLine()?.Trim() ?? \"Umum\";",
+          "        return new Barang(kode, nama, stok, kategori);",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Factories/BarangFactory.cs",
+        "explanation": "Factory memusatkan aturan pembuatan object untuk tiga jenis barang yang digunakan pada praktikum.",
+        "codeTitle": "BarangFactory.cs",
+        "code": [
+          "public static class BarangFactory",
+          "{",
+          "    public static Barang BuatBarang(string tipe)",
+          "    {",
+          "        if (tipe == \"Elektronik\")",
+          "            return new Barang(\"ELK001\", \"Scanner\", 10, \"Elektronik\");",
+          "        if (tipe == \"Makanan\")",
+          "            return new Barang(\"MAK001\", \"Susu\", 50, \"Makanan\");",
+          "        return new Barang(\"GEN001\", \"Barang Umum\", 20, \"Umum\");",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Interfaces/IBarangPrinter.cs dan Services/PencetakBarang.cs",
+        "explanation": "IBarangPrinter mendefinisikan kontrak cetak. Implementasi console dapat diganti tanpa mengubah pemanggil yang memakai interface.",
+        "codeTitle": "IBarangPrinter.cs dan PencetakBarang.cs",
+        "code": [
+          "public interface IBarangPrinter",
+          "{",
+          "    void Cetak(Barang barang);",
+          "}",
+          "",
+          "public class PencetakBarang : IBarangPrinter",
+          "{",
+          "    public void Cetak(Barang barang)",
+          "    {",
+          "        Console.WriteLine(\"==== INFORMASI BARANG ====\");",
+          "        Console.WriteLine($\"Kode     : {barang.KodeBarang}\");",
+          "        Console.WriteLine($\"Nama     : {barang.NamaBarang}\");",
+          "        Console.WriteLine($\"Stok     : {barang.JumlahStok}\");",
+          "        Console.WriteLine($\"Kategori : {barang.Kategori}\");",
+          "        Console.WriteLine(\"==========================\");",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "BarangElektronik, BarangMakanan, dan Factory",
+        "explanation": "Jawaban esai post-test: Factory memilih subclass yang sesuai sehingga pemanggil tidak perlu mengetahui detail constructor subclass.",
+        "codeTitle": "BarangFactory.cs",
+        "code": [
+          "public class BarangElektronik : Barang",
+          "{",
+          "    public BarangElektronik(string kode, string nama, int stok)",
+          "        : base(kode, nama, stok, \"Elektronik\") { }",
+          "}",
+          "",
+          "public class BarangMakanan : Barang",
+          "{",
+          "    public BarangMakanan(string kode, string nama, int stok)",
+          "        : base(kode, nama, stok, \"Makanan\") { }",
+          "}",
+          "",
+          "public static class BarangFactory",
+          "{",
+          "    public static Barang BuatBarang(string tipe) => tipe switch",
+          "    {",
+          "        \"Elektronik\" => new BarangElektronik(\"ELK001\", \"Scanner\", 10),",
+          "        \"Makanan\" => new BarangMakanan(\"MAK001\", \"Susu\", 50),",
+          "        _ => new Barang(\"GEN001\", \"Barang Umum\", 20, \"Umum\")",
+          "    };",
+          "}"
+        ]
+      },
+      {
+        "title": "Program.cs: gunakan factory dan interface",
+        "explanation": "Program utama mengorkestrasi service. Detail pembuatan barang dan pencetakan berada pada class terpisah.",
         "codeTitle": "Program.cs",
         "code": [
-          "var daftar = await PenyimpananBarang.MuatAsync(\"barang.json\");",
-          "var stokRendah = daftar.Where(b => b.JumlahStok < 20).ToList();",
-          "foreach (var barang in stokRendah)",
-          "    Console.WriteLine($\"{barang.KodeBarang}: {barang.JumlahStok}\");"
+          "var barang = BarangFactory.BuatBarang(\"Elektronik\");",
+          "IBarangPrinter printer = new PencetakBarang();",
+          "printer.Cetak(barang);",
+          "",
+          "var input = new InputBarang();",
+          "Barang barangBaru = input.AmbilInput();",
+          "printer.Cetak(barangBaru);"
         ]
       }
     ]
@@ -125,36 +229,37 @@
   "assessments": {
     "pretest": {
       "multipleChoice": [
-        { "question": "Method LINQ mana yang memilih elemen sesuai kondisi?", "answer": "B — Where.", "explanation": "Where menerima predicate dan hanya meneruskan elemen yang memenuhi kondisi." },
-        { "question": "Apa hasil OrderBy(x => x.Nama)?", "answer": "C — Urutan elemen baru berdasarkan nilai Nama secara naik.", "explanation": "OrderBy menghasilkan urutan terurut dan tidak mengubah koleksi sumber." },
-        { "question": "Apa fungsi Select pada LINQ?", "answer": "A — Memproyeksikan setiap elemen ke bentuk/tipe hasil lain.", "explanation": "Select cocok untuk membentuk DTO atau memilih satu properti." }
+        { "question": "Apa tujuan Single Responsibility Principle?", "answer": "B — Memisahkan setiap class berdasarkan satu fungsi utama.", "explanation": "Class dengan satu tanggung jawab lebih mudah dirawat dan diuji." },
+        { "question": "Untuk apa Factory Pattern digunakan?", "answer": "C — Mengatur pembuatan object berdasarkan parameter.", "explanation": "Factory memisahkan proses instansiasi dari logika utama." },
+        { "question": "Apa arti Open-Closed Principle?", "answer": "C — Fitur baru dapat ditambahkan tanpa mengubah class lama terus-menerus.", "explanation": "Desain sebaiknya terbuka untuk ekstensi dan tertutup untuk modifikasi." },
+        { "question": "Mana contoh code smell yang melanggar prinsip desain?", "answer": "C — Semua logic di-hardcode dalam Main().", "explanation": "Main yang menangani semua tanggung jawab sulit dikembangkan dan diuji." },
+        { "question": "Apa salah satu manfaat Factory?", "answer": "C — Memisahkan proses instansiasi object dari logika utama.", "explanation": "Client meminta object melalui factory tanpa menumpuk constructor di Main()." },
+        { "question": "Pembagian class mana yang sesuai SRP untuk sistem gudang?", "answer": "B — GudangManager, InputBarang, dan PencetakLaporan.", "explanation": "Nama tersebut menunjukkan tanggung jawab pengelolaan, input, dan pencetakan yang terpisah." },
+        { "question": "Apa tujuan refactoring?", "answer": "C — Merapikan struktur kode tanpa mengubah perilaku.", "explanation": "Refactoring memperbaiki desain internal sambil mempertahankan fungsi program." },
+        { "question": "Keyword apa yang digunakan untuk mendeklarasikan interface di C#?", "answer": "B — interface.", "explanation": "Contoh deklarasinya adalah `public interface IBarangPrinter`." }
       ],
       "essay": [
-        { "question": "Apa manfaat LINQ untuk laporan gudang?", "answer": "LINQ membuat filter, pengurutan, proyeksi, dan agregasi koleksi terbaca serta tersusun sebagai query, tanpa menulis loop bersarang berulang." },
-        { "question": "Apa arti deferred execution?", "answer": "Sebagian query LINQ baru berjalan saat hasilnya dienumerasi. ToList atau operasi agregat memicu evaluasi; perubahan sumber sebelum evaluasi dapat memengaruhi hasil." }
+        { "question": "Jelaskan Factory Pattern dan kapan sebaiknya digunakan.", "answer": "Factory memusatkan pembuatan object dan memilih jenis object berdasarkan kebutuhan atau parameter. Gunakan saat client tidak perlu mengetahui detail constructor atau terdapat beberapa variasi object yang dibuat." },
+        { "question": "Apa risiko jika satu class memiliki terlalu banyak tanggung jawab?", "answer": "Perubahan pada satu fitur dapat memengaruhi bagian lain, class sulit diuji dan digunakan kembali, serta rawan melanggar SRP. Pisahkan tanggung jawab ke class yang lebih fokus." }
       ]
     },
     "posttest": {
-      "multipleChoice": [
-        { "question": "Apa yang dilakukan GroupBy(k => k.Kategori)?", "answer": "B — Mengelompokkan elemen berdasarkan nilai kategori.", "explanation": "Setiap grup menyediakan key dan elemen yang termasuk dalam grup tersebut." },
-        { "question": "Apa yang dilakukan await pada Task I/O?", "answer": "C — Menunggu penyelesaian operasi asynchronous tanpa memblokir thread selama menunggu.", "explanation": "Method async melanjutkan eksekusi setelah Task selesai dan menghasilkan nilai." },
-        { "question": "Kapan ToList digunakan pada query LINQ?", "answer": "A — Saat hasil perlu dievaluasi dan dimaterialisasi sebagai daftar.", "explanation": "ToList membuat snapshot hasil query pada saat dipanggil." }
-      ],
+      "multipleChoice": [],
       "essay": [
-        { "question": "Buat ringkasan jumlah jenis dan stok per kategori.", "answer": "Contoh: `var ringkasan = daftar.GroupBy(b => b.Kategori).Select(g => new { Kategori = g.Key, Jenis = g.Count(), TotalStok = g.Sum(b => b.JumlahStok) }).ToList();`. Hasil tiap baris mewakili satu kategori." },
-        { "question": "Mengapa operasi database web sebaiknya memakai async/await?", "answer": "Query database adalah I/O yang dapat menunggu jaringan atau disk. API async membebaskan thread request saat menunggu, meningkatkan skalabilitas; gunakan misalnya ToListAsync dan teruskan CancellationToken." }
+        { "question": "Buat Factory Pattern untuk membuat BarangElektronik dan BarangMakanan.", "answer": "Contoh: buat `BarangElektronik : Barang` dan `BarangMakanan : Barang`, lalu `BarangFactory.BuatBarang(tipe)` mengembalikan subclass yang sesuai. Contoh implementasi lengkap tersedia pada solusi praktikum." },
+        { "question": "Apa manfaat jangka panjang prinsip SOLID untuk sistem informasi gudang?", "answer": "Desain modular lebih mudah diuji, dipelihara, dan diperluas saat jenis barang atau kebutuhan berubah. Pemisahan tanggung jawab mengurangi dampak perubahan, sedangkan abstraksi membantu mengganti implementasi tanpa mengubah pemanggil." }
       ]
     }
   },
   "quiz": {
-    "question": "Mengapa query LINQ web perlu memakai ToListAsync saat mengambil data EF Core?",
+    "question": "Menurut Single Responsibility Principle, bagaimana sebaiknya tanggung jawab input dan pencetakan barang disusun?",
     "options": [
-      "Agar hasil database diurutkan otomatis.",
-      "Agar I/O database menunggu secara asynchronous tanpa memblokir thread request.",
-      "Agar seluruh data otomatis divalidasi.",
-      "Agar query tidak pernah dijalankan."
+      "Gabungkan semuanya dalam Main agar file lebih sedikit.",
+      "Pisahkan menjadi class dengan tanggung jawab utama masing-masing.",
+      "Buat semua method static dalam class Barang.",
+      "Gunakan inheritance untuk setiap baris input."
     ],
     "answer": 1,
-    "explanation": "ToListAsync menunggu I/O database secara asynchronous sehingga thread request dapat melayani pekerjaan lain."
+    "explanation": "Pemisahan tanggung jawab membuat input, pencetakan, dan model barang dapat diubah serta diuji secara terpisah."
   }
 }

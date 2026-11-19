@@ -7,7 +7,7 @@ Situs pembelajaran statis berbahasa Indonesia untuk materi C#, OOP, ASP.NET Core
 - Dashboard responsif dengan jalur belajar dan navigasi bab.
 - Pencarian materi (`/`), filter progres, mode terang/gelap, dan mode fokus.
 - Halaman belajar untuk seluruh Bab 1–11: tujuan, ringkasan materi, contoh kode, langkah praktikum, serta contoh penyelesaian.
-- Pembahasan pre-test, post-test, esai, dan tugas dari sembilan PDF yang tersedia; Bab 6–7 memiliki latihan tambahan berjawaban.
+- Pembahasan pre-test, post-test, esai, dan tugas dari seluruh 11 PDF.
 - Kuis interaktif, navigasi antar bab, salin kode, tautan PDF, serta progres lokal yang tersimpan di browser.
 - Workflow GitHub Actions untuk build dan deploy otomatis ke GitHub Pages.
 
@@ -41,7 +41,7 @@ python -m http.server 8000 --directory dist
 
 Buka `http://localhost:8000`.
 
-Build menghasilkan dashboard dan sebelas halaman bab di `dist/`. Bab 6 dan 7 memiliki materi penghubung orisinal karena PDF sumbernya kosong; materi tersebut diberi penanda agar tidak dikira sebagai transkripsi PDF.
+Build menghasilkan dashboard dan sebelas halaman bab di `dist/`, termasuk seluruh modul PDF Bab 1–11.
 
 ## Deploy ke GitHub Pages
 
@@ -54,4 +54,4 @@ Jalur aset relatif sehingga dapat dipublikasikan di root domain maupun URL repos
 
 ## Ketersediaan materi
 
-Bab 1–5 dan 8–11 memiliki modul PDF yang dapat dibuka dari halaman materi. PDF Bab 6 dan 7 kosong (0 byte), sehingga build tidak menerbitkannya sebagai aset unduhan; halaman penghubung tambahan membahas exception handling/file I/O dan LINQ/async-await serta menjelaskan keterbatasan sumbernya. Seluruh PDF yang tersedia memiliki pembahasan pre-test, post-test, dan contoh penyelesaian praktikum di halaman bab.
+Seluruh PDF Bab 1–11 dapat dibuka dari halaman materi. Bab 6 membahas exception handling dan File I/O; Bab 7 membahas SOLID, Factory Pattern, dan refactoring. Soal pada setiap modul dibahas, termasuk jawaban esai post-test Bab 7.

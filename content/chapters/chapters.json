@@ -48,21 +48,21 @@
     "chapter": 6,
     "title": "Exception Handling dan File I/O",
     "category": "C# Lanjutan",
-    "summary": "Materi penghubung tambahan: validasi input, exception handling, dan penyimpanan inventaris JSON.",
-    "topics": ["Validasi input", "Exception handling", "System.Text.Json", "File I/O"],
-    "outcome": "Mampu menjaga aturan data dan menyimpan inventaris sederhana secara lokal.",
-    "file": null,
-    "sourceMissing": true
+    "summary": "Tangani exception, buat custom exception, dan simpan riwayat stok gudang ke file teks.",
+    "topics": ["try-catch-finally", "Custom exception", "System.IO", "File teks dan pencatatan stok"],
+    "outcome": "Mampu menangani kesalahan runtime dan membaca/menulis data stok secara permanen ke file.",
+    "durationHours": 5,
+    "file": "Materi/bab6.pdf"
   },
   {
     "chapter": 7,
-    "title": "LINQ dan Async/Await",
+    "title": "Design Pattern Sederhana dan Refactoring OOP",
     "category": "C# Lanjutan",
-    "summary": "Materi penghubung tambahan: olah inventaris dengan LINQ dan pahami async/await.",
-    "topics": ["Where dan OrderBy", "Select dan GroupBy", "Deferred execution", "Async/await"],
-    "outcome": "Mampu membuat ringkasan koleksi dan memahami pola asynchronous yang dipakai EF Core.",
-    "file": null,
-    "sourceMissing": true
+    "summary": "Terapkan prinsip SOLID, Factory Pattern sederhana, dan refactoring agar kode gudang modular.",
+    "topics": ["Single Responsibility Principle", "Open-Closed Principle", "Factory Pattern", "Refactoring dan interface"],
+    "outcome": "Mampu memisahkan tanggung jawab class dan membuat objek barang melalui factory yang mudah dikembangkan.",
+    "durationHours": 5,
+    "file": "Materi/bab7.pdf"
   },
   {
     "chapter": 8,

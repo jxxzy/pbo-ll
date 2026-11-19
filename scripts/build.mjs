@@ -66,7 +66,7 @@ function renderAssessments(assessments = {}, isSupplementary = false) {
 function renderSidebar(lessons, currentChapter) {
   const groups = [
     { title: 'Fondasi OOP', subtitle: 'Bab 1–5 · C#', chapters: [1, 2, 3, 4, 5] },
-    { title: 'Materi penghubung', subtitle: 'Bab 6–7 · C# Lanjutan', chapters: [6, 7] },
+    { title: 'C# Lanjutan', subtitle: 'Bab 6–7 · Desain dan kualitas kode', chapters: [6, 7] },
     { title: 'Aplikasi web', subtitle: 'Bab 8–11 · ASP.NET', chapters: [8, 9, 10, 11] },
   ];
 
@@ -137,9 +137,8 @@ for (const lesson of lessons) {
   const assessments = lessonContent.assessments;
   const hasCompleteAssessments = ['pretest', 'posttest'].every((name) =>
     Array.isArray(assessments?.[name]?.multipleChoice)
-    && assessments[name].multipleChoice.length > 0
     && Array.isArray(assessments?.[name]?.essay)
-    && assessments[name].essay.length > 0,
+    && (assessments[name].multipleChoice.length + assessments[name].essay.length) > 0,
   );
   const hasCompleteSolutions = Array.isArray(lessonContent.practice?.solutions)
     && lessonContent.practice.solutions.length > 0
@@ -190,6 +189,7 @@ for (const lesson of lessons) {
     : '';
   const page = replaceTemplate(template, {
     CHAPTER: String(lesson.chapter).padStart(2, '0'),
+    DURATION_HOURS: String(lesson.durationHours || 4),
     CATEGORY: escapeHtml(lesson.category),
     TITLE: escapeHtml(lesson.title),
     SUMMARY: escapeHtml(lesson.summary),
