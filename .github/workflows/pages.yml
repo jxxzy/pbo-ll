@@ -1,63 +1,63 @@
-name: Deploy learning site to GitHub Pages
-
+name: Validate and deploy PBO II Learning Studio
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
   workflow_dispatch:
-
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
 concurrency:
-  group: pages
+  group: pbo-pages-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+      - name: Build and run all native labs
+        run: python3 tests/native-smoke.py
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
-      - name: Install dependencies
-        run: npm ci
-      - name: Build site
-        run: npm run build
-      - name: Bundle pinned browser C# compiler
+      - run: npm ci
+      - run: npm run build
+      - run: npm run assets
+      - run: npm test
+      - name: JavaScript syntax and shell scripts
         run: |
-          mkdir -p dist/playground/vendor/wasmsharp
-          npm pack @wasmsharp/core@0.10.2 --ignore-scripts --pack-destination "$RUNNER_TEMP"
-          tar -xzf "$RUNNER_TEMP/wasmsharp-core-0.10.2.tgz" --strip-components=1 -C dist/playground/vendor/wasmsharp
-          test -f dist/playground/vendor/wasmsharp/index.js
-          test -f dist/playground/vendor/wasmsharp/initializeWasmSharpModule.js
-          node --check dist/playground/browser-runner.js
-          node --check dist/playground/lab.js
-      - name: Bundle SQLite WebAssembly
+          for file in app.js chapter.js motion.js playground/*.js scripts/*.mjs praktikum/bab-11/wwwroot/*.js; do node --check "$file"; done
+          bash -n scripts/*.sh
+      - name: Install isolated browser test dependency
         run: |
-          mkdir -p dist/playground/vendor/sqljs
-          npm pack sql.js@1.13.0 --ignore-scripts --pack-destination "$RUNNER_TEMP"
-          tar -xzf "$RUNNER_TEMP/sql.js-1.13.0.tgz" --strip-components=2 -C dist/playground/vendor/sqljs package/dist/sql-wasm.js package/dist/sql-wasm.wasm
-          test -f dist/playground/vendor/sqljs/sql-wasm.wasm
-          node --check dist/playground/web-lab.js
-      - name: Upload site artifact
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Runtime and responsive browser tests
+        run: node tests/browser-smoke.mjs
+      - name: Upload validated site artifact
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v5
         with:
           path: dist
-
   deploy:
-    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [native, build]
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
+      - uses: actions/deploy-pages@v5
         id: deployment
-        uses: actions/deploy-pages@v5

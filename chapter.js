@@ -205,3 +205,9 @@ document.querySelectorAll('[data-copy-code]').forEach((button) => {
 });
 
 updateChapterStatus();
+
+function updatePracticeEvidence(){
+  const target=document.querySelector('#practice-evidence');if(!target)return;
+  try{const record=JSON.parse(localStorage.getItem('pbo-practice-v2:'+chapterNumber)||'null');if(record)target.textContent=record.mode+' · '+new Date(record.at).toLocaleString('id-ID');}catch{}
+}
+updatePracticeEvidence();window.addEventListener('storage',updatePracticeEvidence);window.addEventListener('focus',updatePracticeEvidence);

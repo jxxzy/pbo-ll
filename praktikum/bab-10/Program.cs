@@ -4,7 +4,7 @@ using PraktikumBab10.Data;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
-var databasePath = Path.Combine(builder.Environment.ContentRootPath, "gudang.db");
+var databasePath = builder.Configuration["Lab:DatabasePath"] ?? Path.Combine(builder.Environment.ContentRootPath, "gudang.db");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite($"Data Source={databasePath}"));
 

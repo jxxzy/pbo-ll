@@ -150,7 +150,7 @@ $('run').onclick=async()=>{
   if(!connected&&canBrowser()){runBrowser();return;}
   if(!connected&&canWebLab()){
     closeWebLab();busy=true;controls();
-    try{webLab=await window.PBOBrowserLab.open(current.chapter,$('web-lab'));$('state').textContent='Lab web aktif (bukan ASP.NET runtime)';$('output').textContent='Lab browser aktif. SQLite berjalan nyata di WebAssembly; source C# tidak dikompilasi pada Bab 8–11. Untuk menjalankan perubahan C# asli gunakan Codespaces atau runner lokal.';}catch(e){$('output').textContent=e.message;$('state').textContent='Lab web gagal';}finally{busy=false;controls();}return;
+    try{webLab=await window.PBOBrowserLab.open(current.chapter,$('web-lab'),()=>recordPractice('Latihan SQLite browser (bukan ASP.NET)'));$('state').textContent='Lab web aktif (bukan ASP.NET runtime)';$('output').textContent='Lab browser aktif. SQLite berjalan nyata di WebAssembly; source C# tidak dikompilasi pada Bab 8–11. Untuk menjalankan perubahan C# asli gunakan Codespaces atau runner lokal.';}catch(e){$('output').textContent=e.message;$('state').textContent='Lab web gagal';}finally{busy=false;controls();}return;
   }
   busy=true;const g=++generation;controls();$('preview').hidden=true;$('output').textContent='Mengirim source ke Docker…';
   try{await request('run',{chapter:current.chapter,files:sources,stdin:$('stdin').value});await poll(g);}

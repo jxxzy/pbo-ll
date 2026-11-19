@@ -1,0 +1,3 @@
+# Security policy
+
+The Docker playground is a trusted local teaching tool, not a public multi-tenant compiler. Do not expose port 8787 or make Codespaces forwarded ports public. Run only source you trust. Browser SQLite labs are intentionally separate from ASP.NET runtime, and their data is stored in browser storage. Never enter credentials or production data. Report vulnerabilities privately using the repository's security reporting feature if enabled, or contact the repository owner. Do not include live tokens or personal data. Public compiler hosting requires a dedicated threat model, isolation per execution, authenticated sessions, quotas, network egress filtering and independent security tests; it is not enabled by this repository.

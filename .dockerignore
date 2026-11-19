@@ -3,7 +3,8 @@
 !praktikum/**
 praktikum/**/bin/
 praktikum/**/obj/
-praktikum/**/gudang.db*
+praktikum/**/*.db
+praktikum/**/*.db-*
 praktikum/**/data_barang.txt
 !runner/
 !runner/Dockerfile

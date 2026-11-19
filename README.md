@@ -112,3 +112,7 @@ Ganti angka 8 dengan bab yang diminta. Gunakan tab Ports untuk membuka port 5008
 `npm run assets` membundel runtime browser dan Monaco/JSZip ke dist. `npm run playground` menjalankan build, assets dan runner lokal. Editor memiliki fallback textarea jika Monaco tidak tersedia, syntax highlighting, line numbers, ZIP import/export (daftar file harus sama), snapshot tunggal, catatan, tema, fullscreen dan export output. Formatter hanya aktif untuk bahasa yang Monaco dukung; bukan C# language server penuh. SQLite lab Bab 9–11 menyimpan data lokal bila kuota mencukupi.
 
 Codespaces: `bash scripts/start-cloud-studio.sh` menjalankan empat server asli Bab 8–11 sekaligus. Buka port 5008–5011 secara private. Bab 11 mempunyai dashboard asli di root, Swagger UI, OpenAPI dan health. Nama Codespace bisa diisi pada Playground untuk membuat link ke port privat. Perubahan C# di website tidak otomatis diterapkan ke Codespace; edit source di VS Code browser atau import project ZIP secara manual. Ini bukan compiler publik.
+
+### Verifikasi dan release gate
+
+`npm run build && npm test` memeriksa struktur build, `python3 tests/native-smoke.py` menguji runtime .NET 11 bab, dan workflow Pages menjalankan Playwright pada compiler asli dan lab SQLite. Deployment terbaru menunggu semua job tersebut lulus. Lihat [release gates](docs/RELEASE-GATES.md) dan [security policy](SECURITY.md). Bukti aktivitas praktikum di browser ditampilkan terpisah dari nilai kuis; bukan sertifikasi nilai.

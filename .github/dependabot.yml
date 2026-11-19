@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: {interval: weekly}
+  - package-ecosystem: npm
+    directory: /
+    schedule: {interval: weekly}
+  - package-ecosystem: nuget
+    directories: ["/praktikum/bab-09", "/praktikum/bab-10", "/praktikum/bab-11"]
+    schedule: {interval: weekly}

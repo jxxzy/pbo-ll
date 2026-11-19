@@ -5,7 +5,7 @@ window.PBOBrowserLab=(()=>{
   const sql=()=>engine??=(window.initSqlJs({locateFile:f=>new URL('vendor/sqljs/'+f,location.href).href}).catch(e=>{engine=null;throw e;}));
   const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
   const button=(label,fn)=>{const b=el('button',label);b.type='button';b.onclick=fn;return b;};
-  async function open(chapter,root){
+  async function open(chapter,root,onEvidence=()=>{}){
     const SQL=await sql();let db=new SQL.Database();
     const storageKey='pbo-sqlite-v2:'+chapter;let restored=false;
     if(chapter!==8)try{const saved=localStorage.getItem(storageKey);if(saved){const previous=JSON.parse(saved);if(Array.isArray(previous)&&previous.length<=500000){db.close();db=new SQL.Database(Uint8Array.from(previous));restored=true;}}}catch{try{db.close();}catch{}db=new SQL.Database();}
@@ -42,7 +42,7 @@ window.PBOBrowserLab=(()=>{
       }
       const save=el('button','Tambah barang');save.type='submit';form.append(save);
       const cancel=button('Batal edit',()=>{editId=null;form.reset();save.textContent='Tambah barang';});form.append(cancel);
-      form.onsubmit=e=>{e.preventDefault();try{const v={kodeBarang:fields.kodeBarang.value,namaBarang:fields.namaBarang.value,jumlahStok:Number(fields.jumlahStok.value),kategori:fields.kategori.value};if(editId===null){insert(v);trace.textContent='INSERT INTO Barang (...) VALUES (...);';}else{update(editId,v);trace.textContent='UPDATE Barang SET ... WHERE id = '+editId+';';}editId=null;form.reset();save.textContent='Tambah barang';message.textContent='Data tersimpan di SQLite.';render();}catch(e){message.textContent=e.message;}};
+      form.onsubmit=e=>{e.preventDefault();try{const v={kodeBarang:fields.kodeBarang.value,namaBarang:fields.namaBarang.value,jumlahStok:Number(fields.jumlahStok.value),kategori:fields.kategori.value};if(editId===null){insert(v);trace.textContent='INSERT INTO Barang (...) VALUES (...);';}else{update(editId,v);trace.textContent='UPDATE Barang SET ... WHERE id = '+editId+';';}editId=null;form.reset();save.textContent='Tambah barang';message.textContent='Data tersimpan di SQLite.';render();onEvidence();}catch(e){message.textContent=e.message;}};
       root.append(form);
     }
     const tableWrap=el('div');tableWrap.className='table-scroll';root.append(tableWrap);
@@ -50,10 +50,10 @@ window.PBOBrowserLab=(()=>{
       saveDatabase();
       const table=el('table'),head=el('thead'),hr=el('tr');for(const h of ['ID','Kode','Nama','Stok','Kategori',...(chapter===10?['Aksi']:[])])hr.append(el('th',h));head.append(hr);table.append(head);
       const tbody=el('tbody');for(const row of all()){const tr=el('tr');for(const k of columns.split(','))tr.append(el('td',String(row[k])));
-        if(chapter===10){const td=el('td');td.append(button('Edit',()=>{editId=row.id;for(const k of Object.keys(fields))fields[k].value=row[k];form.querySelector('[type=submit]').textContent='Simpan perubahan';fields.kodeBarang.focus();}),button('Hapus',()=>{if(confirm('Hapus '+row.namaBarang+'?')){remove(row.id);if(editId===row.id){editId=null;form.reset();form.querySelector('[type=submit]').textContent='Tambah barang';}trace.textContent='DELETE FROM Barang WHERE id = '+row.id+';';message.textContent='Barang dihapus.';render();}}));tr.append(td);}tbody.append(tr);}
+        if(chapter===10){const td=el('td');td.append(button('Edit',()=>{editId=row.id;for(const k of Object.keys(fields))fields[k].value=row[k];form.querySelector('[type=submit]').textContent='Simpan perubahan';fields.kodeBarang.focus();}),button('Hapus',()=>{if(confirm('Hapus '+row.namaBarang+'?')){remove(row.id);if(editId===row.id){editId=null;form.reset();form.querySelector('[type=submit]').textContent='Tambah barang';}trace.textContent='DELETE FROM Barang WHERE id = '+row.id+';';message.textContent='Barang dihapus.';render();onEvidence();}}));tr.append(td);}tbody.append(tr);}
       table.append(tbody);tableWrap.replaceChildren(table);
     }
-    if(chapter===8){trace.textContent='GET /Barang → Controller memilih Model → View menampilkan tabel (alur pembelajaran).';root.append(button('Muat ulang daftar',()=>{render();message.textContent='View diperbarui dari model.';}));}
+    if(chapter===8){trace.textContent='GET /Barang → Controller memilih Model → View menampilkan tabel (alur pembelajaran).';root.append(button('Muat ulang daftar',()=>{render();message.textContent='View diperbarui dari model.';onEvidence();}));}
     else trace.textContent='SELECT '+columns+' FROM Barang ORDER BY id;';
     if(chapter===11)root.append(el('p','Gunakan panel REST API di bawah untuk GET, POST, PUT, dan DELETE.'));
     if(chapter!==8)root.append(button('Reset database',()=>{if(confirm('Hapus seluruh data bab ini?')){db.run('DELETE FROM Barang');render();message.textContent='Database direset.';}}));
