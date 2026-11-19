@@ -9,3 +9,5 @@ Remaining release gates: PDF-to-content page-level verification, wider browser/p
 Private Codespaces IDE source is available via start-private-ide.sh. This mode needs private forwarded ports, a session code and a working nested Docker daemon. It does not turn GitHub Pages into a compiler host. Codespaces end-to-end launch still requires verification in a real Codespace.
 
 WASM regression tracking: static binary URLs are normalized and hosting worker sidecar mode is set before .NET initialization (upstream runtime issue #114918). Runtime checks remain mandatory; do not interpret packaging success alone as a passing browser compiler.
+
+Added a Docker integration job for all 11 chapters, same-origin checks, path traversal rejection, native web preview and live API CRUD, plus cleanup checks. It is a release requirement; actual GitHub Codespaces proxy/token flow and Docker Desktop Windows still require independent verification.

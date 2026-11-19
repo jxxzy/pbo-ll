@@ -1,10 +1,9 @@
 """Extract exact MCQ choices/keys from the repository's original PDFs.
-Requires Poppler pdftotext. The source PDFs are not modified.
+Requires PyMuPDF 1.26.7. The source PDFs are not modified.
 """
 import json
 import re
-import subprocess
-import sys
+import fitz
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,7 +13,8 @@ def clean(text):
 
 def chapter_pdf(number):
     path = ROOT / "Materi" / f"bab{number}.pdf"
-    text = subprocess.check_output(["pdftotext", "-enc", "UTF-8", str(path), "-"], text=True, encoding="utf-8").replace("\f", "\n")
+    with fitz.open(path) as pdf:
+        text = "\n".join(page.get_text() for page in pdf)
     result = {}
     for phase, start, end in [
         ("pretest", r"^9\.\s*Pre\s*Test", r"^10\.\s*Langkah Praktikum"),

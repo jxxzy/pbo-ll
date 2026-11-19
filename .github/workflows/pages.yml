@@ -22,6 +22,19 @@ jobs:
           dotnet-version: '10.0.x'
       - name: Build and run all native labs
         run: python3 tests/native-smoke.py
+  docker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci && npm run build
+      - run: docker build -f runner/Dockerfile -t pbo2-lab:net10 .
+      - run: python3 tests/docker-smoke.py
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -38,7 +51,7 @@ jobs:
       - run: npm run assets
       - name: Extract original assessment bank
         run: |
-          command -v pdftotext >/dev/null || (sudo apt-get update && sudo apt-get install -y poppler-utils)
+          python3 -m pip install --disable-pip-version-check --break-system-packages pymupdf==1.26.7
           python3 scripts/extract-assessments.py
       - run: npm test
       - name: JavaScript syntax and shell scripts
@@ -62,7 +75,7 @@ jobs:
           path: dist
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: [native, build]
+    needs: [native, docker, build]
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
