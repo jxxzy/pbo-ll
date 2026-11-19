@@ -94,3 +94,15 @@ Buka http://127.0.0.1:8787/playground/ (gunakan alamat ini, bukan localhost). Im
 Runner hanya bind ke 127.0.0.1; jangan publish port 8787 atau meneruskan melalui tunnel. Docker membatasi CPU, RAM, proses, waktu dan akses file; console tidak memiliki jaringan, web menggunakan jaringan Docker biasa (dapat mengakses jaringan keluar). Ini alat latihan lokal untuk kode tepercaya, bukan sandbox multi-tenant atau layanan publik. Timeout console 60 detik, web 10 menit. Stop sebelum mengganti bab. Jika runner gagal, cek Docker Desktop dan build image ulang setelah update project.
 
 Compiler browser: [WasmSharp](https://github.com/JakeYallop/WasmSharp), Apache-2.0. Build statis biasa tanpa paket runtime tetap menyediakan editor; GitHub Actions mengemas versi runtime yang dipin.
+
+### Semua bab melalui browser
+
+GitHub Pages: Bab 1–7 menggunakan compiler Roslyn/WASM; Bab 8–11 menyediakan latihan versi browser dengan SQLite WebAssembly (sql.js 1.13.0), alur MVC, Create/Read, CRUD, dan pengujian respons API. Data bersifat sementara, dapat diunduh sebagai file SQLite. **Mode Bab 8–11 tidak mengompilasi source C# atau menjalankan server HTTP sungguhan.** Perubahan source editor tidak memengaruhi lab browser.
+
+Untuk menjalankan project asli Bab 1–11 tanpa instalasi lokal, buka [GitHub Codespaces](https://github.com/codespaces/new?hide_repo_select=true&repo=1463545184&ref=main). Konfigurasi devcontainer menyiapkan .NET 10 dan Node.js 22. Dari terminal:
+
+```bash
+bash scripts/run-cloud-lab.sh 8
+```
+
+Ganti angka 8 dengan bab yang diminta. Gunakan tab Ports untuk membuka port 5008–5011; Bab 11 memiliki route /api/barangapi. Pertahankan port private dan hentikan Codespace setelah belajar. GitHub login, kuota dan ketersediaan Codespaces diperlukan. Ini menjalankan source ASP.NET asli di lingkungan cloud pribadi, bukan layanan compiler publik. Source dapat diedit di VS Code browser sebelum run.

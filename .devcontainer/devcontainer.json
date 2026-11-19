@@ -1,0 +1,34 @@
+{
+  "name": "PBO II .NET 10 labs",
+  "image": "mcr.microsoft.com/dotnet/sdk:10.0",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    }
+  },
+  "forwardPorts": [
+    5008,
+    5009,
+    5010,
+    5011
+  ],
+  "portsAttributes": {
+    "5008": {
+      "label": "Bab 8 MVC",
+      "onAutoForward": "notify"
+    },
+    "5009": {
+      "label": "Bab 9 EF Core",
+      "onAutoForward": "notify"
+    },
+    "5010": {
+      "label": "Bab 10 CRUD",
+      "onAutoForward": "notify"
+    },
+    "5011": {
+      "label": "Bab 11 REST API",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "npm ci && npm run build && dotnet --version"
+}

@@ -39,6 +39,13 @@ jobs:
           test -f dist/playground/vendor/wasmsharp/initializeWasmSharpModule.js
           node --check dist/playground/browser-runner.js
           node --check dist/playground/lab.js
+      - name: Bundle SQLite WebAssembly
+        run: |
+          mkdir -p dist/playground/vendor/sqljs
+          npm pack sql.js@1.13.0 --ignore-scripts --pack-destination "$RUNNER_TEMP"
+          tar -xzf "$RUNNER_TEMP/sql.js-1.13.0.tgz" --strip-components=2 -C dist/playground/vendor/sqljs package/dist/sql-wasm.js package/dist/sql-wasm.wasm
+          test -f dist/playground/vendor/sqljs/sql-wasm.wasm
+          node --check dist/playground/web-lab.js
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v5
         with:

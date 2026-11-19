@@ -2,7 +2,13 @@
 const $ = id => document.getElementById(id);
 let labs=[], current=null, sources={}, originals={}, activeFile='', connected=false, busy=false, loading=false, job=null, generation=0;
 let browserAvailable=false, browserWorker=null, browserTimer=null;
+let webAvailable=false, webLab=null;
 const canBrowser=()=>browserAvailable&&current?.chapter<=7;
+const canWebLab=()=>webAvailable&&current?.chapter>=8;
+function closeWebLab(){
+  if(webLab){webLab.dispose();webLab=null;}
+  $('web-lab').hidden=true;
+}
 const key = chapter => 'pbo2-playground-v1:'+chapter;
 const local = location.origin === 'http://127.0.0.1:8787';
 const endpoint = path => '/lab-api/'+path;
@@ -13,13 +19,15 @@ async function request(path, data) {
   return result;
 }
 function controls(){
-  $('run').disabled=(!connected&&!canBrowser())||busy||loading||!current;
+  $('run').disabled=(!connected&&!canBrowser()&&!canWebLab())||busy||loading||!current;
   $('stdin-label').hidden=!current||current.chapter>7||(!connected&&canBrowser());
-  $('run').title=connected?'Jalankan dengan Docker lokal':canBrowser()?'Jalankan C# melalui WebAssembly':'Bab ini memerlukan runner lokal';
-  $('stop').disabled=(!connected&&!browserWorker)||!busy;
+  $('run').title=connected?'Jalankan dengan Docker lokal':canBrowser()?'Jalankan C# melalui WebAssembly':canWebLab()?'Buka praktikum browser (bukan kompilasi ASP.NET)':'Runner tidak tersedia';
+  $('stop').disabled=!webLab&&((!connected&&!browserWorker)||!busy);
   $('chapter').disabled=busy||loading||!labs.length;
   for(const id of ['reset','copy','download','editor']) $(id).disabled=loading||!activeFile;
-  $('send').disabled=!(current?.chapter===11&&job?.ready&&job?.running);
+  $('send').disabled=!(current?.chapter===11&&(webLab||(job?.ready&&job?.running)));
+  $('run').textContent=!connected&&current?.chapter>=8?'▶ Buka Lab Web':'▶ Run';
+  $('web-notice').hidden=!current||current.chapter<8||connected;
 }
 function persist(){try{localStorage.setItem(key(current.chapter),JSON.stringify(sources));}catch(e){$('state').textContent='Penyimpanan browser tidak tersedia';}}
 function showFile(file){
@@ -29,7 +37,7 @@ function showFile(file){
   controls();
 }
 async function load(chapter){
-  loading=true; controls(); $('preview').hidden=true; job=null; $('output').textContent='Belum ada eksekusi.'; $('response').textContent='Jalankan Bab 11 terlebih dahulu.';
+  closeWebLab(); loading=true; controls(); $('preview').hidden=true; job=null; $('output').textContent='Belum ada eksekusi.'; $('response').textContent='Jalankan Bab 11 terlebih dahulu.';
   try{
     const next=labs.find(x=>x.chapter===chapter); if(!next) throw Error('Bab tidak ditemukan');
     const id=String(chapter).padStart(2,'0');
@@ -45,7 +53,7 @@ async function load(chapter){
     $('lesson').href='../bab-'+chapter+'/'; $('api').hidden=chapter!==11; $('stdin-label').hidden=chapter>7;
     $('chapter').value=String(chapter);history.replaceState(null,'','?bab='+chapter);
     showFile('Program.cs');
-    $('state').textContent=connected?'Siap • Docker lokal':canBrowser()?'Siap • Compiler browser (WASM)':chapter>=8?'ASP.NET Core memerlukan runner lokal':'Compiler browser belum tersedia';
+    $('state').textContent=connected?'Siap • Docker lokal':canBrowser()?'Siap • Compiler browser (WASM)':canWebLab()?'Siap • Lab web interaktif (SQLite WASM)':'Runner belum tersedia';
   }catch(e){current=null;activeFile='';$('files').replaceChildren();$('editor').value='';$('output').textContent=e.message;}
   finally{loading=false;controls();}
 }
@@ -98,12 +106,18 @@ function runBrowser(){
 }
 $('run').onclick=async()=>{
   if(!connected&&canBrowser()){runBrowser();return;}
+  if(!connected&&canWebLab()){
+    closeWebLab();busy=true;controls();
+    try{webLab=await window.PBOBrowserLab.open(current.chapter,$('web-lab'));$('state').textContent='Lab web aktif (bukan ASP.NET runtime)';$('output').textContent='Lab browser aktif. SQLite berjalan nyata di WebAssembly; source C# tidak dikompilasi pada Bab 8–11. Untuk menjalankan perubahan C# asli gunakan Codespaces atau runner lokal.';}catch(e){$('output').textContent=e.message;$('state').textContent='Lab web gagal';}finally{busy=false;controls();}return;
+  }
   busy=true;const g=++generation;controls();$('preview').hidden=true;$('output').textContent='Mengirim source ke Docker…';
   try{await request('run',{chapter:current.chapter,files:sources,stdin:$('stdin').value});await poll(g);}
   catch(e){busy=false;$('state').textContent='Gagal';$('output').textContent=e.message;controls();}
 };
-$('stop').onclick=async()=>{if(browserWorker){endBrowser('Dihentikan','Eksekusi browser dihentikan.');return;}try{await request('stop',{});}catch(e){$('state').textContent=e.message;}};
-$('send').onclick=async()=>{try{const method=$('method').value;const result=await request('api',{method,path:$('endpoint').value,body:['POST','PUT'].includes(method)?$('body').value:undefined});$('response').textContent='HTTP '+result.status+'\n'+result.body;}catch(e){$('response').textContent=e.message;}};
+$('stop').onclick=async()=>{if(webLab){closeWebLab();$('state').textContent='Lab web ditutup';$('response').textContent='Buka lab lagi untuk memulai.';controls();return;}if(browserWorker){endBrowser('Dihentikan','Eksekusi browser dihentikan.');return;}try{await request('stop',{});}catch(e){$('state').textContent=e.message;}};
+$('send').onclick=async()=>{try{const method=$('method').value;const payload={method,path:$('endpoint').value,body:['POST','PUT'].includes(method)?$('body').value:undefined};
+  const result=webLab?webLab.request(payload):await request('api',payload);
+  $('response').textContent=(webLab?'Respons lab (bukan HTTP server) ':'HTTP ')+result.status+'\n'+result.body;}catch(e){$('response').textContent=e.message;}};
 (async()=>{
   try{const r=await fetch('manifest.json');if(!r.ok)throw Error('Manifest belum dibangun. Jalankan npm run build.');labs=await r.json();
     for(const lab of labs){const o=document.createElement('option');o.value=lab.chapter;o.textContent='Bab '+lab.chapter+' — '+lab.title;$('chapter').append(o);}
@@ -113,7 +127,8 @@ $('send').onclick=async()=>{try{const method=$('method').value;const result=awai
         const asset=await fetch('./vendor/wasmsharp/index.js',{method:'HEAD',cache:'no-store'});
         browserAvailable=asset.ok&&!(asset.headers.get('content-type')||'').includes('text/html')&&typeof Worker!=='undefined'&&typeof WebAssembly!=='undefined';
       }catch{}
-      $('connection').textContent=browserAvailable?'Mode online: Bab 1–7 menggunakan compiler C# WebAssembly. Bab 8–11 menggunakan runner lokal.':'Editor tersedia; compiler browser belum tersedia pada build ini. Runner lokal diperlukan.';
+      webAvailable=typeof window.initSqlJs==='function'&&!!window.PBOBrowserLab;
+      $('connection').textContent='Mode online: '+(browserAvailable?'Bab 1–7 compiler C# WASM. ':'Compiler C# belum tersedia. ')+(webAvailable?'Bab 8–11 lab web interaktif SQLite WASM. ':'Lab web belum tersedia. ')+'Eksekusi ASP.NET asli melalui Codespaces atau runner lokal.';
     }
     $('setup').open=!connected&&!browserAvailable;
     const selection=Number(new URLSearchParams(location.search).get('bab'));await load(labs.some(l=>l.chapter===selection)?selection:labs[0].chapter);
