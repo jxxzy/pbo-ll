@@ -1,0 +1,250 @@
+{
+  "introduction": "REST API menyajikan data untuk client lain tanpa merender halaman Razor. Aplikasi web, aplikasi mobile, atau perangkat gudang dapat bertukar data melalui endpoint HTTP dan format JSON.",
+  "objectives": [
+    "Membedakan MVC Controller dan API Controller.",
+    "Membuat endpoint GET, POST, PUT, dan DELETE.",
+    "Menguji respons JSON dan status HTTP."
+  ],
+  "sections": [
+    {
+      "title": "Pikirkan resource dan HTTP method",
+      "body": "API controller mengembalikan data atau status HTTP, bukan View. URL mewakili resource barang, sedangkan method menjelaskan operasi yang diminta.",
+      "bullets": [
+        "GET /api/barangapi mengambil daftar.",
+        "GET /api/barangapi/1 mengambil satu barang.",
+        "POST /api/barangapi membuat barang dari JSON request body.",
+        "PUT /api/barangapi/1 memperbarui barang; DELETE /api/barangapi/1 menghapusnya."
+      ]
+    },
+    {
+      "title": "Buat API Controller",
+      "body": "ApiController dan route token menetapkan kontrak endpoint. ControllerBase menyediakan helper respons seperti Ok, NotFound, NoContent, dan CreatedAtAction.",
+      "codeTitle": "Controllers/BarangApiController.cs",
+      "code": [
+        "[ApiController]",
+        "[Route(\"api/[controller]\")]",
+        "public class BarangApiController : ControllerBase",
+        "{",
+        "    private readonly ApplicationDbContext _context;",
+        "",
+        "    public BarangApiController(ApplicationDbContext context)",
+        "    {",
+        "        _context = context;",
+        "    }",
+        "",
+        "    [HttpGet]",
+        "    public ActionResult<List<Barang>> GetAll() => _context.Barang.ToList();",
+        "",
+        "    [HttpGet(\"{id}\")]",
+        "    public ActionResult<Barang> GetById(int id)",
+        "    {",
+        "        var barang = _context.Barang.Find(id);",
+        "        return barang is null ? NotFound() : Ok(barang);",
+        "    }",
+        "}"
+      ],
+      "note": "Dengan [ApiController], ASP.NET Core juga memberi perilaku binding dan validasi request yang cocok untuk API."
+    },
+    {
+      "title": "Tulis dan ubah resource",
+      "body": "POST menerima DTO dari body JSON, lalu memetakan field yang diizinkan ke entity. Setelah tersimpan, CreatedAtAction memberi status 201 dan alamat resource baru. DTO mencegah client mengisi field database seperti Id secara sembarangan.",
+      "codeTitle": "BarangApiController.cs",
+      "code": [
+        "using Microsoft.AspNetCore.Mvc;",
+        "using Microsoft.EntityFrameworkCore;",
+        "",
+        "[HttpPost]",
+        "public async Task<ActionResult<Barang>> Create([FromBody] BarangInput input)",
+        "{",
+        "    var barang = new Barang {",
+        "        KodeBarang = input.KodeBarang, NamaBarang = input.NamaBarang,",
+        "        JumlahStok = input.JumlahStok, Kategori = input.Kategori",
+        "    };",
+        "    _context.Barang.Add(barang);",
+        "    await _context.SaveChangesAsync();",
+        "    return CreatedAtAction(nameof(GetById), new { id = barang.Id }, barang);",
+        "}",
+        "",
+        "[HttpPut(\"{id}\")]",
+        "public async Task<IActionResult> Update(int id, [FromBody] BarangInput input)",
+        "{",
+        "    var barang = await _context.Barang.FindAsync(id);",
+        "    if (barang is null) return NotFound();",
+        "",
+        "    barang.KodeBarang = input.KodeBarang;",
+        "    barang.NamaBarang = input.NamaBarang;",
+        "    barang.JumlahStok = input.JumlahStok;",
+        "    barang.Kategori = input.Kategori;",
+        "    await _context.SaveChangesAsync();",
+        "    return NoContent();",
+        "}",
+        "",
+        "[HttpDelete(\"{id}\")]",
+        "public IActionResult Delete(int id)",
+        "{",
+        "    var barang = _context.Barang.Find(id);",
+        "    if (barang is null) return NotFound();",
+        "    _context.Barang.Remove(barang);",
+        "    _context.SaveChanges();",
+        "    return NoContent();",
+        "}"
+      ]
+    },
+    {
+      "title": "Uji endpoint sebagai client",
+      "body": "Gunakan Postman atau HTTP client. Perhatikan status code dan JSON yang diterima; endpoint API dapat digunakan terpisah dari halaman Razor.",
+      "codeTitle": "Contoh body POST",
+      "code": [
+        "{",
+        "  \"kodeBarang\": \"BRG010\",",
+        "  \"namaBarang\": \"Label Pengiriman\",",
+        "  \"jumlahStok\": 75,",
+        "  \"kategori\": \"Kemasan\"",
+        "}"
+      ],
+      "note": "Uji juga id yang tidak ada dan pastikan endpoint memberi 404, bukan respons seolah-olah data berhasil ditemukan."
+    }
+  ],
+  "practice": {
+    "title": "Praktikum: API inventaris",
+    "steps": [
+      "Tambahkan BarangApiController yang menggunakan ApplicationDbContext.",
+      "Buat GET untuk daftar dan GET dengan id untuk satu barang.",
+      "Buat POST yang menerima JSON dan mengembalikan CreatedAtAction.",
+      "Buat PUT untuk memperbarui barang dan DELETE untuk menghapusnya.",
+      "Uji endpoint sukses dan id yang tidak ditemukan dengan Postman atau browser.",
+      "Catat URL, method, contoh request body, status code, dan response."
+    ],
+    "deliverable": "REST API barang yang dapat diuji tanpa membuka View MVC.",
+    "solutions": [
+      {
+        "title": "Models/BarangInput.cs",
+        "explanation": "DTO allow-list hanya mengekspos field yang boleh dikirim client; Id tetap dikelola database dan tidak dapat dioverride dari body.",
+        "codeTitle": "BarangInput.cs",
+        "code": [
+          "using System.ComponentModel.DataAnnotations;",
+          "",
+          "public class BarangInput",
+          "{",
+          "    [Required] public string KodeBarang { get; set; } = string.Empty;",
+          "    [Required] public string NamaBarang { get; set; } = string.Empty;",
+          "    [Range(0, int.MaxValue)] public int JumlahStok { get; set; }",
+          "    [Required] public string Kategori { get; set; } = string.Empty;",
+          "}"
+        ]
+      },
+      {
+        "title": "Controllers/BarangApiController.cs",
+        "explanation": "Contoh implementasi semua operasi dasar REST. ApiController otomatis mengembalikan 400 saat validasi DataAnnotations gagal; endpoint tetap memeriksa keberadaan id sebelum perubahan.",
+        "codeTitle": "BarangApiController.cs",
+        "code": [
+          "using Microsoft.AspNetCore.Mvc;",
+          "using Microsoft.EntityFrameworkCore;",
+          "",
+          "[ApiController]",
+          "[Route(\"api/[controller]\")]",
+          "public class BarangApiController : ControllerBase",
+          "{",
+          "    private readonly ApplicationDbContext _db;",
+          "    public BarangApiController(ApplicationDbContext db) => _db = db;",
+          "",
+          "    [HttpGet]",
+          "    public async Task<ActionResult<List<Barang>>> GetAll()",
+          "        => await _db.Barang.AsNoTracking().ToListAsync();",
+          "",
+          "    [HttpGet(\"{id:int}\")]",
+          "    public async Task<ActionResult<Barang>> GetById(int id)",
+          "    {",
+          "        var barang = await _db.Barang.FindAsync(id);",
+          "        return barang is null ? NotFound() : Ok(barang);",
+          "    }",
+          "",
+          "    [HttpPost]",
+          "    public async Task<ActionResult<Barang>> Create(BarangInput input)",
+          "    {",
+          "        var barang = new Barang { KodeBarang = input.KodeBarang,",
+          "            NamaBarang = input.NamaBarang, JumlahStok = input.JumlahStok,",
+          "            Kategori = input.Kategori };",
+          "        _db.Barang.Add(barang);",
+          "        await _db.SaveChangesAsync();",
+          "        return CreatedAtAction(nameof(GetById), new { id = barang.Id }, barang);",
+          "    }",
+          "",
+          "    [HttpPut(\"{id:int}\")]",
+          "    public async Task<IActionResult> Update(int id, BarangInput input)",
+          "    {",
+          "        var barang = await _db.Barang.FindAsync(id);",
+          "        if (barang is null) return NotFound();",
+          "        barang.KodeBarang = input.KodeBarang;",
+          "        barang.NamaBarang = input.NamaBarang;",
+          "        barang.JumlahStok = input.JumlahStok;",
+          "        barang.Kategori = input.Kategori;",
+          "        await _db.SaveChangesAsync();",
+          "        return NoContent();",
+          "    }",
+          "",
+          "    [HttpDelete(\"{id:int}\")]",
+          "    public async Task<IActionResult> Delete(int id)",
+          "    {",
+          "        var barang = await _db.Barang.FindAsync(id);",
+          "        if (barang is null) return NotFound();",
+          "        _db.Barang.Remove(barang);",
+          "        await _db.SaveChangesAsync();",
+          "        return NoContent();",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Contoh request dan pengamanan",
+        "explanation": "Payload post-test memuat field yang diperlukan entity. Pada aplikasi nyata, batasi akses API dan gunakan DTO/validasi input, bukan mengekspos entity database tanpa batas.",
+        "codeTitle": "POST /api/barangapi",
+        "code": [
+          "{",
+          "  \"kodeBarang\": \"BRG010\",",
+          "  \"namaBarang\": \"Label Pengiriman\",",
+          "  \"jumlahStok\": 75,",
+          "  \"kategori\": \"Kemasan\"",
+          "}",
+          "",
+          "// Terapkan HTTPS, autentikasi/otorisasi, validasi,",
+          "// rate limiting, dan jangan menyimpan secret di source control."
+        ]
+      }
+    ]
+  },
+  "assessments": {
+    "pretest": {
+      "multipleChoice": [
+        { "question": "Apa ciri API Controller?", "answer": "C — Mengembalikan status dan data seperti Ok() atau NotFound(), umumnya JSON.", "explanation": "API controller tidak merender Razor View untuk setiap request." },
+        { "question": "Untuk apa endpoint API biasanya digunakan?", "answer": "C — Bertukar atau memanipulasi data antara sistem dan client/frontend.", "explanation": "Client dapat berupa web, aplikasi mobile, atau layanan/perangkat lain." },
+        { "question": "Apa arti atribut [ApiController]?", "answer": "C — Menandai controller dengan perilaku khusus API.", "explanation": "Atribut membantu binding/validasi request dan respons kesalahan otomatis." }
+      ],
+      "essay": [
+        { "question": "Bedakan MVC Controller dan API Controller.", "answer": "MVC controller biasanya mengembalikan View HTML untuk browser; API controller mengembalikan data/status HTTP seperti JSON untuk dikonsumsi client lain." },
+        { "question": "Mengapa REST API penting untuk gudang berbasis IoT?", "answer": "API memberi kontrak HTTP terstandar agar sensor, dashboard, aplikasi, dan layanan gudang bertukar data tanpa bergantung pada tampilan atau teknologi client tertentu." }
+      ]
+    },
+    "posttest": {
+      "multipleChoice": [
+        { "question": "Apa fungsi CreatedAtAction(...) setelah POST berhasil?", "answer": "C — Mengembalikan status 201 Created dan lokasi/action resource baru.", "explanation": "Client dapat mengikuti alamat yang diberikan untuk mengambil resource." },
+        { "question": "Atribut apa yang mengikat input JSON dari request body?", "answer": "C — [FromBody].", "explanation": "Body JSON dideserialisasi ke parameter; [ApiController] juga memakai aturan binding API." }
+      ],
+      "essay": [
+        { "question": "Buat JSON payload untuk menambah barang via POST.", "answer": "`{ \"kodeBarang\": \"BRG010\", \"namaBarang\": \"Label Pengiriman\", \"jumlahStok\": 75, \"kategori\": \"Kemasan\" }`. Kirim sebagai body JSON dengan Content-Type: application/json." },
+        { "question": "Bagaimana meningkatkan keamanan REST API?", "answer": "Gunakan HTTPS, autentikasi dan otorisasi dengan prinsip least privilege, validasi input server-side, DTO allow-list, pembatasan laju request, logging yang tidak membocorkan secret, dan pengelolaan secret di konfigurasi aman." }
+      ]
+    }
+  },
+  "quiz": {
+    "question": "Mengapa POST yang berhasil membuat resource sering mengembalikan CreatedAtAction?",
+    "options": [
+      "Untuk merender halaman Index.cshtml.",
+      "Untuk memberi respons created dan lokasi resource yang baru dibuat.",
+      "Untuk memaksa semua GET menjadi DELETE.",
+      "Untuk menyembunyikan body JSON dari client."
+    ],
+    "answer": 1,
+    "explanation": "CreatedAtAction menghasilkan respons 201 Created serta menunjuk action yang dapat mengambil resource baru."
+  }
+}

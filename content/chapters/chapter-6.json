@@ -1,0 +1,262 @@
+{
+  "introduction": "Sebelum data disimpan di database, program perlu mampu menolak input yang salah dan menjelaskan kegagalan dengan aman. Bab penghubung ini membahas exception, validasi sederhana, serta penyimpanan inventaris ke berkas JSON.",
+  "objectives": [
+    "Membedakan validasi input dan penanganan exception.",
+    "Menggunakan try/catch untuk kegagalan yang memang dapat dipulihkan.",
+    "Membaca dan menyimpan kumpulan barang dalam berkas JSON."
+  ],
+  "sections": [
+    {
+      "title": "Tangani kondisi gagal secara spesifik",
+      "body": "Exception menandakan operasi gagal. Tangkap hanya jenis kegagalan yang dapat ditangani, beri pesan yang berguna, dan jangan menyembunyikan error dengan catch umum yang mengabaikannya.",
+      "codeTitle": "Validasi angka",
+      "code": [
+        "Console.Write(\"Jumlah stok: \");",
+        "if (!int.TryParse(Console.ReadLine(), out var stok) || stok < 0)",
+        "{",
+        "    Console.WriteLine(\"Stok harus berupa angka nol atau lebih.\");",
+        "    return;",
+        "}",
+        "",
+        "barang.TambahStok(stok);"
+      ],
+      "note": "TryParse lebih cocok untuk input pengguna yang mungkin salah format; exception cocok untuk kegagalan operasi yang tidak biasa."
+    },
+    {
+      "title": "Jaga aturan object dengan guard",
+      "body": "Validasi juga perlu berada pada batas domain, bukan hanya di tampilan. Method object dapat menolak nilai yang tidak sah sebelum mengubah state.",
+      "codeTitle": "Models/Barang.cs",
+      "code": [
+        "using System.Text.Json.Serialization;",
+        "",
+        "public class Barang",
+        "{",
+        "    public string KodeBarang { get; init; } = string.Empty;",
+        "    public string NamaBarang { get; init; } = string.Empty;",
+        "    private int jumlahStok;",
+        "    [JsonInclude]",
+        "    public int JumlahStok",
+        "    {",
+        "        get => jumlahStok;",
+        "        private set",
+        "        {",
+        "            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));",
+        "            jumlahStok = value;",
+        "        }",
+        "    }",
+        "",
+        "    public void TambahStok(int jumlah)",
+        "    {",
+        "        if (jumlah <= 0)",
+        "            throw new ArgumentOutOfRangeException(nameof(jumlah), \"Jumlah harus positif.\");",
+        "        JumlahStok += jumlah;",
+        "    }",
+        "}"
+      ]
+    },
+    {
+      "title": "Simpan data lokal dalam JSON",
+      "body": "System.Text.Json mengubah object menjadi teks JSON. Periksa file sebelum membaca: file yang belum pernah dibuat dapat berarti inventaris baru, sedangkan JSON rusak perlu dilaporkan agar data tidak diam-diam dianggap kosong.",
+      "codeTitle": "Services/PenyimpananBarang.cs",
+      "code": [
+        "using System.Text.Json;",
+        "",
+        "public static class PenyimpananBarang",
+        "{",
+        "    private static readonly JsonSerializerOptions Options =",
+        "        new() { WriteIndented = true };",
+        "",
+        "    public static List<Barang> Muat(string path)",
+        "    {",
+        "        if (!File.Exists(path)) return new List<Barang>();",
+        "        var json = File.ReadAllText(path);",
+        "        return JsonSerializer.Deserialize<List<Barang>>(json)",
+        "            ?? throw new InvalidDataException(\"Isi file barang tidak valid.\");",
+        "    }",
+        "",
+        "    public static void Simpan(string path, List<Barang> daftar)",
+        "    {",
+        "        var json = JsonSerializer.Serialize(daftar, Options);",
+        "        File.WriteAllText(path, json);",
+        "    }",
+        "}"
+      ],
+      "note": "JsonException dari file yang rusak sebaiknya ditampilkan atau diteruskan ke lapisan aplikasi; jangan menimpa file sebelum pengguna mengetahui masalahnya."
+    }
+  ],
+  "practice": {
+    "title": "Praktikum: inventaris yang tahan input salah",
+    "steps": [
+      "Buat class Barang yang menolak penambahan stok nol atau negatif.",
+      "Minta kode, nama, dan stok dari console; validasi angka memakai TryParse.",
+      "Buat PenyimpananBarang untuk membaca dan menulis List<Barang> sebagai JSON.",
+      "Jika file belum ada, mulai dengan daftar kosong; jika JSON rusak, laporkan error yang jelas.",
+      "Tambahkan satu barang, simpan, jalankan ulang aplikasi, lalu pastikan data lama terbaca."
+    ],
+    "deliverable": "Program console yang menjaga aturan stok dan mempertahankan daftar inventaris dalam file JSON.",
+    "solutions": [
+      {
+        "title": "Models/Barang.cs",
+        "explanation": "Data yang dapat berubah tetap terkapsulasi. Method TambahStok menolak input tidak sah dengan exception spesifik.",
+        "codeTitle": "Barang.cs",
+        "code": [
+          "using System.Text.Json.Serialization;",
+          "",
+          "public class Barang",
+          "{",
+          "    public string KodeBarang { get; init; } = string.Empty;",
+          "    public string NamaBarang { get; init; } = string.Empty;",
+          "    private int jumlahStok;",
+          "    [JsonInclude]",
+          "    public int JumlahStok",
+          "    {",
+          "        get => jumlahStok;",
+          "        private set",
+          "        {",
+          "            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));",
+          "            jumlahStok = value;",
+          "        }",
+          "    }",
+          "",
+          "    public Barang() { }",
+          "    public Barang(string kode, string nama, int stok)",
+          "    {",
+          "        if (string.IsNullOrWhiteSpace(kode)) throw new ArgumentException(\"Kode wajib diisi.\", nameof(kode));",
+          "        if (string.IsNullOrWhiteSpace(nama)) throw new ArgumentException(\"Nama wajib diisi.\", nameof(nama));",
+          "        if (stok < 0) throw new ArgumentOutOfRangeException(nameof(stok));",
+          "        KodeBarang = kode; NamaBarang = nama; JumlahStok = stok;",
+          "    }",
+          "",
+          "    public void TambahStok(int jumlah)",
+          "    {",
+          "        if (jumlah <= 0) throw new ArgumentOutOfRangeException(nameof(jumlah));",
+          "        JumlahStok += jumlah;",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Services/PenyimpananBarang.cs",
+        "explanation": "File yang belum ada diperlakukan sebagai inventaris baru; JSON yang tidak valid menghasilkan error yang terlihat.",
+        "codeTitle": "PenyimpananBarang.cs",
+        "code": [
+          "using System.Text.Json;",
+          "",
+          "public static class PenyimpananBarang",
+          "{",
+          "    private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };",
+          "    public static List<Barang> Muat(string path)",
+          "    {",
+          "        if (!File.Exists(path)) return new List<Barang>();",
+          "        var json = File.ReadAllText(path);",
+          "        return JsonSerializer.Deserialize<List<Barang>>(json)",
+          "            ?? throw new InvalidDataException(\"Data JSON tidak berisi daftar barang.\");",
+          "    }",
+          "    public static void Simpan(string path, List<Barang> daftar)",
+          "        => File.WriteAllText(path, JsonSerializer.Serialize(daftar, Options));",
+          "}"
+        ]
+      },
+      {
+        "title": "Program.cs",
+        "explanation": "Gabungkan validasi input dengan penyimpanan. TryParse menangani kesalahan format yang wajar; exception spesifik memberi pesan untuk masalah domain.",
+        "codeTitle": "Program.cs",
+        "code": [
+          "using System.Text.Json;",
+          "",
+          "var path = Path.Combine(AppContext.BaseDirectory, \"barang.json\");",
+          "List<Barang> daftar;",
+          "try",
+          "{",
+          "    daftar = PenyimpananBarang.Muat(path);",
+          "}",
+          "catch (JsonException ex)",
+          "{",
+          "    Console.Error.WriteLine($\"File JSON rusak: {ex.Message}\");",
+          "    return;",
+          "}",
+          "catch (IOException ex)",
+          "{",
+          "    Console.Error.WriteLine($\"File tidak dapat dibaca: {ex.Message}\");",
+          "    return;",
+          "}",
+          "",
+          "Console.Write(\"Kode barang: \");",
+          "var kode = Console.ReadLine()?.Trim() ?? string.Empty;",
+          "Console.Write(\"Nama barang: \");",
+          "var nama = Console.ReadLine()?.Trim() ?? string.Empty;",
+          "Console.Write(\"Stok awal (nol atau lebih): \");",
+          "if (!int.TryParse(Console.ReadLine(), out var stok) || stok < 0)",
+          "{",
+          "    Console.WriteLine(\"Stok harus berupa angka nol atau lebih.\");",
+          "    return;",
+          "}",
+          "if (string.IsNullOrWhiteSpace(kode) || string.IsNullOrWhiteSpace(nama))",
+          "{",
+          "    Console.WriteLine(\"Kode dan nama wajib diisi.\");",
+          "    return;",
+          "}",
+          "if (daftar.Any(b => b.KodeBarang.Equals(kode, StringComparison.OrdinalIgnoreCase)))",
+          "{",
+          "    Console.WriteLine(\"Kode barang sudah digunakan.\");",
+          "    return;",
+          "}",
+          "",
+          "try",
+          "{",
+          "    daftar.Add(new Barang(kode, nama, stok));",
+          "    PenyimpananBarang.Simpan(path, daftar);",
+          "    Console.WriteLine($\"{daftar.Count} barang tersimpan.\");",
+          "}",
+          "catch (ArgumentException ex)",
+          "{",
+          "    Console.WriteLine($\"Input tidak valid: {ex.Message}\");",
+          "}",
+          "catch (IOException ex)",
+          "{",
+          "    Console.Error.WriteLine($\"Data gagal disimpan: {ex.Message}\");",
+          "}",
+          "catch (UnauthorizedAccessException ex)",
+          "{",
+          "    Console.Error.WriteLine($\"Akses file ditolak: {ex.Message}\");",
+          "}"
+        ]
+      }
+    ]
+  },
+  "assessments": {
+    "pretest": {
+      "multipleChoice": [
+        { "question": "Metode mana yang paling sesuai untuk memeriksa input angka dari pengguna?", "answer": "A — int.TryParse.", "explanation": "TryParse mengembalikan status gagal tanpa melempar exception untuk input yang bukan angka." },
+        { "question": "Apa tujuan catch (FileNotFoundException)?", "answer": "B — Menangani kegagalan file yang tidak ditemukan secara spesifik.", "explanation": "Penanganan spesifik memungkinkan aplikasi memberi respons yang sesuai terhadap masalah file." },
+        { "question": "Library bawaan apa yang dapat mengubah object C# menjadi JSON?", "answer": "C — System.Text.Json.", "explanation": "JsonSerializer menyediakan Serialize dan Deserialize." }
+      ],
+      "essay": [
+        { "question": "Bedakan validasi input dan exception handling.", "answer": "Validasi memeriksa nilai sebelum operasi dilakukan, misalnya TryParse dan batas stok. Exception handling menangani kegagalan saat operasi berjalan, misalnya file tidak tersedia atau JSON rusak." },
+        { "question": "Mengapa catch umum yang kosong berbahaya?", "answer": "Error tersembunyi, data dapat tidak tersimpan, dan pengguna mengira operasi berhasil. Tangkap tipe yang dipahami, beri pesan/log, atau teruskan error." }
+      ]
+    },
+    "posttest": {
+      "multipleChoice": [
+        { "question": "Apa yang sebaiknya dilakukan jika file JSON belum pernah dibuat?", "answer": "A — Mulai dengan daftar kosong dan buat file saat menyimpan pertama kali.", "explanation": "File yang belum ada dapat menjadi kondisi awal normal; file yang ada tetapi rusak harus dibedakan." },
+        { "question": "Apa yang dilakukan JsonSerializer.Deserialize<T>()?", "answer": "B — Mengubah teks JSON menjadi object bertipe T.", "explanation": "Deserialisasi dapat gagal, misalnya saat format JSON tidak valid." },
+        { "question": "Di mana aturan stok positif sebaiknya ditegakkan?", "answer": "C — Pada method/domain object, bukan hanya di UI.", "explanation": "Semua pemanggil object harus tunduk pada invariant yang sama." }
+      ],
+      "essay": [
+        { "question": "Bagaimana menangani JSON inventaris yang rusak?", "answer": "Tangkap JsonException pada batas aplikasi, beri tahu pengguna bahwa file tidak dapat dibaca, pertahankan file asli, dan sediakan langkah pemulihan seperti backup atau perbaikan manual. Jangan diam-diam menggantinya dengan daftar kosong." },
+        { "question": "Jelaskan alur simpan dan muat inventaris JSON.", "answer": "Muat teks file, deserialisasikan ke List<Barang>, ubah data melalui aturan object, serialisasikan kembali dengan JsonSerializer, lalu tulis ke file. Tangani file awal yang belum ada dan error I/O secara terpisah." }
+      ]
+    }
+  },
+  "quiz": {
+    "question": "Apa pilihan paling aman untuk input jumlah stok yang diketik pengguna?",
+    "options": [
+      "Gunakan int.Parse tanpa pemeriksaan.",
+      "Gunakan int.TryParse lalu tolak nilai negatif.",
+      "Tangkap semua exception dan abaikan.",
+      "Ubah input menjadi 0 jika formatnya salah."
+    ],
+    "answer": 1,
+    "explanation": "TryParse menangani format tidak valid tanpa exception, lalu aturan domain memastikan stok tidak negatif."
+  }
+}

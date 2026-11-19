@@ -1,0 +1,103 @@
+[
+  {
+    "chapter": 1,
+    "title": "Dasar OOP: Class & Object",
+    "category": "Fondasi OOP",
+    "summary": "Kenali class, object, field, method, dan constructor melalui sistem gudang sederhana.",
+    "topics": ["Class dan object", "Field dan method", "Constructor", "Program berbasis objek"],
+    "outcome": "Mampu mendefinisikan class, membuat object, dan menyusun program sederhana berbasis objek dengan C#.",
+    "file": "Materi/bab1.pdf"
+  },
+  {
+    "chapter": 2,
+    "title": "Encapsulation dan Properties",
+    "category": "Fondasi OOP",
+    "summary": "Atur akses dan validasi data objek dengan access modifier serta properties.",
+    "topics": ["Access modifier public dan private", "Getter dan setter", "Auto-properties", "Validasi data"],
+    "outcome": "Mampu menerapkan enkapsulasi dan mengontrol akses ke field melalui properties di C#.",
+    "file": "Materi/bab2.pdf"
+  },
+  {
+    "chapter": 3,
+    "title": "Inheritance dan Polymorphism",
+    "category": "Fondasi OOP",
+    "summary": "Bangun class yang fleksibel dengan pewarisan, virtual, override, dan polimorfisme.",
+    "topics": ["Inheritance", "Keyword base", "Method virtual dan override", "Polimorfisme"],
+    "outcome": "Mampu menerapkan pewarisan dan polimorfisme untuk merancang sistem yang modular.",
+    "file": "Materi/bab3.pdf"
+  },
+  {
+    "chapter": 4,
+    "title": "Abstract Class dan Interface",
+    "category": "Fondasi OOP",
+    "summary": "Bandingkan dua cara membangun kontrak dan abstraksi dalam desain C#.",
+    "topics": ["Abstract class dan method", "Interface", "Implementasi kontrak", "Memilih abstraksi yang tepat"],
+    "outcome": "Mampu membedakan serta menerapkan abstract class dan interface pada desain berorientasi objek.",
+    "file": "Materi/bab4.pdf"
+  },
+  {
+    "chapter": 5,
+    "title": "Collection dan Generic Class",
+    "category": "Fondasi OOP",
+    "summary": "Kelola banyak objek secara efisien menggunakan List, Dictionary, dan generic.",
+    "topics": ["List<T>", "Dictionary<K,V>", "Class dan method generic", "Indeksasi data berdasarkan kode"],
+    "outcome": "Mampu mengelola kumpulan objek dengan collection dan membuat generic class atau method sederhana.",
+    "file": "Materi/bab5.pdf"
+  },
+  {
+    "chapter": 6,
+    "title": "Exception Handling dan File I/O",
+    "category": "C# Lanjutan",
+    "summary": "Materi penghubung tambahan: validasi input, exception handling, dan penyimpanan inventaris JSON.",
+    "topics": ["Validasi input", "Exception handling", "System.Text.Json", "File I/O"],
+    "outcome": "Mampu menjaga aturan data dan menyimpan inventaris sederhana secara lokal.",
+    "file": null,
+    "sourceMissing": true
+  },
+  {
+    "chapter": 7,
+    "title": "LINQ dan Async/Await",
+    "category": "C# Lanjutan",
+    "summary": "Materi penghubung tambahan: olah inventaris dengan LINQ dan pahami async/await.",
+    "topics": ["Where dan OrderBy", "Select dan GroupBy", "Deferred execution", "Async/await"],
+    "outcome": "Mampu membuat ringkasan koleksi dan memahami pola asynchronous yang dipakai EF Core.",
+    "file": null,
+    "sourceMissing": true
+  },
+  {
+    "chapter": 8,
+    "title": "Struktur Dasar ASP.NET Core MVC",
+    "category": "ASP.NET Core",
+    "summary": "Mulai aplikasi web dengan arsitektur MVC, routing, controller, dan view.",
+    "topics": ["Arsitektur Model–View–Controller", "Struktur folder", "Routing dasar", "Controller dan view"],
+    "outcome": "Mampu membuat aplikasi web ASP.NET Core MVC sederhana yang menghubungkan controller dan view.",
+    "file": "Materi/bab8.pdf"
+  },
+  {
+    "chapter": 9,
+    "title": "Model dan CRUD dengan EF Core",
+    "category": "ASP.NET Core",
+    "summary": "Hubungkan aplikasi dengan database lewat entity, DbContext, migrasi, dan CRUD dasar.",
+    "topics": ["Entity class", "DbContext dan koneksi database", "Migrasi EF Core", "Create dan Read data"],
+    "outcome": "Mampu mengonfigurasi Entity Framework Core dan menjalankan operasi CRUD dasar dari aplikasi web.",
+    "file": "Materi/bab9.pdf"
+  },
+  {
+    "chapter": 10,
+    "title": "CRUD Lengkap dan Validasi Form",
+    "category": "ASP.NET Core",
+    "summary": "Sempurnakan alur data form dengan ViewModel dan validasi input.",
+    "topics": ["Operasi Create, Read, Update, Delete", "ViewModel", "Validasi DataAnnotations", "Umpan balik kesalahan"],
+    "outcome": "Mampu membangun halaman CRUD dengan validasi dan mengelola alur data form ke database.",
+    "file": "Materi/bab10.pdf"
+  },
+  {
+    "chapter": 11,
+    "title": "REST API dengan ASP.NET Core",
+    "category": "ASP.NET Core",
+    "summary": "Sajikan dan kelola data lewat endpoint HTTP dengan respons JSON.",
+    "topics": ["Konsep RESTful API", "API Controller", "HTTP GET dan POST", "JSON dan pengujian endpoint"],
+    "outcome": "Mampu membuat dan menguji endpoint REST API untuk mengelola data barang.",
+    "file": "Materi/bab11.pdf"
+  }
+]

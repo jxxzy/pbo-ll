@@ -1,0 +1,171 @@
+{
+  "introduction": "Gudang dapat menyimpan barang biasa maupun elektronik. Inheritance memungkinkan class khusus memakai perilaku dasar Barang dan menambahkan informasi yang hanya dimiliki barang elektronik.",
+  "objectives": [
+    "Membuat class turunan dengan inheritance dan base.",
+    "Mengganti perilaku virtual menggunakan override.",
+    "Menjelaskan polymorphism melalui referensi bertipe induk."
+  ],
+  "sections": [
+    {
+      "title": "Turunkan class dan teruskan constructor",
+      "body": "BarangElektronik : Barang menyatakan bahwa class elektronik mewarisi anggota yang dapat diakses dari Barang. base(...) memanggil constructor induk untuk mengisi bagian umum.",
+      "codeTitle": "BarangElektronik.cs",
+      "code": [
+        "public class BarangElektronik : Barang",
+        "{",
+        "    public int DayaListrik { get; set; }",
+        "",
+        "    public BarangElektronik(string kode, string nama, int stok, string kategori, int daya)",
+        "        : base(kode, nama, stok, kategori)",
+        "    {",
+        "        DayaListrik = daya;",
+        "    }",
+        "}"
+      ]
+    },
+    {
+      "title": "Virtual dan override",
+      "body": "Method induk harus ditandai virtual agar class turunan boleh menyediakan implementasi pengganti. override menyatakan bahwa implementasi tersebut mengganti method induk yang sama.",
+      "codeTitle": "Barang dan BarangElektronik",
+      "code": [
+        "public virtual void TampilkanInfo()",
+        "{",
+        "    Console.WriteLine($\"[{KodeBarang}] {NamaBarang} - Stok: {JumlahStok}\");",
+        "}",
+        "",
+        "public override void TampilkanInfo()",
+        "{",
+        "    base.TampilkanInfo();",
+        "    Console.WriteLine($\"Daya: {DayaListrik} Watt\");",
+        "}"
+      ],
+      "note": "base.TampilkanInfo() memakai keluaran umum dari class induk sebelum menambahkan informasi daya."
+    },
+    {
+      "title": "Polymorphism saat program berjalan",
+      "body": "Variabel bertipe Barang dapat menunjuk ke object BarangElektronik. Ketika method virtual dipanggil, implementasi yang dijalankan mengikuti tipe object sebenarnya.",
+      "codeTitle": "Program.cs",
+      "code": [
+        "Barang[] daftar =",
+        "{",
+        "    new Barang(\"BRG001\", \"Peti Plastik\", 80, \"Kemasan\"),",
+        "    new BarangElektronik(\"ELK001\", \"Barcode Scanner\", 10, \"Elektronik\", 25)",
+        "};",
+        "",
+        "foreach (Barang item in daftar)",
+        "{",
+        "    item.TampilkanInfo();",
+        "}"
+      ],
+      "note": "Pemanggilan kedua tetap menggunakan referensi Barang, tetapi akan menjalankan override milik BarangElektronik."
+    }
+  ],
+  "practice": {
+    "title": "Praktikum: ragam barang gudang",
+    "steps": [
+      "Salin project Bab 2, lalu buat class BarangElektronik yang mewarisi Barang.",
+      "Tambahkan DayaListrik dan constructor yang meneruskan data umum ke base(...).",
+      "Ubah TampilkanInfo() pada Barang menjadi virtual.",
+      "Override TampilkanInfo() di BarangElektronik dan tampilkan daya listrik.",
+      "Masukkan Barang dan BarangElektronik ke dalam Barang[] lalu tampilkan dengan foreach."
+    ],
+    "deliverable": "Daftar campuran barang yang menampilkan detail sesuai jenis object masing-masing.",
+    "solutions": [
+      {
+        "title": "Barang dan BarangElektronik",
+        "explanation": "Class turunan meneruskan field umum ke constructor base, menambah daya listrik, dan mengganti method virtual.",
+        "codeTitle": "Models/BarangElektronik.cs",
+        "code": [
+          "public class Barang",
+          "{",
+          "    public string KodeBarang { get; }",
+          "    public string NamaBarang { get; }",
+          "    public int JumlahStok { get; }",
+          "    public string Kategori { get; }",
+          "",
+          "    public Barang(string kode, string nama, int stok, string kategori)",
+          "    {",
+          "        KodeBarang = kode; NamaBarang = nama;",
+          "        JumlahStok = stok; Kategori = kategori;",
+          "    }",
+          "",
+          "    public virtual void TampilkanInfo()",
+          "        => Console.WriteLine($\"[{KodeBarang}] {NamaBarang} - Stok: {JumlahStok}\");",
+          "}",
+          "",
+          "public class BarangElektronik : Barang",
+          "{",
+          "    public int DayaListrik { get; }",
+          "    public BarangElektronik(string kode, string nama, int stok, string kategori, int daya)",
+          "        : base(kode, nama, stok, kategori) => DayaListrik = daya;",
+          "",
+          "    public override void TampilkanInfo()",
+          "    {",
+          "        base.TampilkanInfo();",
+          "        Console.WriteLine($\"Daya: {DayaListrik} Watt\");",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Menguji polymorphism",
+        "explanation": "Referensi Barang[] dapat berisi object dari class turunan. Pemanggilan method virtual menggunakan implementasi sesuai tipe object.",
+        "codeTitle": "Program.cs",
+        "code": [
+          "Barang[] daftar =",
+          "{",
+          "    new Barang(\"BRG001\", \"Peti Plastik\", 80, \"Kemasan\"),",
+          "    new BarangElektronik(\"ELK001\", \"Barcode Scanner\", 10, \"Elektronik\", 25)",
+          "};",
+          "",
+          "foreach (var item in daftar) item.TampilkanInfo();"
+        ]
+      },
+      {
+        "title": "BarangMakanan.cs",
+        "explanation": "Class ini mewarisi informasi umum Barang dan menambahkan tanggal kedaluwarsa.",
+        "codeTitle": "BarangMakanan.cs",
+        "code": [
+          "public class BarangMakanan : Barang",
+          "{",
+          "    public DateTime TanggalKadaluarsa { get; }",
+          "    public BarangMakanan(string kode, string nama, int stok, DateTime tanggal)",
+          "        : base(kode, nama, stok, \"Makanan\") => TanggalKadaluarsa = tanggal;",
+          "}"
+        ]
+      }
+    ]
+  },
+  "assessments": {
+    "pretest": {
+      "multipleChoice": [
+        { "question": "Keyword override digunakan untuk apa?", "answer": "C — Mengganti implementasi method virtual dari parent.", "explanation": "Method parent harus virtual, abstract, atau sudah override agar dapat di-override." },
+        { "question": "Apa yang diwarisi child class dari parent?", "answer": "C — Anggota public/protected yang dapat diwarisi, beserta perilaku parent yang relevan.", "explanation": "Member private tetap tersembunyi dan constructor tidak diwarisi sebagai constructor child." }
+      ],
+      "essay": [
+        { "question": "Apa itu inheritance dan manfaatnya pada sistem gudang?", "answer": "Inheritance membentuk class baru dari class dasar. Class BarangElektronik dan BarangMakanan dapat memakai data umum Barang, lalu menambahkan sifat khusus tanpa menduplikasi struktur." },
+        { "question": "Jelaskan polymorphism dengan contoh.", "answer": "Polymorphism memungkinkan pemanggilan method yang sama menghasilkan perilaku sesuai tipe object. Misalnya `Barang[]` berisi Barang dan BarangElektronik; pemanggilan `TampilkanInfo()` memakai override pada object elektronik." }
+      ]
+    },
+    "posttest": {
+      "multipleChoice": [
+        { "question": "Kata kunci apa yang menandai method parent agar dapat dioverride?", "answer": "D — virtual.", "explanation": "virtual membuka kemungkinan implementasi berbeda pada class turunan." }
+      ],
+      "essay": [
+        { "question": "Buat BarangMakanan yang mewarisi Barang dan menambahkan TanggalKadaluarsa.", "answer": "Contoh: `public class BarangMakanan : Barang { public DateTime TanggalKadaluarsa { get; set; } public BarangMakanan(string kode, string nama, int stok, DateTime tanggal) : base(kode, nama, stok, \"Makanan\") { TanggalKadaluarsa = tanggal; } }`. Constructor meneruskan data umum ke base." },
+        { "question": "Apa yang terjadi jika method parent tidak di-override?", "answer": "Pemanggilan melalui object turunan tetap menggunakan implementasi warisan dari parent. Jika method parent abstract, class turunan konkret wajib menyediakan override agar dapat dibuat." }
+      ]
+    }
+  },
+  "quiz": {
+    "question": "Apa syarat agar method induk dapat diganti oleh class turunan dengan override?",
+    "options": [
+      "Method induk harus private.",
+      "Method induk harus static.",
+      "Method induk harus virtual atau abstract.",
+      "Class induk harus sealed."
+    ],
+    "answer": 2,
+    "explanation": "virtual atau abstract membuka titik ekstensi yang dapat diimplementasikan atau diganti oleh class turunan."
+  }
+}

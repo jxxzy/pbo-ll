@@ -1,0 +1,202 @@
+{
+  "introduction": "ASP.NET Core MVC memisahkan data aplikasi, alur permintaan, dan antarmuka. Pemisahan ini membuat fitur gudang lebih mudah diuji, dikembangkan, dan dipelihara.",
+  "objectives": [
+    "Menjelaskan fungsi Model, View, dan Controller.",
+    "Mengenali struktur proyek ASP.NET Core MVC.",
+    "Membuat halaman dan route awal untuk daftar barang."
+  ],
+  "sections": [
+    {
+      "title": "Ikuti alur Model–View–Controller",
+      "body": "Browser mengirim request ke route. Controller memproses alur, mengambil data dari Model, lalu memilih View untuk dirender sebagai HTML.",
+      "bullets": [
+        "Model mewakili data dan aturan domain.",
+        "View (.cshtml) menyajikan data menggunakan Razor.",
+        "Controller menerima request dan memilih hasil seperti View atau redirect."
+      ]
+    },
+    {
+      "title": "Kenali struktur proyek",
+      "body": "Template MVC membuat folder dan file awal. Setiap bagian punya tanggung jawab tersendiri, jadi hindari menaruh semua logika di View.",
+      "codeTitle": "Struktur aplikasi",
+      "code": [
+        "Controllers/       // HomeController, BarangController",
+        "Models/            // model atau entity",
+        "Views/Home/        // Index.cshtml",
+        "Views/Barang/      // view untuk BarangController",
+        "Views/Shared/      // _Layout.cshtml",
+        "wwwroot/           // CSS, JavaScript, gambar",
+        "Program.cs         // service dan routing"
+      ],
+      "note": "Action BarangController.Index biasanya akan mencari View di Views/Barang/Index.cshtml."
+    },
+    {
+      "title": "Sambungkan action dengan view",
+      "body": "Mulai dari template ASP.NET Core Web App (Model-View-Controller), lalu tambahkan action dan view dengan nama yang cocok.",
+      "codeTitle": "Controllers/BarangController.cs",
+      "code": [
+        "public class BarangController : Controller",
+        "{",
+        "    public IActionResult Index()",
+        "    {",
+        "        ViewData[\"Title\"] = \"Daftar Barang\";",
+        "        return View();",
+        "    }",
+        "}"
+      ],
+      "note": "return View() merender view yang sesuai dengan nama action. Route default umumnya mengikuti pola controller/action, misalnya /Barang/Index."
+    },
+    {
+      "title": "Render tampilan Razor",
+      "body": "View dapat berisi HTML dan ekspresi Razor untuk menampilkan nilai yang disiapkan controller. Data tabel masih statis pada tahap pengenalan ini; Bab 9 akan menghubungkannya ke database.",
+      "codeTitle": "Views/Barang/Index.cshtml",
+      "code": [
+        "<h2>@ViewData[\"Title\"]</h2>",
+        "<p>Daftar awal inventaris gudang.</p>",
+        "",
+        "<table class=\"table\">",
+        "  <tr><th>Kode</th><th>Barang</th><th>Stok</th></tr>",
+        "  <tr><td>BRG001</td><td>Box Kardus</td><td>120</td></tr>",
+        "</table>"
+      ]
+    }
+  ],
+  "practice": {
+    "title": "Praktikum: halaman inventaris pertama",
+    "steps": [
+      "Buat project ASP.NET Core Web App (Model-View-Controller) dengan framework yang tersedia di lingkungan .NET kamu.",
+      "Jalankan project dan amati route awal serta halaman Home/Index.",
+      "Tambahkan BarangController dengan action Index().",
+      "Buat Views/Barang/Index.cshtml dan tampilkan judul serta tabel dua barang.",
+      "Tambahkan link navigasi ke /Barang/Index pada layout bersama."
+    ],
+    "deliverable": "Aplikasi MVC yang dapat membuka halaman daftar barang melalui route /Barang.",
+    "solutions": [
+      {
+        "title": "Konfigurasi dan route aplikasi",
+        "explanation": "Template MVC sudah menyiapkan sebagian konfigurasi. Pastikan service MVC dan route default tersedia sebelum controller dipanggil.",
+        "codeTitle": "Program.cs",
+        "code": [
+          "var builder = WebApplication.CreateBuilder(args);",
+          "builder.Services.AddControllersWithViews();",
+          "",
+          "var app = builder.Build();",
+          "app.UseStaticFiles();",
+          "app.UseRouting();",
+          "app.MapControllerRoute(",
+          "    name: \"default\",",
+          "    pattern: \"{controller=Home}/{action=Index}/{id?}\");",
+          "app.Run();"
+        ]
+      },
+      {
+        "title": "Views/Home/Index.cshtml",
+        "explanation": "Modifikasi halaman awal sesuai langkah praktikum sebelum menambahkan halaman daftar barang.",
+        "codeTitle": "Views/Home/Index.cshtml",
+        "code": [
+          "<h2>Selamat Datang di Aplikasi Gudang</h2>",
+          "<p>Ini adalah halaman awal berbasis MVC.</p>"
+        ]
+      },
+      {
+        "title": "Models/BarangRingkas.cs",
+        "explanation": "Model sederhana ini menjaga tipe data view tetap jelas selama database belum ditambahkan.",
+        "codeTitle": "BarangRingkas.cs",
+        "code": [
+          "public class BarangRingkas",
+          "{",
+          "    public string Kode { get; set; } = string.Empty;",
+          "    public string Nama { get; set; } = string.Empty;",
+          "    public int Stok { get; set; }",
+          "}"
+        ]
+      },
+      {
+        "title": "Controllers/BarangController.cs",
+        "explanation": "Nama controller dan action menentukan route /Barang/Index. Untuk tahap awal, action mengirim daftar statis bertipe ke View.",
+        "codeTitle": "BarangController.cs",
+        "code": [
+          "using System.Collections.Generic;",
+          "using Microsoft.AspNetCore.Mvc;",
+          "",
+          "public class BarangController : Controller",
+          "{",
+          "    public IActionResult Index()",
+          "    {",
+          "        var daftar = new List<BarangRingkas>",
+          "        {",
+          "            new() { Kode = \"BRG001\", Nama = \"Box Kardus\", Stok = 120 },",
+          "            new() { Kode = \"BRG002\", Nama = \"Label\", Stok = 75 }",
+          "        };",
+          "        return View(daftar);",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Views/Barang/Index.cshtml",
+        "explanation": "Razor melakukan iterasi atas data bertipe yang dikirim oleh action Index.",
+        "codeTitle": "Index.cshtml",
+        "code": [
+          "@model IEnumerable<BarangRingkas>",
+          "<h1>Daftar Barang</h1>",
+          "<table class=\"table\">",
+          "  <thead><tr><th>Kode</th><th>Nama</th><th>Stok</th></tr></thead>",
+          "  <tbody>",
+          "  @foreach (var barang in Model)",
+          "  {",
+          "    <tr><td>@barang.Kode</td><td>@barang.Nama</td><td>@barang.Stok</td></tr>",
+          "  }",
+          "  </tbody>",
+          "</table>"
+        ]
+      },
+      {
+        "title": "Tambahkan link di Views/Shared/_Layout.cshtml",
+        "explanation": "Letakkan tautan dalam elemen navigasi layout agar halaman barang dapat dibuka dari semua halaman.",
+        "codeTitle": "_Layout.cshtml",
+        "code": [
+          "<nav>",
+          "  <a asp-controller=\"Home\" asp-action=\"Index\">Beranda</a>",
+          "  <a asp-controller=\"Barang\" asp-action=\"Index\">Daftar barang</a>",
+          "</nav>"
+        ]
+      }
+    ]
+  },
+  "assessments": {
+    "pretest": {
+      "multipleChoice": [
+        { "question": "Apa kepanjangan MVC?", "answer": "C — Model–View–Controller.", "explanation": "MVC memisahkan data/domain, tampilan, dan pengendali alur request." },
+        { "question": "Di mana file Index.cshtml untuk halaman Home berada?", "answer": "C — Views/Home/.", "explanation": "Folder view mengikuti nama controller tanpa akhiran Controller." },
+        { "question": "Ke mana routing default ASP.NET Core MVC biasanya diarahkan?", "answer": "C — /Home/Index.", "explanation": "Pola default umumnya `{controller=Home}/{action=Index}/{id?}`." },
+        { "question": "Apa nama file layout utama MVC?", "answer": "D — _Layout.cshtml.", "explanation": "Layout bersama biasanya tersimpan di Views/Shared/." }
+      ],
+      "essay": [
+        { "question": "Jelaskan fungsi Model, View, dan Controller.", "answer": "Model membawa data dan aturan domain; View merender antarmuka; Controller menerima request, mengoordinasikan model, lalu memilih respons atau view." },
+        { "question": "Mengapa pemisahan MVC penting?", "answer": "Pemisahan tanggung jawab memudahkan pengujian, pemeliharaan, penggunaan ulang, dan perubahan tampilan tanpa mencampur logika domain." }
+      ]
+    },
+    "posttest": {
+      "multipleChoice": [
+        { "question": "Apa fungsi return View() pada action controller?", "answer": "C — Mengarahkan hasil action ke tampilan Razor (.cshtml) yang sesuai.", "explanation": "Tanpa nama view, MVC mencari view dengan nama action pada folder controller terkait." },
+        { "question": "Untuk apa folder wwwroot digunakan?", "answer": "B — Menyimpan file statis seperti CSS, JavaScript, dan gambar.", "explanation": "File di wwwroot dapat disajikan melalui middleware static files." }
+      ],
+      "essay": [
+        { "question": "Jelaskan routing default ASP.NET Core MVC.", "answer": "Pola route default `{controller=Home}/{action=Index}/{id?}` membaca segmen URL sebagai controller, action, dan id opsional. Jika segmen tidak diberikan, HomeController.Index menjadi default." },
+        { "question": "Mengapa controller perlu memiliki method Index()?", "answer": "Tidak wajib untuk semua controller, tetapi Index adalah konvensi action awal untuk daftar/halaman utama. Route `/Barang` biasanya mencari action Index jika route default diterapkan." }
+      ]
+    }
+  },
+  "quiz": {
+    "question": "Bagian mana yang memilih View untuk menjawab request pengguna?",
+    "options": [
+      "Model",
+      "Controller",
+      "wwwroot",
+      "_ValidationScriptsPartial"
+    ],
+    "answer": 1,
+    "explanation": "Controller menangani request dan memilih hasil. View bertugas menyajikan antarmuka, sedangkan Model membawa data dan aturan domain."
+  }
+}

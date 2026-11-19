@@ -1,0 +1,303 @@
+{
+  "introduction": "Form web perlu kontrak input yang jelas dan umpan balik saat data salah. ViewModel membentuk data khusus untuk form, sedangkan DataAnnotations dan ModelState membantu memvalidasi sebelum perubahan disimpan.",
+  "objectives": [
+    "Membedakan entity Model dan ViewModel.",
+    "Menerapkan Required, Display, dan Range.",
+    "Menyelesaikan alur CRUD dengan validasi dan umpan balik."
+  ],
+  "sections": [
+    {
+      "title": "Bentuk kontrak form dengan ViewModel",
+      "body": "ViewModel memuat hanya data yang diperlukan form. Atribut validasi menjadi aturan yang dapat diperiksa di server dan, bila skrip validasi aktif, juga di browser.",
+      "codeTitle": "ViewModels/BarangViewModel.cs",
+      "code": [
+        "using System.ComponentModel.DataAnnotations;",
+        "",
+        "public class BarangViewModel",
+        "{",
+        "    public int Id { get; set; }",
+        "    [Required, Display(Name = \"Kode Barang\")]",
+        "    public string KodeBarang { get; set; } = string.Empty;",
+        "",
+        "    [Required, Display(Name = \"Nama Barang\")]",
+        "    public string NamaBarang { get; set; } = string.Empty;",
+        "",
+        "    [Range(0, int.MaxValue, ErrorMessage = \"Stok tidak boleh negatif\")]",
+        "    public int JumlahStok { get; set; }",
+        "",
+        "    [Display(Name = \"Kategori\")]",
+        "    public string Kategori { get; set; } = string.Empty;",
+        "}"
+      ]
+    },
+    {
+      "title": "Validasi dan petakan data di controller",
+      "body": "ModelState.IsValid menunjukkan apakah input memenuhi aturan model. Jika valid, petakan ViewModel ke entity; jika tidak, kembalikan ViewModel supaya pengguna dapat memperbaiki form.",
+      "codeTitle": "BarangController.cs",
+      "code": [
+        "[HttpPost]",
+        "public IActionResult Create(BarangViewModel vm)",
+        "{",
+        "    if (!ModelState.IsValid) return View(vm);",
+        "",
+        "    var barang = new Barang",
+        "    {",
+        "        KodeBarang = vm.KodeBarang,",
+        "        NamaBarang = vm.NamaBarang,",
+        "        JumlahStok = vm.JumlahStok,",
+        "        Kategori = vm.Kategori",
+        "    };",
+        "",
+        "    _context.Barang.Add(barang);",
+        "    _context.SaveChanges();",
+        "    return RedirectToAction(nameof(Index));",
+        "}"
+      ],
+      "note": "Jangan mengandalkan validasi browser saja. Validasi server tetap diperlukan karena request dapat dikirim tanpa menjalankan JavaScript."
+    },
+    {
+      "title": "Tampilkan error dekat input",
+      "body": "Tag Helper asp-for menghubungkan label dan input dengan properti ViewModel. asp-validation-for menunjukkan pesan validasi untuk field yang sama.",
+      "codeTitle": "Views/Barang/Create.cshtml",
+      "code": [
+        "@model BarangViewModel",
+        "",
+        "<form asp-action=\"Create\" method=\"post\">",
+        "  <label asp-for=\"KodeBarang\"></label>",
+        "  <input asp-for=\"KodeBarang\" class=\"form-control\" />",
+        "  <span asp-validation-for=\"KodeBarang\" class=\"text-danger\"></span>",
+        "",
+        "  <label asp-for=\"JumlahStok\"></label>",
+        "  <input asp-for=\"JumlahStok\" type=\"number\" class=\"form-control\" />",
+        "  <span asp-validation-for=\"JumlahStok\" class=\"text-danger\"></span>",
+        "",
+        "  <button type=\"submit\">Simpan</button>",
+        "</form>"
+      ],
+      "note": "Aktifkan partial _ValidationScriptsPartial pada section Scripts bila ingin validasi client-side."
+    },
+    {
+      "title": "Lengkapi alur CRUD",
+      "body": "Index menampilkan data, Create menambah, Edit memuat lalu memperbarui record, dan Delete meminta konfirmasi sebelum menghapus. Setelah perubahan sukses, redirect kembali ke Index menjaga alur tetap jelas.",
+      "bullets": [
+        "Read: ambil data dengan _context.Barang.ToList().",
+        "Update: cari entity berdasarkan id, validasi input, lalu panggil Update dan SaveChanges.",
+        "Delete: tampilkan konfirmasi terlebih dahulu; aksi POST yang melakukan penghapusan.",
+        "Jika entity tidak ditemukan, kembalikan NotFound() alih-alih membuat tampilan sukses."
+      ]
+    }
+  ],
+  "practice": {
+    "title": "Praktikum: CRUD dengan form yang tervalidasi",
+    "steps": [
+      "Buat BarangViewModel dan aturan Required, Display, serta Range.",
+      "Ubah aksi Create POST agar menerima ViewModel dan memeriksa ModelState.IsValid.",
+      "Petakan nilai form ke entity Barang sebelum menyimpannya.",
+      "Tampilkan pesan validasi di Create.cshtml menggunakan asp-validation-for.",
+      "Tambahkan daftar Index, form Edit, dan halaman konfirmasi Delete.",
+      "Uji input kosong, stok negatif, perubahan data valid, dan penghapusan."
+    ],
+    "deliverable": "Alur Create, Read, Update, Delete dengan validasi input dan pesan kesalahan yang terlihat.",
+    "solutions": [
+      {
+        "title": "ViewModels/SupplierViewModel.cs",
+        "explanation": "Jawaban tugas post-test: ViewModel supplier hanya mengekspos nilai yang diperlukan form dan menerapkan validasi server.",
+        "codeTitle": "SupplierViewModel.cs",
+        "code": [
+          "using System.ComponentModel.DataAnnotations;",
+          "",
+          "public class SupplierViewModel",
+          "{",
+          "    [Required, StringLength(100)]",
+          "    public string NamaSupplier { get; set; } = string.Empty;",
+          "",
+          "    [Required, EmailAddress]",
+          "    public string Email { get; set; } = string.Empty;",
+          "",
+          "    [Required, Phone]",
+          "    public string NoTelp { get; set; } = string.Empty;",
+          "}"
+        ]
+      },
+      {
+        "title": "Alur CRUD Barang yang tervalidasi",
+        "explanation": "Berikut pola inti controller. Edit menggunakan allow-list properti agar client tidak dapat mengubah field entity lain; delete memakai POST dan token anti-forgery.",
+        "codeTitle": "BarangController.cs",
+        "code": [
+          "using Microsoft.AspNetCore.Mvc;",
+          "using Microsoft.EntityFrameworkCore;",
+          "",
+          "public class BarangController : Controller",
+          "{",
+          "    private readonly ApplicationDbContext _db;",
+          "    public BarangController(ApplicationDbContext db) => _db = db;",
+          "",
+          "    public async Task<IActionResult> Index()",
+          "        => View(await _db.Barang.AsNoTracking().ToListAsync());",
+          "",
+          "    public IActionResult Create() => View(new BarangViewModel());",
+          "    [HttpPost, ValidateAntiForgeryToken]",
+          "    public async Task<IActionResult> Create(BarangViewModel vm)",
+          "    {",
+          "        if (!ModelState.IsValid) return View(vm);",
+          "        _db.Barang.Add(new Barang { KodeBarang = vm.KodeBarang,",
+          "            NamaBarang = vm.NamaBarang, JumlahStok = vm.JumlahStok, Kategori = vm.Kategori });",
+          "        await _db.SaveChangesAsync();",
+          "        return RedirectToAction(nameof(Index));",
+          "    }",
+          "",
+          "    public async Task<IActionResult> Edit(int id)",
+          "    {",
+          "        var b = await _db.Barang.FindAsync(id);",
+          "        if (b is null) return NotFound();",
+          "        return View(new BarangViewModel { Id = b.Id, KodeBarang = b.KodeBarang,",
+          "            NamaBarang = b.NamaBarang, JumlahStok = b.JumlahStok, Kategori = b.Kategori });",
+          "    }",
+          "    [HttpPost, ValidateAntiForgeryToken]",
+          "    public async Task<IActionResult> Edit(int id, BarangViewModel vm)",
+          "    {",
+          "        if (!ModelState.IsValid) return View(vm);",
+          "        var b = await _db.Barang.FindAsync(id);",
+          "        if (b is null) return NotFound();",
+          "        b.KodeBarang = vm.KodeBarang; b.NamaBarang = vm.NamaBarang;",
+          "        b.JumlahStok = vm.JumlahStok; b.Kategori = vm.Kategori;",
+          "        await _db.SaveChangesAsync();",
+          "        return RedirectToAction(nameof(Index));",
+          "    }",
+          "",
+          "    public async Task<IActionResult> Delete(int id)",
+          "    {",
+          "        var b = await _db.Barang.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);",
+          "        return b is null ? NotFound() : View(b);",
+          "    }",
+          "",
+          "    [HttpPost, ValidateAntiForgeryToken]",
+          "    [ActionName(\"Delete\")]",
+          "    public async Task<IActionResult> DeleteConfirmed(int id)",
+          "    {",
+          "        var b = await _db.Barang.FindAsync(id);",
+          "        if (b is null) return NotFound();",
+          "        _db.Barang.Remove(b); await _db.SaveChangesAsync();",
+          "        return RedirectToAction(nameof(Index));",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Views/Barang/Create.cshtml",
+        "explanation": "Tag Helper membangun input dan label yang terikat ke ViewModel. Pesan server-side ditampilkan kembali jika validasi gagal.",
+        "codeTitle": "Create.cshtml",
+        "code": [
+          "@model BarangViewModel",
+          "<form asp-action=\"Create\" method=\"post\">",
+          "  <div asp-validation-summary=\"ModelOnly\" class=\"text-danger\"></div>",
+          "  <label asp-for=\"KodeBarang\"></label>",
+          "  <input asp-for=\"KodeBarang\" />",
+          "  <span asp-validation-for=\"KodeBarang\"></span>",
+          "  <label asp-for=\"NamaBarang\"></label>",
+          "  <input asp-for=\"NamaBarang\" />",
+          "  <span asp-validation-for=\"NamaBarang\"></span>",
+          "  <label asp-for=\"JumlahStok\"></label>",
+          "  <input asp-for=\"JumlahStok\" type=\"number\" />",
+          "  <span asp-validation-for=\"JumlahStok\"></span>",
+          "  <button type=\"submit\">Simpan</button>",
+          "</form>",
+          "@section Scripts { <partial name=\"_ValidationScriptsPartial\" /> }"
+        ]
+      },
+      {
+        "title": "Views/Barang/Index.cshtml",
+        "explanation": "Halaman daftar menyediakan tombol tambah, menampilkan data, dan membuka halaman Edit atau konfirmasi Delete untuk setiap barang.",
+        "codeTitle": "Index.cshtml",
+        "code": [
+          "@model IEnumerable<Barang>",
+          "<h1>Daftar Barang</h1>",
+          "<a asp-action=\"Create\" class=\"btn btn-success\">Tambah Barang</a>",
+          "<table class=\"table\">",
+          "  <thead><tr><th>Kode</th><th>Nama</th><th>Stok</th><th>Kategori</th><th>Aksi</th></tr></thead>",
+          "  <tbody>",
+          "  @foreach (var item in Model)",
+          "  {",
+          "    <tr>",
+          "      <td>@item.KodeBarang</td><td>@item.NamaBarang</td>",
+          "      <td>@item.JumlahStok</td><td>@item.Kategori</td>",
+          "      <td><a asp-action=\"Edit\" asp-route-id=\"@item.Id\">Edit</a>",
+          "          <a asp-action=\"Delete\" asp-route-id=\"@item.Id\">Hapus</a></td>",
+          "    </tr>",
+          "  }",
+          "  </tbody>",
+          "</table>"
+        ]
+      },
+      {
+        "title": "Views/Barang/Edit.cshtml",
+        "explanation": "Form edit mengirim input ke action Edit(id) yang sama dan mempertahankan pesan validasi.",
+        "codeTitle": "Edit.cshtml",
+        "code": [
+          "@model BarangViewModel",
+          "<form asp-action=\"Edit\" asp-route-id=\"@Model.Id\" method=\"post\">",
+          "  <div asp-validation-summary=\"ModelOnly\" class=\"text-danger\"></div>",
+          "  <label asp-for=\"KodeBarang\"></label><input asp-for=\"KodeBarang\" />",
+          "  <span asp-validation-for=\"KodeBarang\"></span>",
+          "  <label asp-for=\"NamaBarang\"></label><input asp-for=\"NamaBarang\" />",
+          "  <span asp-validation-for=\"NamaBarang\"></span>",
+          "  <label asp-for=\"JumlahStok\"></label><input asp-for=\"JumlahStok\" type=\"number\" />",
+          "  <span asp-validation-for=\"JumlahStok\"></span>",
+          "  <label asp-for=\"Kategori\"></label><input asp-for=\"Kategori\" />",
+          "  <button type=\"submit\">Simpan perubahan</button>",
+          "</form>",
+          "@section Scripts { <partial name=\"_ValidationScriptsPartial\" /> }"
+        ]
+      },
+      {
+        "title": "Views/Barang/Delete.cshtml",
+        "explanation": "Minta konfirmasi melalui halaman sebelum mengirim POST penghapusan. Token anti-forgery dihasilkan oleh Form Tag Helper.",
+        "codeTitle": "Delete.cshtml",
+        "code": [
+          "@model Barang",
+          "<h1>Hapus barang?</h1>",
+          "<p>Yakin ingin menghapus @Model.NamaBarang (@Model.KodeBarang)?</p>",
+          "<form asp-action=\"Delete\" asp-route-id=\"@Model.Id\" method=\"post\">",
+          "  <button type=\"submit\">Ya, hapus</button>",
+          "  <a asp-action=\"Index\">Batal</a>",
+          "</form>"
+        ]
+      }
+    ]
+  },
+  "assessments": {
+    "pretest": {
+      "multipleChoice": [
+        { "question": "Apa fungsi atribut [Required]?", "answer": "B — Menandai properti yang wajib diisi.", "explanation": "Validasi server memastikan nilainya tidak kosong; aturan client-side perlu skrip yang sesuai." },
+        { "question": "Untuk apa ViewModel digunakan?", "answer": "D — Membawa data yang dibutuhkan antara form/view dan controller.", "explanation": "ViewModel membatasi kontrak input/output khusus tampilan." },
+        { "question": "Di mana validasi input sebaiknya didefinisikan?", "answer": "C — Pada Model atau ViewModel, lalu diperiksa server-side.", "explanation": "Validasi browser membantu UX, tetapi tidak menggantikan pemeriksaan server." },
+        { "question": "Apa yang diperiksa ModelState.IsValid?", "answer": "C — Apakah input memenuhi aturan binding dan validasi.", "explanation": "Jika false, tampilkan kembali form beserta pesan kesalahannya." }
+      ],
+      "essay": [
+        { "question": "Apa beda Model dan ViewModel pada ASP.NET Core MVC?", "answer": "Model/entity merepresentasikan data domain atau penyimpanan; ViewModel membawa subset data dan aturan yang dibutuhkan tampilan tertentu. ViewModel menghindari pengikatan langsung ke semua properti entity." },
+        { "question": "Mengapa validasi penting di sistem gudang?", "answer": "Validasi mencegah data penting kosong, stok negatif, atau format salah masuk ke sistem sehingga laporan, pengadaan, dan transaksi tetap konsisten." }
+      ]
+    },
+    "posttest": {
+      "multipleChoice": [
+        { "question": "Apa fungsi [Range(0, int.MaxValue)]?", "answer": "B — Membatasi nilai angka pada rentang yang ditentukan.", "explanation": "Contoh ini menerima stok 0 atau lebih dan menolak angka negatif." },
+        { "question": "Kapan aksi Create(BarangViewModel vm) tidak boleh menyimpan?", "answer": "B — Saat ModelState tidak valid.", "explanation": "Kembalikan view beserta vm agar pengguna dapat memperbaiki field yang salah." }
+      ],
+      "essay": [
+        { "question": "Buat ViewModel supplier dengan NamaSupplier, Email, dan NoTelp serta validasi.", "answer": "Gunakan `[Required, StringLength(100)]` pada NamaSupplier, `[Required, EmailAddress]` pada Email, dan `[Required, Phone]` pada NoTelp. Inisialisasi properti string dengan `string.Empty` dan periksa ModelState pada POST." },
+        { "question": "Bagaimana ViewModel meningkatkan keamanan dan fleksibilitas form?", "answer": "ViewModel mengekspos hanya field yang memang boleh diterima form, mengurangi overposting, dan memungkinkan aturan atau format form berubah tanpa memodifikasi entity database." }
+      ]
+    }
+  },
+  "quiz": {
+    "question": "Apa yang sebaiknya dilakukan ketika ModelState.IsValid bernilai false?",
+    "options": [
+      "Tetap menyimpan entity agar form tidak hilang.",
+      "Menghapus record lalu redirect.",
+      "Mengembalikan View dengan ViewModel agar error dapat diperbaiki.",
+      "Mematikan validasi untuk request berikutnya."
+    ],
+    "answer": 2,
+    "explanation": "ViewModel perlu dikembalikan ke form agar nilai yang sudah diisi dan pesan validasi tetap tersedia."
+  }
+}

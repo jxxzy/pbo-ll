@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101320">
+    <meta name="description" content="Ruang belajar Pemrograman Berorientasi Objek II: materi C#, ASP.NET Core MVC, dan REST API dalam satu perjalanan belajar.">
+    <title>Belajar PBO II — Pemrograman Berorientasi Objek</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+    <script src="content/chapters/chapters.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#konten">Lewati ke materi</a>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar" aria-label="Navigasi materi">
+        <a class="brand" href="#beranda" aria-label="Belajar PBO II, beranda">
+          <span class="brand-mark" aria-hidden="true">&lt;/&gt;</span>
+          <span><strong>Belajar PBO II</strong><small>C# · ASP.NET Core</small></span>
+        </a>
+
+        <div class="sidebar-progress">
+          <div class="sidebar-progress-heading"><span>Progres materi</span><strong id="progress-label">0%</strong></div>
+          <div class="progress-track" role="progressbar" aria-label="Progres materi selesai" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="overall-progress"></span></div>
+          <p><span id="completed-count">0 dari 11 bab</span> selesai</p>
+        </div>
+
+        <label class="search-box sidebar-search">
+          <span aria-hidden="true">⌕</span>
+          <span class="visually-hidden">Cari materi</span>
+          <input id="search-input" type="search" placeholder="Cari materi..." autocomplete="off">
+          <kbd>/</kbd>
+        </label>
+
+        <p class="sidebar-label">PERJALANAN BELAJAR</p>
+        <nav class="sidebar-nav" aria-label="Navigasi utama materi">
+          <a class="sidebar-link active" href="#beranda"><span aria-hidden="true">⌂</span> Beranda</a>
+          <a class="sidebar-link" href="#peta-belajar"><span aria-hidden="true">⌘</span> Peta belajar</a>
+          <details class="chapter-group" open>
+            <summary><span class="summary-index">01</span><span><strong>Fondasi OOP</strong><small>Bab 1–5 · C#</small></span><span class="summary-arrow">⌄</span></summary>
+            <a href="#lesson-1"><span>01</span> Class &amp; Object</a>
+            <a href="#lesson-2"><span>02</span> Encapsulation</a>
+            <a href="#lesson-3"><span>03</span> Inheritance</a>
+            <a href="#lesson-4"><span>04</span> Abstract &amp; Interface</a>
+            <a href="#lesson-5"><span>05</span> Collection &amp; Generic</a>
+          </details>
+          <details class="chapter-group">
+            <summary><span class="summary-index">02</span><span><strong>Materi penghubung</strong><small>Bab 6–7 · C# Lanjutan</small></span><span class="summary-arrow">⌄</span></summary>
+            <a href="#lesson-6"><span>06</span> Exception Handling &amp; File I/O</a>
+            <a href="#lesson-7"><span>07</span> LINQ &amp; Async/Await</a>
+          </details>
+          <details class="chapter-group">
+            <summary><span class="summary-index">03</span><span><strong>Aplikasi web</strong><small>Bab 8–11 · ASP.NET</small></span><span class="summary-arrow">⌄</span></summary>
+            <a href="#lesson-8"><span>08</span> Struktur MVC</a>
+            <a href="#lesson-9"><span>09</span> Model &amp; EF Core</a>
+            <a href="#lesson-10"><span>10</span> CRUD &amp; validasi</a>
+            <a href="#lesson-11"><span>11</span> REST API</a>
+          </details>
+          <a class="sidebar-link" href="#materi"><span aria-hidden="true">▤</span> Semua materi</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <span class="online-dot"></span>
+          <p>Belajar mandiri,<br>selangkah demi selangkah.</p>
+          <small>Progres disimpan di browser ini.</small>
+        </div>
+      </aside>
+
+      <button class="sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="Tutup navigasi" hidden></button>
+
+      <div class="app-main">
+        <header class="main-topbar">
+          <div class="topbar-leading">
+            <button class="icon-button mobile-menu" id="menu-toggle" type="button" aria-label="Buka navigasi" aria-controls="sidebar" aria-expanded="false">☰</button>
+            <div class="breadcrumb"><span>Kursus</span><span aria-hidden="true">/</span><strong>Beranda</strong></div>
+          </div>
+          <div class="topbar-actions">
+            <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Aktifkan mode terang" title="Ganti tampilan">☼</button>
+            <button class="button button-quiet focus-toggle" id="focus-toggle" type="button" aria-pressed="false"><span aria-hidden="true">◎</span> Mode fokus</button>
+            <button class="button button-primary top-continue" id="continue-button" type="button">Mulai belajar <span aria-hidden="true">↗</span></button>
+          </div>
+        </header>
+
+        <main id="konten">
+          <div class="dashboard-shell">
+            <section class="hero" id="beranda" aria-labelledby="course-title">
+              <div class="hero-copy">
+                <p class="eyebrow"><span class="status-dot"></span> KELAS PRAKTIKUM · C# &amp; ASP.NET CORE</p>
+                <h1 id="course-title">Belajar berpikir.<br><span>Bangun aplikasimu.</span></h1>
+                <p class="hero-description">Pahami cara merancang program dengan OOP, susun aplikasi web dengan ASP.NET Core, lalu bawa datamu ke REST API.</p>
+                <div class="hero-actions">
+                  <button class="button button-primary hero-continue" type="button" data-continue>Mulai dari Bab 1 <span aria-hidden="true">→</span></button>
+                  <a class="button button-outline" href="#peta-belajar">Lihat peta belajar</a>
+                </div>
+                <div class="hero-meta"><span class="avatar-stack" aria-hidden="true"><i>C#</i><i>MVC</i><i>API</i></span><span>11 bab siap belajar</span><span class="meta-separator">•</span><span>Belajar sesuai ritme sendiri</span></div>
+              </div>
+              <div class="hero-art" role="img" aria-label="Ilustrasi kode C# untuk aplikasi sistem gudang">
+                <div class="art-orbit orbit-one"></div>
+                <div class="art-window">
+                  <div class="window-head"><span></span><span></span><span></span><b>Barang.cs</b></div>
+                  <div class="code-lines">
+                    <p><i>01</i><span class="code-purple">public class</span> <b>Barang</b></p>
+                    <p><i>02</i>{</p>
+                    <p><i>03</i>&nbsp;&nbsp;<span class="code-blue">public string</span> Nama { get; set; }</p>
+                    <p><i>04</i>&nbsp;&nbsp;<span class="code-blue">public int</span> Stok { get; set; }</p>
+                    <p><i>05</i></p>
+                    <p><i>06</i>&nbsp;&nbsp;<span class="code-yellow">public void</span> Tampilkan()</p>
+                    <p><i>07</i>&nbsp;&nbsp;&nbsp;&nbsp;Console.WriteLine(Nama);</p>
+                    <p><i>08</i>}</p>
+                  </div>
+                  <div class="code-footer"><span class="code-live"></span> Object siap dibuat <span>C#</span></div>
+                </div>
+                <div class="art-note note-top"><span class="note-icon">01</span> Pahami objek</div>
+                <div class="art-note note-bottom"><span class="note-check">✓</span> Solusi siap dijalankan</div>
+                <span class="art-caption">DARI OBJEK → APLIKASI → API</span>
+              </div>
+            </section>
+
+            <section class="path-section" id="peta-belajar" aria-labelledby="path-title">
+              <div class="section-heading">
+                <div><p class="eyebrow">PETA BELAJAR</p><h2 id="path-title">Tiga langkah menuju aplikasimu</h2></div>
+                <p>Ikuti urutannya, atau langsung ke topik yang kamu perlukan.</p>
+              </div>
+              <div class="path-grid">
+                <a class="path-tile" href="#lesson-1"><span class="path-number">01</span><span><strong>Kenali objek</strong><small>Class, encapsulation, dan collection</small></span><span class="path-arrow">↗</span></a>
+                <a class="path-tile" href="#lesson-6"><span class="path-number violet">02</span><span><strong>Perkuat program</strong><small>Exception, JSON, LINQ, dan async/await</small></span><span class="path-arrow">↗</span></a>
+                <a class="path-tile" href="#lesson-8"><span class="path-number amber">03</span><span><strong>Bangun aplikasi</strong><small>ASP.NET Core MVC, CRUD, dan API</small></span><span class="path-arrow">↗</span></a>
+              </div>
+            </section>
+
+            <section class="overview-grid" aria-label="Ringkasan kelas">
+              <div class="overview-card progress-overview">
+                <div class="overview-heading"><span class="overview-icon icon-progress" aria-hidden="true">↗</span><span>Progres belajarmu</span><strong id="progress-label-card">0%</strong></div>
+                <div class="progress-track"><span id="overall-progress-card"></span></div>
+                <p><span id="completed-count-card">0 dari 11 bab</span> materi tersedia sudah diselesaikan</p>
+              </div>
+              <div class="overview-card">
+                <div class="overview-heading"><span class="overview-icon icon-book" aria-hidden="true">▤</span><span>Modul tersedia</span></div>
+                <strong class="overview-number">11 <small>/ 11 bab</small></strong>
+                <p>9 PDF dan 2 materi penghubung tambahan</p>
+              </div>
+              <div class="overview-card">
+                <div class="overview-heading"><span class="overview-icon icon-time" aria-hidden="true">◷</span><span>Ritme belajar</span></div>
+                <strong class="overview-number">4 <small>jam / bab</small></strong>
+                <p>Waktu praktikum yang disarankan</p>
+              </div>
+            </section>
+
+            <section class="lesson-section" id="materi" aria-labelledby="lessons-title">
+              <div class="section-heading">
+                <div><p class="eyebrow">DASHBOARD BELAJAR</p><h2 id="lessons-title">Lanjutkan perjalananmu</h2><p class="section-subtitle">Pilih bab untuk melihat topik, tujuan belajar, dan modul PDF.</p></div>
+                <label class="filter-label">
+                  <span class="visually-hidden">Filter progres</span>
+                  <select id="status-filter">
+                    <option value="all">Semua bab</option>
+                    <option value="incomplete">Belum selesai</option>
+                    <option value="complete">Sudah selesai</option>
+                  </select>
+                </label>
+              </div>
+              <div class="lesson-summary"><span id="module-count">11 bab</span><span>•</span><span>Progres tersimpan otomatis</span></div>
+              <div class="module-list" id="module-list" aria-live="polite"></div>
+              <p class="empty-state" id="empty-state" hidden>Tidak ada materi yang cocok. Coba kata kunci atau filter lain.</p>
+            </section>
+
+            <section class="closing-note" id="tentang">
+              <span class="closing-mark" aria-hidden="true">✳</span>
+              <div><p class="eyebrow">BELAJAR DENGAN PRAKTIK</p><h2>Satu konsep. Satu aplikasi.</h2><p>Siapkan editor C# dan ikuti latihan serta solusi tiap bab. Bab 6 dan 7 adalah materi penghubung tambahan karena PDF sumbernya kosong.</p></div>
+              <a class="button button-outline" href="#materi">Jelajahi materi <span aria-hidden="true">↑</span></a>
+            </section>
+          </div>
+          <footer class="footer"><a class="brand footer-brand" href="#beranda"><span class="brand-mark" aria-hidden="true">&lt;/&gt;</span><span><strong>Belajar PBO II</strong><small>Pemrograman Berorientasi Objek</small></span></a><p>Belajar mandiri, selangkah demi selangkah.</p><a href="#beranda">Kembali ke atas ↑</a></footer>
+        </main>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="id" data-theme="dark">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101320">
+    <meta name="description" content="{{SUMMARY}}">
+    <title>{{TITLE}} · Belajar PBO II</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../styles.css">
+    <script src="../content/chapters/chapters.js" defer></script>
+    <script src="../chapter.js" defer></script>
+  </head>
+  <body data-chapter="{{CHAPTER}}">
+    <a class="skip-link" href="#konten">Lewati ke materi</a>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar" aria-label="Navigasi materi">
+        <a class="brand" href="../index.html#beranda" aria-label="Belajar PBO II, beranda">
+          <span class="brand-mark" aria-hidden="true">&lt;/&gt;</span>
+          <span><strong>Belajar PBO II</strong><small>C# · ASP.NET Core</small></span>
+        </a>
+        <div class="sidebar-progress">
+          <div class="sidebar-progress-heading"><span>Progres materi</span><strong id="progress-label">0%</strong></div>
+          <div class="progress-track" id="overall-progress-track" role="progressbar" aria-label="Progres materi selesai" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="overall-progress"></span></div>
+          <p><span id="completed-count">0 dari 11 bab</span> selesai</p>
+        </div>
+        <p class="sidebar-label">PERJALANAN BELAJAR</p>
+        <nav class="sidebar-nav" aria-label="Navigasi utama materi">
+          <a class="sidebar-link" href="../index.html#beranda"><span aria-hidden="true">⌂</span> Beranda</a>
+          {{SIDEBAR_NAV}}
+        </nav>
+        <div class="sidebar-bottom">
+          <span class="online-dot"></span>
+          <p>Belajar mandiri,<br>selangkah demi selangkah.</p>
+          <small>Progres disimpan di browser ini.</small>
+        </div>
+      </aside>
+      <button class="sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="Tutup navigasi" hidden></button>
+      <div class="app-main">
+        <header class="main-topbar">
+          <div class="topbar-leading">
+            <button class="icon-button mobile-menu" id="menu-toggle" type="button" aria-label="Buka navigasi" aria-controls="sidebar" aria-expanded="false">☰</button>
+            <a class="button button-quiet" href="../index.html#materi"><span aria-hidden="true">←</span> Semua materi</a>
+            <div class="breadcrumb"><span>Kursus</span><span aria-hidden="true">/</span><strong>Bab {{CHAPTER}}</strong></div>
+          </div>
+          <div class="topbar-actions">
+            <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Aktifkan mode terang" title="Ganti tampilan">☼</button>
+            <button class="button button-quiet focus-toggle" id="focus-toggle" type="button" aria-pressed="false"><span aria-hidden="true">◎</span> Mode fokus</button>
+          </div>
+        </header>
+
+        <main id="konten">
+          <div class="dashboard-shell chapter-shell">
+            <section class="lesson-hero">
+              <p class="eyebrow"><span class="status-dot"></span> BAB {{CHAPTER}} · {{CATEGORY}}</p>
+              <h1>{{TITLE}}</h1>
+              <p class="lesson-intro">{{INTRODUCTION}}</p>
+              {{SOURCE_NOTICE}}
+              <div class="lesson-hero-footer">
+                <span>Praktikum · ±4 jam</span>
+                <span class="meta-separator">•</span>
+                <span>Studi kasus sistem gudang</span>
+                {{PDF_HERO_LINK}}
+              </div>
+            </section>
+
+            <div class="lesson-layout">
+              <article class="lesson-article">
+                <section class="lesson-objectives">
+                  <p class="eyebrow">TARGET BELAJAR</p>
+                  <h2>Setelah bab ini, kamu bisa…</h2>
+                  <ul>{{OBJECTIVES}}</ul>
+                </section>
+
+                <div class="lesson-sections">
+                  {{LESSON_SECTIONS}}
+                </div>
+
+                <section class="practice-section" id="praktikum">
+                  <p class="eyebrow">PRAKTIKUM</p>
+                  <h2>{{PRACTICE_TITLE}}</h2>
+                  <p class="practice-lead">Ikuti langkah berikut dan kembangkan contoh menjadi program gudang yang bisa kamu jalankan.</p>
+                  <ol class="practice-steps">{{PRACTICE_STEPS}}</ol>
+                  <div class="deliverable"><strong>Hasil yang diharapkan</strong><p>{{DELIVERABLE}}</p></div>
+                  {{PRACTICE_SOLUTION}}
+                </section>
+
+                {{ASSESSMENT_SOLUTIONS}}
+
+                <section class="quiz-section" id="cek-pemahaman">
+                  <p class="eyebrow">CEK PEMAHAMAN</p>
+                  <h2>Uji satu konsep</h2>
+                  <div class="quiz-box" id="quiz-box" data-answer="{{ANSWER}}" data-explanation="{{EXPLANATION}}">
+                    <fieldset>
+                      <legend>{{QUESTION}}</legend>
+                      {{QUIZ_OPTIONS}}
+                    </fieldset>
+                    <button class="button button-primary" id="quiz-submit" type="button">Periksa jawaban <span aria-hidden="true">→</span></button>
+                    <p class="quiz-feedback" id="quiz-feedback" role="status" aria-live="polite"></p>
+                  </div>
+                  <div class="chapter-completion">
+                    <div><strong id="completion-title">Selesaikan bab ini</strong><p id="completion-description">Jawab cek pemahaman dengan benar untuk menandai bab selesai.</p></div>
+                    <button class="button button-quiet" id="mark-complete" type="button" disabled>Tandai selesai</button>
+                  </div>
+                </section>
+
+                <nav class="lesson-pagination" aria-label="Navigasi antar bab">
+                  {{PREVIOUS_LINK}}
+                  {{NEXT_LINK}}
+                </nav>
+              </article>
+
+              <aside class="lesson-index">
+                <section class="lesson-index-card">
+                  <p class="eyebrow">DALAM BAB INI</p>
+                  <nav aria-label="Daftar isi bab">{{TOC_ITEMS}}</nav>
+                </section>
+                <section class="lesson-index-card lesson-progress-card">
+                  <p class="eyebrow">PROGRES BAB</p>
+                  <strong id="chapter-status">Belum selesai</strong>
+                  <p>Progres tersimpan otomatis di browser ini.</p>
+                  {{PDF_SIDEBAR_LINK}}
+                </section>
+              </aside>
+            </div>
+          </div>
+          <footer class="footer">
+            <a class="brand footer-brand" href="../index.html#beranda"><span class="brand-mark" aria-hidden="true">&lt;/&gt;</span><span><strong>Belajar PBO II</strong><small>Pemrograman Berorientasi Objek</small></span></a>
+            <p>Belajar mandiri, selangkah demi selangkah.</p>
+            <a href="#konten">Kembali ke atas ↑</a>
+          </footer>
+        </main>
+      </div>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

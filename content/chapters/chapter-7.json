@@ -1,0 +1,160 @@
+{
+  "introduction": "Data inventaris lebih berguna ketika dapat disaring, diurutkan, dan diproyeksikan secara ringkas. LINQ menyediakan operasi tersebut; async/await membantu operasi I/O tidak memblokir thread ketika aplikasi mulai berinteraksi dengan file, database, atau API.",
+  "objectives": [
+    "Memakai Where, OrderBy, Select, dan GroupBy pada koleksi.",
+    "Memahami deferred execution dan kapan query dimaterialisasi.",
+    "Menerapkan async/await pada operasi I/O berbasis Task."
+  ],
+  "sections": [
+    {
+      "title": "Saring dan urutkan dengan LINQ",
+      "body": "Query LINQ dapat ditulis dengan method chaining. Where memilih elemen yang cocok, OrderBy mengurutkan, lalu ToList menjalankan query dan menghasilkan daftar baru.",
+      "codeTitle": "Daftar stok rendah",
+      "code": [
+        "var stokRendah = daftarBarang",
+        "    .Where(barang => barang.JumlahStok < 20)",
+        "    .OrderBy(barang => barang.JumlahStok)",
+        "    .ToList();",
+        "",
+        "foreach (var barang in stokRendah)",
+        "    Console.WriteLine($\"{barang.KodeBarang}: {barang.JumlahStok}\");"
+      ]
+    },
+    {
+      "title": "Pilih bentuk data yang diperlukan",
+      "body": "Select memproyeksikan entity menjadi bentuk ringkas. GroupBy dapat merangkum data per kategori. Query LINQ sering dievaluasi saat hasil benar-benar dibaca; ToList membuat snapshot saat itu.",
+      "codeTitle": "Ringkasan per kategori",
+      "code": [
+        "var ringkasan = daftarBarang",
+        "    .GroupBy(barang => barang.Kategori)",
+        "    .Select(grup => new",
+        "    {",
+        "        Kategori = grup.Key,",
+        "        JumlahJenis = grup.Count(),",
+        "        TotalStok = grup.Sum(barang => barang.JumlahStok)",
+        "    })",
+        "    .OrderBy(item => item.Kategori)",
+        "    .ToList();"
+      ]
+    },
+    {
+      "title": "Tunggu operasi I/O dengan async/await",
+      "body": "Operasi seperti membaca file atau database dapat memerlukan waktu. API async mengembalikan Task; await menunggu hasil tanpa memblokir thread pemanggil. Jangan memakai async hanya untuk pekerjaan CPU yang tidak membutuhkan I/O.",
+      "codeTitle": "Membaca JSON secara async",
+      "code": [
+        "public static async Task<List<Barang>> MuatAsync(",
+        "    string path, CancellationToken cancellationToken = default)",
+        "{",
+        "    if (!File.Exists(path)) return new List<Barang>();",
+        "    var json = await File.ReadAllTextAsync(path, cancellationToken);",
+        "    return JsonSerializer.Deserialize<List<Barang>>(json)",
+        "        ?? throw new InvalidDataException(\"Data JSON bukan daftar barang.\");",
+        "}"
+      ],
+      "note": "Gunakan ToListAsync pada query EF Core di Bab 9; jangan memanggil ToList() sinkron pada request web untuk query database."
+    }
+  ],
+  "practice": {
+    "title": "Praktikum: laporan inventaris yang responsif",
+    "steps": [
+      "Siapkan List<Barang> dengan beberapa kategori dan nilai stok yang bervariasi.",
+      "Buat query stok rendah dengan Where dan urutkan dengan OrderBy.",
+      "Buat ringkasan jumlah jenis dan total stok per kategori dengan GroupBy dan Select.",
+      "Materialisasikan hasil saat dibutuhkan dengan ToList dan tampilkan melalui foreach.",
+      "Baca file JSON dengan File.ReadAllTextAsync dan await; terapkan CancellationToken.",
+      "Uji daftar kosong dan data JSON rusak agar keduanya tidak tertukar."
+    ],
+    "deliverable": "Program yang menghasilkan laporan stok/kategori dan membaca data JSON secara asynchronous.",
+    "solutions": [
+      {
+        "title": "Laporan menggunakan LINQ",
+        "explanation": "Where memfilter, OrderBy mengurutkan, Select membentuk DTO laporan, dan GroupBy merangkum data per kategori.",
+        "codeTitle": "Program.cs",
+        "code": [
+          "var stokRendah = daftarBarang",
+          "    .Where(b => b.JumlahStok < 20)",
+          "    .OrderBy(b => b.JumlahStok)",
+          "    .Select(b => new { b.KodeBarang, b.NamaBarang, b.JumlahStok })",
+          "    .ToList();",
+          "",
+          "var perKategori = daftarBarang",
+          "    .GroupBy(b => b.Kategori)",
+          "    .Select(g => new { Kategori = g.Key, Jenis = g.Count(), Stok = g.Sum(b => b.JumlahStok) })",
+          "    .OrderBy(x => x.Kategori)",
+          "    .ToList();",
+          "",
+          "foreach (var b in stokRendah)",
+          "    Console.WriteLine($\"{b.KodeBarang} {b.NamaBarang}: {b.JumlahStok}\");",
+          "foreach (var g in perKategori)",
+          "    Console.WriteLine($\"{g.Kategori}: {g.Jenis} jenis, stok {g.Stok}\");"
+        ]
+      },
+      {
+        "title": "Membaca file JSON secara asynchronous",
+        "explanation": "CancellationToken diteruskan ke API I/O sehingga pemanggil dapat membatalkan operasi yang sudah tidak diperlukan.",
+        "codeTitle": "Services/PenyimpananBarang.cs",
+        "code": [
+          "using System.Text.Json;",
+          "",
+          "public static class PenyimpananBarang",
+          "{",
+          "    public static async Task<List<Barang>> MuatAsync(",
+          "        string path, CancellationToken cancellationToken = default)",
+          "    {",
+          "        if (!File.Exists(path)) return new List<Barang>();",
+          "        var json = await File.ReadAllTextAsync(path, cancellationToken);",
+          "        return JsonSerializer.Deserialize<List<Barang>>(json)",
+          "            ?? throw new InvalidDataException(\"Data JSON bukan daftar barang.\");",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Jalankan service dan query di Program.cs",
+        "explanation": "Top-level statements memanggil helper asynchronous lalu memproses data yang sudah dibaca dengan LINQ.",
+        "codeTitle": "Program.cs",
+        "code": [
+          "var daftar = await PenyimpananBarang.MuatAsync(\"barang.json\");",
+          "var stokRendah = daftar.Where(b => b.JumlahStok < 20).ToList();",
+          "foreach (var barang in stokRendah)",
+          "    Console.WriteLine($\"{barang.KodeBarang}: {barang.JumlahStok}\");"
+        ]
+      }
+    ]
+  },
+  "assessments": {
+    "pretest": {
+      "multipleChoice": [
+        { "question": "Method LINQ mana yang memilih elemen sesuai kondisi?", "answer": "B — Where.", "explanation": "Where menerima predicate dan hanya meneruskan elemen yang memenuhi kondisi." },
+        { "question": "Apa hasil OrderBy(x => x.Nama)?", "answer": "C — Urutan elemen baru berdasarkan nilai Nama secara naik.", "explanation": "OrderBy menghasilkan urutan terurut dan tidak mengubah koleksi sumber." },
+        { "question": "Apa fungsi Select pada LINQ?", "answer": "A — Memproyeksikan setiap elemen ke bentuk/tipe hasil lain.", "explanation": "Select cocok untuk membentuk DTO atau memilih satu properti." }
+      ],
+      "essay": [
+        { "question": "Apa manfaat LINQ untuk laporan gudang?", "answer": "LINQ membuat filter, pengurutan, proyeksi, dan agregasi koleksi terbaca serta tersusun sebagai query, tanpa menulis loop bersarang berulang." },
+        { "question": "Apa arti deferred execution?", "answer": "Sebagian query LINQ baru berjalan saat hasilnya dienumerasi. ToList atau operasi agregat memicu evaluasi; perubahan sumber sebelum evaluasi dapat memengaruhi hasil." }
+      ]
+    },
+    "posttest": {
+      "multipleChoice": [
+        { "question": "Apa yang dilakukan GroupBy(k => k.Kategori)?", "answer": "B — Mengelompokkan elemen berdasarkan nilai kategori.", "explanation": "Setiap grup menyediakan key dan elemen yang termasuk dalam grup tersebut." },
+        { "question": "Apa yang dilakukan await pada Task I/O?", "answer": "C — Menunggu penyelesaian operasi asynchronous tanpa memblokir thread selama menunggu.", "explanation": "Method async melanjutkan eksekusi setelah Task selesai dan menghasilkan nilai." },
+        { "question": "Kapan ToList digunakan pada query LINQ?", "answer": "A — Saat hasil perlu dievaluasi dan dimaterialisasi sebagai daftar.", "explanation": "ToList membuat snapshot hasil query pada saat dipanggil." }
+      ],
+      "essay": [
+        { "question": "Buat ringkasan jumlah jenis dan stok per kategori.", "answer": "Contoh: `var ringkasan = daftar.GroupBy(b => b.Kategori).Select(g => new { Kategori = g.Key, Jenis = g.Count(), TotalStok = g.Sum(b => b.JumlahStok) }).ToList();`. Hasil tiap baris mewakili satu kategori." },
+        { "question": "Mengapa operasi database web sebaiknya memakai async/await?", "answer": "Query database adalah I/O yang dapat menunggu jaringan atau disk. API async membebaskan thread request saat menunggu, meningkatkan skalabilitas; gunakan misalnya ToListAsync dan teruskan CancellationToken." }
+      ]
+    }
+  },
+  "quiz": {
+    "question": "Mengapa query LINQ web perlu memakai ToListAsync saat mengambil data EF Core?",
+    "options": [
+      "Agar hasil database diurutkan otomatis.",
+      "Agar I/O database menunggu secara asynchronous tanpa memblokir thread request.",
+      "Agar seluruh data otomatis divalidasi.",
+      "Agar query tidak pernah dijalankan."
+    ],
+    "answer": 1,
+    "explanation": "ToListAsync menunggu I/O database secara asynchronous sehingga thread request dapat melayani pekerjaan lain."
+  }
+}

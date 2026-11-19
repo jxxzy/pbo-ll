@@ -1,0 +1,150 @@
+{
+  "introduction": "Field public membuat bagian lain program bebas mengubah data object. Enkapsulasi menyembunyikan detail penyimpanan dan menyediakan property sebagai pintu akses yang dapat memeriksa nilai.",
+  "objectives": [
+    "Menjelaskan peran public, private, dan enkapsulasi.",
+    "Menggunakan property untuk membaca dan mengubah field secara terkendali.",
+    "Mencegah jumlah stok bernilai negatif."
+  ],
+  "sections": [
+    {
+      "title": "Sembunyikan field yang perlu dijaga",
+      "body": "Modifier private membatasi akses ke dalam class. Kode lain menggunakan property publik, sehingga aturan tetap berada dekat dengan data yang dijaga.",
+      "codeTitle": "Barang.cs",
+      "code": [
+        "public class Barang",
+        "{",
+        "    private int jumlahStok;",
+        "",
+        "    public int JumlahStok",
+        "    {",
+        "        get => jumlahStok;",
+        "        set",
+        "        {",
+        "            if (value >= 0)",
+        "            {",
+        "                jumlahStok = value;",
+        "            }",
+        "        }",
+        "    }",
+        "}"
+      ],
+      "note": "value adalah nilai yang dikirim ke setter. Setter dapat menolak nilai yang tidak sesuai aturan."
+    },
+    {
+      "title": "Pilih property yang sesuai",
+      "body": "Auto-property cocok untuk data yang belum memerlukan aturan khusus. Property hanya-baca dapat menghitung nilai dari data lain tanpa menyimpan duplikat.",
+      "codeTitle": "Barang.cs",
+      "code": [
+        "public string Kategori { get; set; }",
+        "",
+        "public string StatusStok =>",
+        "    JumlahStok > 50 ? \"Aman\" : \"Perlu Reorder\";"
+      ],
+      "bullets": [
+        "Gunakan property tervalidasi untuk stok.",
+        "Gunakan auto-property untuk kategori sederhana.",
+        "Gunakan expression-bodied property untuk status turunan."
+      ]
+    },
+    {
+      "title": "Uji aturan melalui property",
+      "body": "Akses object lewat property yang sama, baik ketika membaca maupun menulis. Dengan begitu, aturan enkapsulasi tidak dapat dilewati oleh pemanggil.",
+      "codeTitle": "Program.cs",
+      "code": [
+        "var barang = new Barang();",
+        "barang.JumlahStok = 12;",
+        "Console.WriteLine(barang.JumlahStok);",
+        "",
+        "barang.JumlahStok = -4;",
+        "Console.WriteLine(barang.JumlahStok); // nilai negatif ditolak"
+      ],
+      "note": "Untuk aplikasi yang perlu menampilkan pesan kesalahan, pertimbangkan setter dengan hasil validasi yang eksplisit atau method khusus seperti UbahStok()."
+    }
+  ],
+  "practice": {
+    "title": "Praktikum: lindungi data inventaris",
+    "steps": [
+      "Salin project Bab 1 dan pastikan aplikasi masih dapat dijalankan.",
+      "Ubah field JumlahStok menjadi private, lalu buat property dengan getter dan setter.",
+      "Tambahkan validasi agar setter tidak menerima stok negatif.",
+      "Ubah TampilkanInfo() agar membaca property, bukan field langsung.",
+      "Buat property Status yang hanya-baca dan uji nilai stok di atas serta di bawah batas."
+    ],
+    "deliverable": "Class Barang yang tidak memungkinkan kode pemanggil menetapkan stok negatif.",
+    "solutions": [
+      {
+        "title": "Barang.cs",
+        "explanation": "Field stok tidak dapat disentuh langsung dari luar class. Property menjadi satu-satunya jalur untuk mengubah stok dan menjalankan validasi.",
+        "codeTitle": "Barang.cs",
+        "code": [
+          "public class Barang",
+          "{",
+          "    private int jumlahStok;",
+          "",
+          "    public string KodeBarang { get; set; } = string.Empty;",
+          "    public string NamaBarang { get; set; } = string.Empty;",
+          "    public string Kategori { get; set; } = \"Umum\";",
+          "",
+          "    public int JumlahStok",
+          "    {",
+          "        get => jumlahStok;",
+          "        set",
+          "        {",
+          "            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value));",
+          "            jumlahStok = value;",
+          "        }",
+          "    }",
+          "",
+          "    public string Status => JumlahStok > 50 ? \"Aman\" : \"Perlu Reorder\";",
+          "}"
+        ]
+      },
+      {
+        "title": "Menguji validasi property",
+        "explanation": "Nilai negatif ditolak, sehingga stok tetap menyimpan nilai valid terakhir.",
+        "codeTitle": "Program.cs",
+        "code": [
+          "var barang = new Barang { KodeBarang = \"BRG001\", NamaBarang = \"Karton\" };",
+          "barang.JumlahStok = 20;",
+          "try { barang.JumlahStok = -5; }",
+          "catch (ArgumentOutOfRangeException) { Console.WriteLine(\"Stok tidak valid.\"); }",
+          "",
+          "Console.WriteLine(barang.JumlahStok); // 20",
+          "Console.WriteLine(barang.Status);     // Perlu Reorder"
+        ]
+      }
+    ]
+  },
+  "assessments": {
+    "pretest": {
+      "multipleChoice": [
+        { "question": "Access modifier apa yang membatasi akses hanya dari class itu sendiri?", "answer": "B — private.", "explanation": "Anggota private hanya dapat diakses dari dalam class yang mendeklarasikannya." },
+        { "question": "Apa tujuan property dalam C#?", "answer": "C — Mengakses field secara terkendali.", "explanation": "Property memberi jalur get/set yang dapat memasang validasi atau aturan akses." }
+      ],
+      "essay": [
+        { "question": "Jelaskan enkapsulasi.", "answer": "Enkapsulasi menyembunyikan detail internal object dan menyediakan akses terkontrol melalui property atau method, sehingga aturan class tetap terjaga." },
+        { "question": "Apa keuntungan property dibanding field public?", "answer": "Property memungkinkan validasi, read-only/write-only access, dan perubahan implementasi internal tanpa mengubah cara pemanggil menggunakan class." }
+      ]
+    },
+    "posttest": {
+      "multipleChoice": [
+        { "question": "Apa fungsi bagian set pada property?", "answer": "B — Menyimpan atau memvalidasi nilai yang diberikan.", "explanation": "Di dalam setter, nilai baru tersedia melalui keyword value." }
+      ],
+      "essay": [
+        { "question": "Buat property Harga dengan nilai minimal 0.", "answer": "Contoh: `private decimal harga; public decimal Harga { get => harga; set { if (value < 0) throw new ArgumentOutOfRangeException(nameof(value)); harga = value; } }`. Nilai invalid ditolak secara eksplisit." },
+        { "question": "Mengapa JumlahStok sebaiknya tidak public sebagai field?", "answer": "Field public dapat diubah tanpa validasi sehingga stok negatif atau tidak konsisten bisa tersimpan. Field private dengan property/method memungkinkan aturan perubahan dijaga." }
+      ]
+    }
+  },
+  "quiz": {
+    "question": "Mengapa JumlahStok lebih aman diakses lewat property daripada field public?",
+    "options": [
+      "Property menghapus object setelah digunakan.",
+      "Property dapat menerapkan aturan saat nilai dibaca atau diubah.",
+      "Property membuat semua field otomatis menjadi static.",
+      "Property menggantikan kebutuhan constructor."
+    ],
+    "answer": 1,
+    "explanation": "Property memberi kontrol terhadap akses data, misalnya menolak nilai stok negatif sebelum disimpan."
+  }
+}

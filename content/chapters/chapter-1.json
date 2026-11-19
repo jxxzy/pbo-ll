@@ -1,0 +1,187 @@
+{
+  "introduction": "Kita mulai dengan sistem gudang kecil. Daripada menyimpan data barang di banyak variabel terpisah, kita bentuk satu class sebagai cetak biru lalu buat object untuk setiap barang.",
+  "objectives": [
+    "Menjelaskan hubungan class dan object.",
+    "Membedakan field, method, dan constructor.",
+    "Membuat object barang dan memanggil perilakunya."
+  ],
+  "sections": [
+    {
+      "title": "Class adalah cetak biru",
+      "body": "Class mengelompokkan data dan perilaku yang saling berkaitan. Object adalah instans nyata dari class. Deklarasi variabel object hanya menyiapkan referensi; kata kunci new membuat object dan menjalankan constructor.",
+      "bullets": [
+        "Field menyimpan keadaan object, misalnya kode dan jumlah stok.",
+        "Method menjalankan perilaku object, misalnya menampilkan informasi.",
+        "Constructor bernama sama dengan class dan tidak memiliki tipe kembalian."
+      ]
+    },
+    {
+      "title": "Bangun class Barang",
+      "body": "Constructor menerima nilai awal agar object langsung memiliki identitas dan informasi stok.",
+      "codeTitle": "Models/Barang.cs",
+      "code": [
+        "public class Barang",
+        "{",
+        "    public string KodeBarang;",
+        "    public string NamaBarang;",
+        "    public int JumlahStok;",
+        "    public string Kategori;",
+        "",
+        "    public Barang(string kode, string nama, int stok, string kategori)",
+        "    {",
+        "        KodeBarang = kode;",
+        "        NamaBarang = nama;",
+        "        JumlahStok = stok;",
+        "        Kategori = kategori;",
+        "    }",
+        "",
+        "    public void TampilkanInfo()",
+        "    {",
+        "        Console.WriteLine($\"[{KodeBarang}] {NamaBarang} - Stok: {JumlahStok}\");",
+        "    }",
+        "}"
+      ],
+      "note": "Contoh ini sengaja memakai field public untuk memperkenalkan struktur class. Di Bab 2, akses field akan diperketat dengan enkapsulasi."
+    },
+    {
+      "title": "Buat object dan gunakan method",
+      "body": "Setiap pemanggilan new menghasilkan object terpisah. Mengubah stok pada satu object tidak mengubah object barang yang lain.",
+      "codeTitle": "Program.cs",
+      "code": [
+        "var karton = new Barang(\"BRG001\", \"Karton\", 120, \"Kemasan\");",
+        "var bubbleWrap = new Barang(\"BRG002\", \"Bubble Wrap\", 40, \"Pelindung\");",
+        "",
+        "karton.TampilkanInfo();",
+        "bubbleWrap.TampilkanInfo();",
+        "",
+        "string status = karton.JumlahStok > 50 ? \"Stok aman\" : \"Perlu reorder\";",
+        "Console.WriteLine(status);"
+      ],
+      "note": "Jika object sering dibuat tanpa data awal yang lengkap, constructor overload dapat memberikan nilai default. Pastikan input pengguna juga divalidasi sebelum dikonversi."
+    }
+  ],
+  "practice": {
+    "title": "Praktikum: inventaris gudang",
+    "steps": [
+      "Buat project Console App .NET dan folder Models.",
+      "Buat class Barang dengan kode, nama, stok, kategori, constructor, dan TampilkanInfo().",
+      "Buat dua object dengan data berbeda; tampilkan keduanya dari Program.cs.",
+      "Tambahkan method StatusStok() yang memberi tanda jika stok di bawah batas reorder.",
+      "Buat constructor tanpa parameter dengan nilai awal yang jelas, lalu coba masukkan data lewat Console.ReadLine().",
+      "Simpan beberapa object dalam array dan tampilkan menggunakan foreach."
+    ],
+    "deliverable": "Program console yang mencetak informasi setiap barang dan status stoknya.",
+    "solutions": [
+      {
+        "title": "Models/Barang.cs",
+        "explanation": "Contoh class lengkap dengan constructor berparameter, constructor default, method informasi, dan aturan reorder.",
+        "codeTitle": "Barang.cs",
+        "code": [
+          "public class Barang",
+          "{",
+          "    public string KodeBarang;",
+          "    public string NamaBarang;",
+          "    public int JumlahStok;",
+          "    public string Kategori;",
+          "",
+          "    public Barang()",
+          "        : this(\"UNKNOWN\", \"Barang Baru\", 0, \"Umum\") { }",
+          "",
+          "    public Barang(string kode, string nama, int stok, string kategori)",
+          "    {",
+          "        KodeBarang = kode;",
+          "        NamaBarang = nama;",
+          "        JumlahStok = stok;",
+          "        Kategori = kategori;",
+          "    }",
+          "",
+          "    public string StatusStok() =>",
+          "        JumlahStok > 50 ? \"Stok Aman\" : \"Perlu Reorder\";",
+          "",
+          "    public void TampilkanInfo()",
+          "    {",
+          "        Console.WriteLine($\"[{KodeBarang}] {NamaBarang} - \" +",
+          "            $\"Stok: {JumlahStok}, Kategori: {Kategori} ({StatusStok()})\");",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Program.cs",
+        "explanation": "Buat dua object, minta satu object tambahan dari input console, lalu tampilkan semua barang melalui array.",
+        "codeTitle": "Program.cs",
+        "code": [
+          "var input = new Barang();",
+          "Console.Write(\"Kode barang: \");",
+          "input.KodeBarang = Console.ReadLine() ?? string.Empty;",
+          "Console.Write(\"Nama barang: \");",
+          "input.NamaBarang = Console.ReadLine() ?? string.Empty;",
+          "Console.Write(\"Jumlah stok: \");",
+          "if (!int.TryParse(Console.ReadLine(), out var stok) || stok < 0)",
+          "{",
+          "    Console.WriteLine(\"Stok harus berupa angka nol atau lebih.\");",
+          "    return;",
+          "}",
+          "input.JumlahStok = stok;",
+          "",
+          "var daftar = new Barang[]",
+          "{",
+          "    new(\"BRG001\", \"Karton\", 120, \"Kemasan\"),",
+          "    new(\"BRG002\", \"Bubble Wrap\", 40, \"Pelindung\"),",
+          "    input",
+          "};",
+          "",
+          "foreach (var barang in daftar)",
+          "{",
+          "    barang.TampilkanInfo();",
+          "}"
+        ]
+      }
+    ]
+  },
+  "assessments": {
+    "pretest": {
+      "multipleChoice": [
+        { "question": "Apa fungsi class dalam OOP?", "answer": "C — Class adalah template untuk membuat object.", "explanation": "Class mendefinisikan data dan perilaku yang dapat dimiliki setiap object." },
+        { "question": "Apa yang dimaksud object?", "answer": "E — Instans nyata dari sebuah class.", "explanation": "Object dibuat dari class menggunakan new dan memiliki nilai data sendiri." },
+        { "question": "Manakah atribut barang gudang?", "answer": "C — NamaBarang.", "explanation": "NamaBarang adalah data/keadaan; Menyimpan dan TampilkanInfo adalah perilaku." },
+        { "question": "Untuk apa constructor digunakan?", "answer": "D — Menginisialisasi object saat dibuat.", "explanation": "Constructor memberi nilai awal pada object ketika operator new dipanggil." },
+        { "question": "Apa beda deklarasi dan instansiasi object?", "answer": "D — Deklarasi menyatakan variabel referensi; instansiasi memakai new untuk membuat object.", "explanation": "Contohnya, `Barang item;` adalah deklarasi, sedangkan `item = new Barang(...)` membuat object." }
+      ],
+      "essay": [
+        { "question": "Jelaskan object dan hubungannya dengan class.", "answer": "Class adalah cetak biru yang menentukan field dan method. Object adalah instans dari class dengan nilai field dan identitasnya sendiri." },
+        { "question": "Sebutkan dua atribut object Barang.", "answer": "Contohnya KodeBarang dan NamaBarang. JumlahStok dan Kategori juga dapat menjadi atribut." },
+        { "question": "Apa manfaat constructor?", "answer": "Constructor menyiapkan keadaan awal object sehingga nilainya dapat langsung valid dan konsisten saat dibuat." },
+        { "question": "Apa perbedaan field dan method?", "answer": "Field menyimpan data object, sedangkan method menjalankan perilaku atau operasi terhadap data tersebut." },
+        { "question": "Apa yang terjadi jika object dibuat tanpa constructor yang sesuai?", "answer": "Pemanggilan gagal dikompilasi. Gunakan constructor yang tersedia atau tambahkan overload/default constructor yang sesuai." }
+      ]
+    },
+    "posttest": {
+      "multipleChoice": [
+        { "question": "Apa peran class Barang pada sistem gudang?", "answer": "B — Menyimpan data dan perilaku terkait barang secara terstruktur.", "explanation": "Class membungkus keadaan dan operasi yang berhubungan dengan barang." },
+        { "question": "Apa yang tersedia jika class tidak mendeklarasikan constructor sama sekali?", "answer": "C — Compiler menyediakan constructor default tanpa parameter.", "explanation": "Constructor default otomatis disediakan hanya jika tidak ada constructor buatan." },
+        { "question": "Apa kegunaan method TampilkanInfo()?", "answer": "B — Menampilkan informasi barang kepada pengguna.", "explanation": "Method merupakan perilaku object; implementasinya dapat mencetak field barang." },
+        { "question": "Apa arti deklarasi `Barang item1;`?", "answer": "C — Deklarasi variabel object, belum membuat instans.", "explanation": "Instans baru dibuat setelah pemanggilan `new Barang(...)`." },
+        { "question": "Apa fungsi field JumlahStok?", "answer": "C — Menyimpan jumlah barang yang tersedia.", "explanation": "Nilai stok adalah keadaan inventaris, bukan perintah atau identitas pemasok." }
+      ],
+      "essay": [
+        { "question": "Apa itu constructor overloading dan kapan digunakan?", "answer": "Constructor overloading adalah beberapa constructor dengan daftar parameter berbeda. Gunakan saat object dapat dibuat dari kombinasi data awal yang berbeda, misalnya dengan data lengkap atau nilai default." },
+        { "question": "Bagaimana StatusStok() membantu keputusan?", "answer": "Method membandingkan stok dengan batas minimum dan menandai barang yang perlu reorder, sehingga petugas dapat memprioritaskan pengadaan." },
+        { "question": "Berikan implementasi class Barang yang realistis.", "answer": "Contoh: `public class Barang { public string Kode { get; set; } = \"\"; public int Stok { get; private set; } public void TambahStok(int jumlah) { if (jumlah <= 0) throw new ArgumentOutOfRangeException(nameof(jumlah)); Stok += jumlah; } }`. Stok berubah melalui operasi yang dapat divalidasi." },
+        { "question": "Mengapa Barang dan Supplier sebaiknya menjadi class terpisah?", "answer": "Keduanya memiliki data dan aturan berbeda. Pemisahan menghindari class serba guna, membantu penggunaan ulang, dan membuat perubahan atau pengujian lebih terarah." },
+        { "question": "Jelaskan proses pembuatan object.", "answer": "Program mendeklarasikan variabel bertipe class, memanggil `new` dengan constructor yang cocok, lalu constructor menginisialisasi object dan hasil referensinya dapat digunakan." }
+      ]
+    }
+  },
+  "quiz": {
+    "question": "Apa yang terjadi ketika program menjalankan new Barang(\"BRG001\", ...)?",
+    "options": [
+      "Class baru ditulis ke source code.",
+      "Object dibuat dan constructor yang sesuai dipanggil.",
+      "Semua object Barang yang ada ikut diperbarui.",
+      "Method TampilkanInfo otomatis berjalan."
+    ],
+    "answer": 1,
+    "explanation": "new membuat instans object dan memanggil constructor. Method lain hanya berjalan ketika dipanggil secara eksplisit."
+  }
+}

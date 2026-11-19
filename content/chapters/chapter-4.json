@@ -1,0 +1,181 @@
+{
+  "introduction": "Tidak semua barang gudang mempunyai data dan perilaku yang sama. Abstract class menyediakan fondasi bersama, sedangkan interface menetapkan kemampuan tambahan yang dapat dipakai lintas jenis class.",
+  "objectives": [
+    "Membedakan abstract class dan interface.",
+    "Mengimplementasikan method abstract pada class konkret.",
+    "Memeriksa kemampuan object melalui interface."
+  ],
+  "sections": [
+    {
+      "title": "Abstract class sebagai fondasi",
+      "body": "Abstract class tidak dapat dibuat langsung menjadi object. Ia dapat menyimpan data dan method biasa, sekaligus memaksa class turunan menyediakan implementasi method abstract.",
+      "codeTitle": "ItemGudang.cs",
+      "code": [
+        "public abstract class ItemGudang",
+        "{",
+        "    public string Kode { get; }",
+        "    public string Nama { get; }",
+        "",
+        "    protected ItemGudang(string kode, string nama)",
+        "    {",
+        "        Kode = kode;",
+        "        Nama = nama;",
+        "    }",
+        "",
+        "    public void CetakInfo() => Console.WriteLine($\"[{Kode}] {Nama}\");",
+        "    public abstract string EvaluasiRisiko();",
+        "}"
+      ]
+    },
+    {
+      "title": "Class konkret melengkapi kontrak",
+      "body": "Setiap subclass memberikan aturan risiko sesuai domainnya. Barang kimia dan makanan berbagi identitas dasar, tetapi mempunyai kebijakan penyimpanan berbeda.",
+      "codeTitle": "BarangKimia.cs",
+      "code": [
+        "public class BarangKimia : ItemGudang",
+        "{",
+        "    public BarangKimia(string kode, string nama) : base(kode, nama) { }",
+        "",
+        "    public override string EvaluasiRisiko()",
+        "        => \"Perlu penyimpanan khusus bahan berbahaya.\";",
+        "}"
+      ],
+      "note": "Karena EvaluasiRisiko() abstract, class turunan yang tidak abstract wajib mengimplementasikannya."
+    },
+    {
+      "title": "Interface untuk kemampuan tambahan",
+      "body": "Interface menyatakan kemampuan tanpa menentukan hierarki class. Hanya barang yang perlu dipantau kedaluwarsanya yang mengimplementasikan IPeriksaKadaluarsa.",
+      "codeTitle": "BarangMakanan.cs",
+      "code": [
+        "public interface IPeriksaKadaluarsa",
+        "{",
+        "    DateTime TanggalKadaluarsa { get; set; }",
+        "    bool ApakahKadaluarsa();",
+        "}",
+        "",
+        "public class BarangMakanan : ItemGudang, IPeriksaKadaluarsa",
+        "{",
+        "    public DateTime TanggalKadaluarsa { get; set; }",
+        "",
+        "    public BarangMakanan(string kode, string nama, DateTime tanggal)",
+        "        : base(kode, nama)",
+        "    {",
+        "        TanggalKadaluarsa = tanggal;",
+        "    }",
+        "",
+        "    public override string EvaluasiRisiko()",
+        "        => \"Perlu suhu penyimpanan stabil.\";",
+        "",
+        "    public bool ApakahKadaluarsa()",
+        "        => TanggalKadaluarsa < DateTime.Today;",
+        "}"
+      ],
+      "note": "Interface menambah kemampuan pemeriksaan kedaluwarsa tanpa memaksa semua jenis ItemGudang memiliki tanggal tersebut."
+    }
+  ],
+  "practice": {
+    "title": "Praktikum: standar item gudang",
+    "steps": [
+      "Buat abstract class ItemGudang dengan kode, nama, CetakInfo(), dan EvaluasiRisiko().",
+      "Buat BarangKimia dan BarangMakanan sebagai subclass; masing-masing memberi risiko yang sesuai.",
+      "Buat interface IPeriksaKadaluarsa untuk barang yang memiliki tanggal kedaluwarsa.",
+      "Implementasikan interface tersebut pada BarangMakanan.",
+      "Uji object melalui referensi ItemGudang dan periksa kemampuan interface dengan pattern matching."
+    ],
+    "deliverable": "Model dua jenis barang yang memakai data dasar bersama dan kemampuan khusus yang terpisah.",
+    "solutions": [
+      {
+        "title": "ItemGudang.cs",
+        "explanation": "Class abstrak menyatukan informasi umum, sementara EvaluasiRisiko() wajib disediakan oleh setiap jenis barang konkret.",
+        "codeTitle": "ItemGudang.cs",
+        "code": [
+          "public abstract class ItemGudang",
+          "{",
+          "    public string Kode { get; }",
+          "    public string Nama { get; }",
+          "    protected ItemGudang(string kode, string nama)",
+          "    {",
+          "        Kode = kode; Nama = nama;",
+          "    }",
+          "    public void CetakInfo() => Console.WriteLine($\"[{Kode}] {Nama}\");",
+          "    public abstract string EvaluasiRisiko();",
+          "}",
+          "",
+          "public class BarangKimia : ItemGudang",
+          "{",
+          "    public BarangKimia(string kode, string nama) : base(kode, nama) { }",
+          "    public override string EvaluasiRisiko() => \"Perlu penyimpanan khusus bahan berbahaya.\";",
+          "}"
+        ]
+      },
+      {
+        "title": "IPeriksaKadaluarsa.cs dan BarangMakanan.cs",
+        "explanation": "Interface menambahkan kemampuan khusus untuk barang yang punya tanggal kedaluwarsa. Item lain tidak perlu mengimplementasikannya.",
+        "codeTitle": "BarangMakanan.cs",
+        "code": [
+          "public interface IPeriksaKadaluarsa",
+          "{",
+          "    DateTime TanggalKadaluarsa { get; set; }",
+          "    bool ApakahKadaluarsa();",
+          "}",
+          "",
+          "public class BarangMakanan : ItemGudang, IPeriksaKadaluarsa",
+          "{",
+          "    public DateTime TanggalKadaluarsa { get; set; }",
+          "    public BarangMakanan(string kode, string nama, DateTime tanggal)",
+          "        : base(kode, nama) => TanggalKadaluarsa = tanggal;",
+          "    public override string EvaluasiRisiko() => \"Perlu suhu penyimpanan stabil.\";",
+          "    public bool ApakahKadaluarsa() => TanggalKadaluarsa < DateTime.Today;",
+          "}"
+        ]
+      },
+      {
+        "title": "Menguji kemampuan melalui abstract class dan interface",
+        "explanation": "Gunakan tipe abstrak untuk operasi umum dan interface untuk kemampuan opsional yang hanya dimiliki jenis barang tertentu.",
+        "codeTitle": "Program.cs",
+        "code": [
+          "ItemGudang item1 = new BarangKimia(\"KIM001\", \"Asam Sulfat\");",
+          "ItemGudang item2 = new BarangMakanan(\"MAK001\", \"Susu\", DateTime.Today.AddDays(10));",
+          "item1.CetakInfo();",
+          "Console.WriteLine(item1.EvaluasiRisiko());",
+          "item2.CetakInfo();",
+          "Console.WriteLine(item2.EvaluasiRisiko());",
+          "if (item2 is IPeriksaKadaluarsa cek)",
+          "    Console.WriteLine(cek.ApakahKadaluarsa() ? \"Kadaluarsa\" : \"Masih berlaku\");"
+        ]
+      }
+    ]
+  },
+  "assessments": {
+    "pretest": {
+      "multipleChoice": [
+        { "question": "Apa kemampuan abstract class di C#?", "answer": "C — Abstract class dapat memiliki field dan method biasa, serta anggota abstract.", "explanation": "Abstract class tidak dapat diinstansiasi langsung, tetapi dapat memiliki implementasi bersama." },
+        { "question": "Apa yang dapat dideklarasikan interface?", "answer": "D — Kontrak method/property yang harus dipenuhi implementor.", "explanation": "Interface mendeskripsikan kemampuan; interface modern juga mendukung beberapa anggota berimplementasi, tetapi bukan field instance atau constructor." }
+      ],
+      "essay": [
+        { "question": "Kapan abstract class lebih sesuai daripada interface?", "answer": "Gunakan abstract class saat tipe turunan memiliki identitas/relasi dasar yang sama dan perlu berbagi state atau implementasi, misalnya ItemGudang dengan Kode dan Nama." },
+        { "question": "Apa keuntungan utama interface pada sistem besar?", "answer": "Interface memisahkan kontrak dari implementasi dan memungkinkan class yang tidak berada dalam satu hierarki mewarisi banyak kemampuan, sehingga komponen mudah ditukar dan diuji." }
+      ]
+    },
+    "posttest": {
+      "multipleChoice": [
+        { "question": "Apa yang wajib dilakukan class konkret turunan abstract class?", "answer": "C — Mengimplementasikan semua anggota abstract yang belum dipenuhi.", "explanation": "Class turunan yang belum memenuhi kontrak harus tetap abstract." }
+      ],
+      "essay": [
+        { "question": "Jelaskan hubungan abstract class dan interface di C#.", "answer": "Keduanya dapat menetapkan kontrak. Abstract class juga dapat menyimpan state dan kode bersama serta diwarisi satu kali, sedangkan sebuah class dapat mengimplementasikan beberapa interface sebagai kumpulan kemampuan." },
+        { "question": "Berikan dua barang yang cocok memakai interface.", "answer": "BarangMakanan dan obat dapat mengimplementasikan `IPeriksaKadaluarsa`; keduanya punya tanggal kedaluwarsa meski tidak harus berada pada hierarki parent yang sama. BarangKimia dapat mengimplementasikan `IBerbahaya`." }
+      ]
+    }
+  },
+  "quiz": {
+    "question": "Pernyataan mana yang tepat tentang abstract class?",
+    "options": [
+      "Abstract class harus selalu memiliki interface.",
+      "Abstract class tidak dapat memiliki property atau method biasa.",
+      "Abstract class dapat memuat implementasi bersama dan method abstract.",
+      "Abstract class selalu dapat dibuat dengan new."
+    ],
+    "answer": 2,
+    "explanation": "Abstract class dapat memuat state dan method konkret, tetapi tidak dapat diinstansiasi langsung."
+  }
+}

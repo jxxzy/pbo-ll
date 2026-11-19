@@ -1,0 +1,234 @@
+import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const output = path.join(root, 'dist');
+const contentRoot = path.join(root, 'content', 'chapters');
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function renderCode(title, lines) {
+  return `<div class="code-block"><div class="code-block-top"><span>${escapeHtml(title)}</span><button class="copy-code" type="button" data-copy-code>Salin kode</button></div><pre><code>${escapeHtml(lines.join('\n'))}</code></pre></div>`;
+}
+
+function renderSection(section, index) {
+  const bullets = section.bullets?.length
+    ? `<ul class="lesson-bullets">${section.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
+    : '';
+  const code = section.code?.length ? renderCode(section.codeTitle, section.code) : '';
+  const note = section.note ? `<p class="lesson-note">${escapeHtml(section.note)}</p>` : '';
+
+  return `<section class="lesson-section" id="topik-${index + 1}"><p class="eyebrow">${String(index + 1).padStart(2, '0')} · MATERI</p><h2>${escapeHtml(section.title)}</h2><p>${escapeHtml(section.body)}</p>${bullets}${code}${note}</section>`;
+}
+
+function renderSolution(solutions = []) {
+  if (!solutions.length) return '';
+  return `<details class="solution-details" id="solusi-praktikum"><summary>Lihat contoh penyelesaian praktikum</summary><div class="solution-content">${solutions.map((solution) => `<section><h3>${escapeHtml(solution.title)}</h3><p>${escapeHtml(solution.explanation)}</p>${renderCode(solution.codeTitle, solution.code)}</section>`).join('')}</div></details>`;
+}
+
+function renderAssessment(name, assessment) {
+  if (!assessment) return '';
+  const multipleChoice = assessment.multipleChoice?.length
+    ? `<div class="assessment-group"><h3>Pilihan ganda</h3>${assessment.multipleChoice.map((item, index) => `<article class="answer-card"><h4>${index + 1}. ${escapeHtml(item.question)}</h4><p class="answer-key"><strong>Jawaban:</strong> ${escapeHtml(item.answer)}</p><p>${escapeHtml(item.explanation)}</p></article>`).join('')}</div>`
+    : '';
+  const essays = assessment.essay?.length
+    ? `<div class="assessment-group"><h3>Esai dan tugas tertulis</h3>${assessment.essay.map((item, index) => `<article class="answer-card"><h4>${index + 1}. ${escapeHtml(item.question)}</h4><p><strong>Contoh jawaban:</strong> ${escapeHtml(item.answer)}</p></article>`).join('')}</div>`
+    : '';
+  const count = (assessment.multipleChoice?.length || 0) + (assessment.essay?.length || 0);
+  return `<details class="assessment-details"><summary>${escapeHtml(name)} · ${count} pembahasan</summary><div class="assessment-content">${multipleChoice}${essays}</div></details>`;
+}
+
+function renderAssessments(assessments = {}, isSupplementary = false) {
+  const pretest = renderAssessment(
+    isSupplementary ? 'Latihan konsep' : 'Pre-test / tugas pendahuluan',
+    assessments.pretest,
+  );
+  const posttest = renderAssessment(
+    isSupplementary ? 'Evaluasi konsep' : 'Post-test / laporan praktikum',
+    assessments.posttest,
+  );
+  if (!pretest && !posttest) return '';
+  const heading = isSupplementary ? 'Latihan mandiri, lengkap dengan jawaban' : 'Soal modul, sudah dibahas';
+  const introduction = isSupplementary
+    ? 'Bab ini disusun sebagai materi penghubung karena PDF sumber kosong; latihan berikut merupakan evaluasi tambahan, bukan soal dari PDF.'
+    : 'Buka bagian soal untuk melihat jawaban dan alasan singkatnya. Jawaban esai adalah contoh; susun dengan bahasamu sendiri.';
+  return `<section class="assessment-section" id="pembahasan-soal"><p class="eyebrow">KUNCI DAN PEMBAHASAN</p><h2>${heading}</h2><p class="assessment-intro">${introduction}</p>${pretest}${posttest}</section>`;
+}
+
+function renderSidebar(lessons, currentChapter) {
+  const groups = [
+    { title: 'Fondasi OOP', subtitle: 'Bab 1–5 · C#', chapters: [1, 2, 3, 4, 5] },
+    { title: 'Materi penghubung', subtitle: 'Bab 6–7 · C# Lanjutan', chapters: [6, 7] },
+    { title: 'Aplikasi web', subtitle: 'Bab 8–11 · ASP.NET', chapters: [8, 9, 10, 11] },
+  ];
+
+  return `<a class="sidebar-link" href="../index.html#peta-belajar"><span aria-hidden="true">⌘</span> Peta belajar</a>${groups.map((group, groupIndex) => {
+    const links = group.chapters.map((chapterNumber) => {
+      const lesson = lessons.find((item) => item.chapter === chapterNumber);
+      if (lesson.unavailable) {
+        return `<a class="chapter-unavailable" href="../index.html#lesson-${chapterNumber}"><span>${String(chapterNumber).padStart(2, '0')}</span> Bab ${chapterNumber} · belum tersedia</a>`;
+      }
+      const active = lesson.chapter === currentChapter ? ' aria-current="page"' : '';
+      return `<a${active} href="../bab-${lesson.chapter}/"><span>${String(lesson.chapter).padStart(2, '0')}</span> ${escapeHtml(lesson.title)}</a>`;
+    }).join('');
+    return `<details class="chapter-group"${group.chapters.includes(currentChapter) ? ' open' : ''}><summary><span class="summary-index">${String(groupIndex + 1).padStart(2, '0')}</span><span><strong>${escapeHtml(group.title)}</strong><small>${escapeHtml(group.subtitle)}</small></span><span class="summary-arrow">⌄</span></summary>${links}</details>`;
+  }).join('')}<a class="sidebar-link" href="../index.html#materi"><span aria-hidden="true">▤</span> Semua materi</a>`;
+}
+
+function renderPracticeSteps(steps) {
+  return steps.map((step) => `<li>${escapeHtml(step)}</li>`).join('');
+}
+
+function renderQuizOptions(options) {
+  return options.map((option, index) => `<label class="quiz-option"><input type="radio" name="answer" value="${index}"><span>${escapeHtml(option)}</span></label>`).join('');
+}
+
+function replaceTemplate(template, values) {
+  return Object.entries(values).reduce(
+    (page, [key, value]) => page.replaceAll(`{{${key}}}`, () => value),
+    template,
+  );
+}
+
+await rm(output, { recursive: true, force: true });
+await mkdir(output, { recursive: true });
+
+for (const file of ['index.html', 'app.js', 'chapter.js', 'styles.css', 'favicon.svg', '.nojekyll']) {
+  await cp(path.join(root, file), path.join(output, file));
+}
+
+await cp(path.join(root, 'content'), path.join(output, 'content'), { recursive: true });
+await cp(path.join(root, 'Materi'), path.join(output, 'Materi'), { recursive: true });
+const emptyPdfs = [];
+for (const file of await readdir(path.join(output, 'Materi'))) {
+  const filePath = path.join(output, 'Materi', file);
+  const fileStats = await stat(filePath);
+  if (file.toLowerCase().endsWith('.pdf') && fileStats.isFile() && fileStats.size === 0) {
+    await rm(filePath);
+    emptyPdfs.push(file);
+  }
+}
+
+const lessons = JSON.parse(await readFile(path.join(contentRoot, 'chapters.json'), 'utf8'));
+const template = await readFile(path.join(contentRoot, 'template.html'), 'utf8');
+
+for (const lesson of lessons) {
+  if (lesson.unavailable) continue;
+
+  if (lesson.file) {
+    const pdfPath = path.join(root, ...lesson.file.split('/'));
+    const pdfStats = await stat(pdfPath);
+    if (pdfStats.size === 0) {
+      throw new Error(`Bab ${lesson.chapter} references an empty PDF: ${lesson.file}`);
+    }
+  } else if (!lesson.sourceMissing) {
+    throw new Error(`Bab ${lesson.chapter} has no PDF and is not marked as supplementary content.`);
+  }
+
+  const lessonContent = JSON.parse(await readFile(path.join(contentRoot, `chapter-${lesson.chapter}.json`), 'utf8'));
+  const assessments = lessonContent.assessments;
+  const hasCompleteAssessments = ['pretest', 'posttest'].every((name) =>
+    Array.isArray(assessments?.[name]?.multipleChoice)
+    && assessments[name].multipleChoice.length > 0
+    && Array.isArray(assessments?.[name]?.essay)
+    && assessments[name].essay.length > 0,
+  );
+  const hasCompleteSolutions = Array.isArray(lessonContent.practice?.solutions)
+    && lessonContent.practice.solutions.length > 0
+    && lessonContent.practice.solutions.every((solution) =>
+      typeof solution.title === 'string'
+      && typeof solution.codeTitle === 'string'
+      && Array.isArray(solution.code),
+    );
+  const quiz = lessonContent.quiz;
+  const hasValidQuiz = typeof quiz?.question === 'string'
+    && typeof quiz.explanation === 'string'
+    && Array.isArray(quiz.options)
+    && quiz.options.length > 1
+    && quiz.options.every((option) => typeof option === 'string')
+    && Number.isInteger(quiz.answer)
+    && quiz.answer >= 0
+    && quiz.answer < quiz.options.length;
+  if (!Array.isArray(lessonContent.sections)
+    || lessonContent.sections.length === 0
+    || !Array.isArray(lessonContent.objectives)
+    || lessonContent.objectives.length === 0
+    || !hasCompleteSolutions
+    || !hasCompleteAssessments
+    || !hasValidQuiz) {
+    throw new Error(`Bab ${lesson.chapter} is missing lesson content, worked solutions, or assessments.`);
+  }
+
+  const availableLessons = lessons.filter((item) => !item.unavailable);
+  const position = availableLessons.findIndex((item) => item.chapter === lesson.chapter);
+  const previous = availableLessons[position - 1];
+  const next = availableLessons[position + 1];
+  const previousLink = previous
+    ? `<a class="pagination-link previous" href="../bab-${previous.chapter}/"><span>← Bab sebelumnya</span><strong>${escapeHtml(previous.title)}</strong></a>`
+    : `<a class="pagination-link previous" href="../index.html#materi"><span>← Kembali</span><strong>Semua materi</strong></a>`;
+  const nextLink = next
+    ? `<a class="pagination-link next" href="../bab-${next.chapter}/"><span>Bab berikutnya →</span><strong>${escapeHtml(next.title)}</strong></a>`
+    : `<a class="pagination-link next" href="../index.html#materi"><span>Selesai</span><strong>Kembali ke dashboard ↑</strong></a>`;
+  const sectionList = lessonContent.sections.map(renderSection).join('');
+  const toc = lessonContent.sections.map((section, index) => `<a href="#topik-${index + 1}">${escapeHtml(section.title)}</a>`).join('');
+  const pdfHeroLink = lesson.file
+    ? `<a class="button button-outline" href="../${escapeHtml(lesson.file)}" target="_blank" rel="noopener">Buka modul PDF <span aria-hidden="true">↗</span></a>`
+    : '<span class="button button-outline pdf-unavailable">PDF sumber tidak tersedia</span>';
+  const pdfSidebarLink = lesson.file
+    ? `<a class="pdf-link" href="../${escapeHtml(lesson.file)}" target="_blank" rel="noopener">Unduh modul PDF ↗</a>`
+    : `<p class="pdf-unavailable-note">PDF sumber Bab ${lesson.chapter} kosong. Halaman ini adalah materi penghubung tambahan.</p>`;
+  const sourceNotice = lesson.sourceMissing
+    ? `<p class="source-notice">Materi penghubung orisinal: PDF sumber Bab ${lesson.chapter} kosong. Isi berikut bukan transkripsi dari PDF.</p>`
+    : '';
+  const page = replaceTemplate(template, {
+    CHAPTER: String(lesson.chapter).padStart(2, '0'),
+    CATEGORY: escapeHtml(lesson.category),
+    TITLE: escapeHtml(lesson.title),
+    SUMMARY: escapeHtml(lesson.summary),
+    INTRODUCTION: escapeHtml(lessonContent.introduction),
+    SOURCE_NOTICE: sourceNotice,
+    SIDEBAR_NAV: renderSidebar(lessons, lesson.chapter),
+    OBJECTIVES: lessonContent.objectives.map((objective) => `<li>${escapeHtml(objective)}</li>`).join(''),
+    LESSON_SECTIONS: sectionList,
+    PRACTICE_TITLE: escapeHtml(lessonContent.practice.title),
+    PRACTICE_STEPS: renderPracticeSteps(lessonContent.practice.steps),
+    DELIVERABLE: escapeHtml(lessonContent.practice.deliverable),
+    PRACTICE_SOLUTION: renderSolution(lessonContent.practice.solutions),
+    ASSESSMENT_SOLUTIONS: renderAssessments(lessonContent.assessments, lesson.sourceMissing),
+    ANSWER: String(quiz.answer),
+    EXPLANATION: escapeHtml(quiz.explanation),
+    QUESTION: escapeHtml(quiz.question),
+    QUIZ_OPTIONS: renderQuizOptions(quiz.options),
+    TOC_ITEMS: `${toc}<a href="#praktikum">Langkah praktikum</a><a href="#solusi-praktikum">Contoh penyelesaian</a><a href="#pembahasan-soal">Pembahasan soal</a><a href="#cek-pemahaman">Cek pemahaman</a>`,
+    PDF_HERO_LINK: pdfHeroLink,
+    PDF_SIDEBAR_LINK: pdfSidebarLink,
+    PREVIOUS_LINK: previousLink,
+    NEXT_LINK: nextLink,
+  });
+  if (/\{\{[A-Z_]+\}\}/.test(page)) {
+    throw new Error(`Unresolved template placeholder found in Bab ${lesson.chapter}.`);
+  }
+
+  const pageDirectory = path.join(output, `bab-${lesson.chapter}`);
+  await mkdir(pageDirectory, { recursive: true });
+  await writeFile(path.join(pageDirectory, 'index.html'), page, 'utf8');
+}
+
+await writeFile(
+  path.join(output, 'content', 'chapters', 'chapters.js'),
+  `window.PBO_LESSONS = ${JSON.stringify(lessons)};\n`,
+  'utf8',
+);
+
+const skippedPdfs = emptyPdfs.length
+  ? ` Skipped empty source PDF(s): ${emptyPdfs.join(', ')}.`
+  : '';
+console.log(`Built dashboard and ${lessons.filter((lesson) => !lesson.unavailable).length} lesson pages in dist.${skippedPdfs}`);

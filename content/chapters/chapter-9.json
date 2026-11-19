@@ -1,0 +1,288 @@
+{
+  "introduction": "Agar daftar barang tidak hilang saat aplikasi berhenti, simpan data ke database. Entity Framework Core (EF Core) bertindak sebagai ORM yang memetakan object C# ke tabel.",
+  "objectives": [
+    "Menjelaskan hubungan entity, DbContext, dan database.",
+    "Mengonfigurasi EF Core dengan SQLite.",
+    "Menjalankan migrasi serta operasi Create dan Read dasar."
+  ],
+  "sections": [
+    {
+      "title": "Entity mewakili data tabel",
+      "body": "Entity class menggambarkan kolom pada tabel. DataAnnotations dapat menetapkan aturan seperti nilai wajib dan rentang stok yang diperbolehkan.",
+      "codeTitle": "Models/Barang.cs",
+      "code": [
+        "using System.ComponentModel.DataAnnotations;",
+        "using Microsoft.EntityFrameworkCore;",
+        "",
+        "public class Barang",
+        "{",
+        "    public int Id { get; set; }",
+        "",
+        "    [Required]",
+        "    public string KodeBarang { get; set; } = string.Empty;",
+        "",
+        "    [Required]",
+        "    public string NamaBarang { get; set; } = string.Empty;",
+        "",
+        "    [Range(0, int.MaxValue)]",
+        "    public int JumlahStok { get; set; }",
+        "    public string Kategori { get; set; } = string.Empty;",
+        "}"
+      ]
+    },
+    {
+      "title": "DbContext dan konfigurasi koneksi",
+      "body": "DbContext menjadi pintu utama aplikasi ke database. DbSet<Barang> merepresentasikan kumpulan record Barang yang dapat ditanya atau diubah.",
+      "codeTitle": "Models/ApplicationDbContext.cs",
+      "code": [
+        "public class ApplicationDbContext : DbContext",
+        "{",
+        "    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)",
+        "        : base(options) { }",
+        "",
+        "    public DbSet<Barang> Barang => Set<Barang>();",
+        "}"
+      ],
+      "note": "Tambahkan paket Microsoft.EntityFrameworkCore.Sqlite dan Microsoft.EntityFrameworkCore.Tools sebelum memakai konfigurasi SQLite."
+    },
+    {
+      "title": "Daftarkan provider SQLite",
+      "body": "Daftarkan DbContext di Program.cs agar controller dapat menerimanya melalui dependency injection.",
+      "codeTitle": "Program.cs",
+      "code": [
+        "using Microsoft.EntityFrameworkCore;",
+        "",
+        "builder.Services.AddDbContext<ApplicationDbContext>(options =>",
+        "    options.UseSqlite(\"Data Source=gudang.db\"));"
+      ]
+    },
+    {
+      "title": "Buat skema dengan migration",
+      "body": "Migration mencatat perubahan model sebagai perubahan skema database. Jalankan perintah dari folder project yang berisi file .csproj.",
+      "codeTitle": "Package Manager Console",
+      "code": [
+        "Add-Migration InitialCreate",
+        "Update-Database"
+      ],
+      "bullets": [
+        "Add-Migration membuat deskripsi perubahan skema.",
+        "Update-Database menerapkan migration ke database.",
+        "Ulangi proses ini setelah struktur entity berubah."
+      ]
+    },
+    {
+      "title": "Gunakan context di controller",
+      "body": "Dependency injection memasok DbContext ke controller. Untuk input, periksa ModelState sebelum menyimpan agar data invalid tidak masuk ke database.",
+      "codeTitle": "Controllers/BarangController.cs",
+      "code": [
+        "private readonly ApplicationDbContext _context;",
+        "",
+        "public BarangController(ApplicationDbContext context)",
+        "{",
+        "    _context = context;",
+        "}",
+        "",
+        "public IActionResult Index() => View(_context.Barang.ToList());",
+        "",
+        "[HttpPost]",
+        "public IActionResult Create(Barang barang)",
+        "{",
+        "    if (!ModelState.IsValid) return View(barang);",
+        "    _context.Barang.Add(barang);",
+        "    _context.SaveChanges();",
+        "    return RedirectToAction(nameof(Index));",
+        "}"
+      ]
+    }
+  ],
+  "practice": {
+    "title": "Praktikum: persistensikan inventaris",
+    "steps": [
+      "Tambahkan paket EF Core provider SQLite dan Tools ke project.",
+      "Buat entity Barang dengan Id, KodeBarang, NamaBarang, JumlahStok, dan Kategori.",
+      "Buat ApplicationDbContext dengan DbSet<Barang>.",
+      "Daftarkan SQLite pada Program.cs menggunakan Data Source=gudang.db.",
+      "Buat migration awal dan terapkan dengan Update-Database.",
+      "Gunakan context pada BarangController untuk menampilkan daftar dan menyimpan barang baru.",
+      "Buat View Index dan Create untuk menampilkan serta memasukkan data."
+    ],
+    "deliverable": "Aplikasi MVC yang membaca dan menyimpan barang ke database lokal.",
+    "solutions": [
+      {
+        "title": "Pasang provider SQLite dan EF Core Tools",
+        "explanation": "Pilih satu provider yang cocok dengan target project. Contoh berikut mengikuti materi dan menggunakan SQLite.",
+        "codeTitle": "Package Manager Console",
+        "code": [
+          "Install-Package Microsoft.EntityFrameworkCore.Sqlite",
+          "Install-Package Microsoft.EntityFrameworkCore.Tools",
+          "",
+          "// Alternatif CLI:",
+          "dotnet add package Microsoft.EntityFrameworkCore.Sqlite",
+          "dotnet add package Microsoft.EntityFrameworkCore.Design",
+          "dotnet tool install --global dotnet-ef"
+        ]
+      },
+      {
+        "title": "Models/Barang.cs dan ApplicationDbContext.cs",
+        "explanation": "DataAnnotations memvalidasi nilai dasar, sementara DbContext mengekspos entity ke EF Core. Pastikan namespace package EF Core sudah diimpor.",
+        "codeTitle": "Models/Barang.cs",
+        "code": [
+          "using System.ComponentModel.DataAnnotations;",
+          "using Microsoft.EntityFrameworkCore;",
+          "",
+          "public class Barang",
+          "{",
+          "    public int Id { get; set; }",
+          "    [Required] public string KodeBarang { get; set; } = string.Empty;",
+          "    [Required] public string NamaBarang { get; set; } = string.Empty;",
+          "    [Range(0, int.MaxValue)] public int JumlahStok { get; set; }",
+          "    public string Kategori { get; set; } = string.Empty;",
+          "}",
+          "",
+          "public class ApplicationDbContext : DbContext",
+          "{",
+          "    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)",
+          "        : base(options) { }",
+          "    public DbSet<Barang> Barang => Set<Barang>();",
+          "}"
+        ]
+      },
+      {
+        "title": "Program.cs",
+        "explanation": "Tambahkan paket Microsoft.EntityFrameworkCore.Sqlite dan daftarkan context sebelum middleware dan route aplikasi.",
+        "codeTitle": "Program.cs",
+        "code": [
+          "using Microsoft.EntityFrameworkCore;",
+          "",
+          "var builder = WebApplication.CreateBuilder(args);",
+          "builder.Services.AddControllersWithViews();",
+          "builder.Services.AddDbContext<ApplicationDbContext>(options =>",
+          "    options.UseSqlite(\"Data Source=gudang.db\"));",
+          "",
+          "var app = builder.Build();",
+          "app.UseStaticFiles();",
+          "app.UseRouting();",
+          "app.MapControllerRoute(\"default\", \"{controller=Home}/{action=Index}/{id?}\");",
+          "app.Run();"
+        ]
+      },
+      {
+        "title": "Jalankan migration dari terminal",
+        "explanation": "Jalankan dari folder yang berisi file project .csproj setelah paket EF Core Tools terpasang.",
+        "codeTitle": "Terminal",
+        "code": [
+          "dotnet ef migrations add InitialCreate",
+          "dotnet ef database update"
+        ]
+      },
+      {
+        "title": "BarangController dan views Create/Index",
+        "explanation": "GET menampilkan data, POST memvalidasi lalu menyimpan. EF Core async menjaga request web tetap responsif.",
+        "codeTitle": "Controllers/BarangController.cs",
+        "code": [
+          "using Microsoft.AspNetCore.Mvc;",
+          "using Microsoft.EntityFrameworkCore;",
+          "",
+          "public class BarangController : Controller",
+          "{",
+          "    private readonly ApplicationDbContext _context;",
+          "    public BarangController(ApplicationDbContext context) => _context = context;",
+          "",
+          "    public async Task<IActionResult> Index()",
+          "        => View(await _context.Barang.AsNoTracking().ToListAsync());",
+          "",
+          "    public IActionResult Create() => View(new Barang());",
+          "",
+          "    [HttpPost, ValidateAntiForgeryToken]",
+          "    public async Task<IActionResult> Create([Bind(\"KodeBarang,NamaBarang,JumlahStok,Kategori\")] Barang barang)",
+          "    {",
+          "        if (!ModelState.IsValid) return View(barang);",
+          "        _context.Barang.Add(barang);",
+          "        await _context.SaveChangesAsync();",
+          "        return RedirectToAction(nameof(Index));",
+          "    }",
+          "}"
+        ]
+      },
+      {
+        "title": "Views/Barang/Index.cshtml",
+        "explanation": "View menampilkan data yang dikirim action Index dan menyediakan tautan untuk menambah data.",
+        "codeTitle": "Index.cshtml",
+        "code": [
+          "@model IEnumerable<Barang>",
+          "<h1>Daftar Barang</h1>",
+          "<a asp-action=\"Create\">Tambah barang</a>",
+          "<table class=\"table\">",
+          "  <thead><tr><th>Kode</th><th>Nama</th><th>Stok</th><th>Kategori</th></tr></thead>",
+          "  <tbody>",
+          "  @foreach (var barang in Model)",
+          "  {",
+          "    <tr><td>@barang.KodeBarang</td><td>@barang.NamaBarang</td>",
+          "        <td>@barang.JumlahStok</td><td>@barang.Kategori</td></tr>",
+          "  }",
+          "  </tbody>",
+          "</table>"
+        ]
+      },
+      {
+        "title": "Views/Barang/Create.cshtml",
+        "explanation": "Form mengirim POST ke action Create dan menampilkan kembali validasi entity ketika input belum memenuhi aturan.",
+        "codeTitle": "Create.cshtml",
+        "code": [
+          "@model Barang",
+          "<form asp-action=\"Create\" method=\"post\">",
+          "  <div asp-validation-summary=\"ModelOnly\" class=\"text-danger\"></div>",
+          "  <label asp-for=\"KodeBarang\"></label>",
+          "  <input asp-for=\"KodeBarang\" />",
+          "  <span asp-validation-for=\"KodeBarang\"></span>",
+          "  <label asp-for=\"NamaBarang\"></label>",
+          "  <input asp-for=\"NamaBarang\" />",
+          "  <span asp-validation-for=\"NamaBarang\"></span>",
+          "  <label asp-for=\"JumlahStok\"></label>",
+          "  <input asp-for=\"JumlahStok\" type=\"number\" />",
+          "  <span asp-validation-for=\"JumlahStok\"></span>",
+          "  <label asp-for=\"Kategori\"></label>",
+          "  <input asp-for=\"Kategori\" />",
+          "  <button type=\"submit\">Simpan</button>",
+          "</form>",
+          "@section Scripts { <partial name=\"_ValidationScriptsPartial\" /> }"
+        ]
+      }
+    ]
+  },
+  "assessments": {
+    "pretest": {
+      "multipleChoice": [
+        { "question": "Entity Framework Core termasuk jenis teknologi apa?", "answer": "C — ORM (Object Relational Mapper).", "explanation": "EF Core memetakan object .NET ke struktur dan record database." },
+        { "question": "Apa fungsi DbContext?", "answer": "C — Menjembatani entity/model dengan database.", "explanation": "Context mengelola query, perubahan entity, dan penyimpanan." },
+        { "question": "Perintah apa yang menerapkan migration ke database dengan CLI .NET?", "answer": "B — `dotnet ef database update`.", "explanation": "Perintah ini menerapkan migration yang tersedia; `dotnet ef migrations add` membuat migration." },
+        { "question": "Bagaimana kumpulan entity dideklarasikan dalam DbContext?", "answer": "C — Dengan DbSet<T>.", "explanation": "DbSet<Barang> mewakili koleksi entity Barang." }
+      ],
+      "essay": [
+        { "question": "Apa manfaat ORM seperti EF Core dibanding query SQL manual?", "answer": "ORM memetakan object dan tabel, mengurangi boilerplate SQL, menyediakan LINQ serta pelacakan perubahan, dan mengelola migration. SQL tetap berguna untuk kasus khusus atau optimasi." },
+        { "question": "Jelaskan hubungan entity class dan tabel.", "answer": "Entity biasanya dipetakan ke tabel, properti ke kolom, dan tiap instance ke baris. EF Core menggunakan konfigurasi dan konvensi untuk melakukan pemetaan." }
+      ]
+    },
+    "posttest": {
+      "multipleChoice": [
+        { "question": "Apa konvensi untuk property bernama Id pada entity?", "answer": "B — Biasanya menjadi primary key.", "explanation": "Konvensi EF Core mengenali Id atau BarangId sebagai primary key kecuali dikonfigurasi lain." },
+        { "question": "Apa yang dilakukan Update-Database atau database update?", "answer": "C — Menerapkan migration untuk membuat atau mengubah skema database.", "explanation": "Perintah menjalankan perubahan skema yang telah dibuat terhadap database terkonfigurasi." }
+      ],
+      "essay": [
+        { "question": "Tulis model Barang yang valid dan menolak input kosong.", "answer": "Contoh: `public class Barang { public int Id { get; set; } [Required] public string KodeBarang { get; set; } = \"\"; [Required] public string NamaBarang { get; set; } = \"\"; [Range(0, int.MaxValue)] public int JumlahStok { get; set; } }`. Periksa ModelState sebelum menyimpan." },
+        { "question": "Jelaskan DbContext dan hubungannya dengan entity.", "answer": "DbContext mengelola koneksi, query, pelacakan perubahan, dan penyimpanan. DbSet<TEntity> menghubungkan entity dengan koleksi data/tabel, sedangkan SaveChanges menerapkan perubahan ke database." }
+      ]
+    }
+  },
+  "quiz": {
+    "question": "Apa peran DbSet<Barang> pada ApplicationDbContext?",
+    "options": [
+      "Menentukan route controller.",
+      "Mewakili kumpulan data Barang yang dikelola EF Core.",
+      "Menyimpan file CSS aplikasi.",
+      "Mengganti migration dengan query HTML."
+    ],
+    "answer": 1,
+    "explanation": "DbSet mewakili kumpulan entity yang dapat ditanya dan dimodifikasi melalui DbContext."
+  }
+}
