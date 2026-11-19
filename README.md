@@ -36,7 +36,7 @@ dist/                      Dashboard dan halaman bab hasil build, tidak disimpan
 
 ## Build dan preview lokal
 
-Persyaratan: Node.js 22+.
+Persyaratan: Node.js 22+ untuk membangun situs dan .NET 10 SDK untuk menjalankan project praktikum.
 
 ```powershell
 npm ci
@@ -50,7 +50,7 @@ Build menghasilkan dashboard dan sebelas halaman bab di `dist/`, termasuk seluru
 
 ## Menjalankan file praktikum
 
-Setiap halaman bab memiliki tautan **Unduh file praktikum**. Unduh file dalam satu folder dan jalankan petunjuk pada `README.md` di folder tersebut. Praktikum Bab 1–7 adalah console app; Bab 8–10 adalah aplikasi MVC; Bab 11 adalah REST API. Project menggunakan .NET 8, dan Bab 9–11 memulihkan paket EF Core/SQLite saat pertama kali dijalankan.
+Setiap halaman bab memiliki tautan **Unduh file praktikum**. Unduh file dalam satu folder dan jalankan petunjuk pada `README.md` di folder tersebut. Praktikum Bab 1–7 adalah console app; Bab 8–10 adalah aplikasi MVC; Bab 11 adalah REST API. Semua project menargetkan .NET 10 LTS. Bab 9–11 memulihkan EF Core/SQLite saat pertama kali dijalankan.
 
 Contoh menjalankan project:
 

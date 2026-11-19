@@ -113,11 +113,55 @@ function setSidebarOpen(isOpen) {
   sidebarBackdrop.hidden = !isOpen;
   menuToggle.setAttribute('aria-expanded', String(isOpen));
   menuToggle.setAttribute('aria-label', isOpen ? 'Tutup navigasi' : 'Buka navigasi');
+  if (isOpen) {
+    window.requestAnimationFrame(() => sidebar.querySelector('input, a[href], summary')?.focus());
+  }
 }
 
 menuToggle.addEventListener('click', () => setSidebarOpen(!sidebar.classList.contains('is-open')));
-sidebarBackdrop.addEventListener('click', () => setSidebarOpen(false));
-sidebar.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setSidebarOpen(false)));
+sidebarBackdrop.addEventListener('click', () => {
+  setSidebarOpen(false);
+  menuToggle.focus();
+});
+sidebar.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
+  setSidebarOpen(false);
+  const destination = new URL(link.href);
+  if (destination.origin === window.location.origin
+    && destination.pathname === window.location.pathname
+    && destination.hash) {
+    const target = document.getElementById(decodeURIComponent(destination.hash.slice(1)));
+    if (target) {
+      if (!target.hasAttribute('tabindex')) {
+        target.setAttribute('tabindex', '-1');
+        target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true });
+      }
+      target.focus({ preventScroll: true });
+    }
+  }
+}));
+
+document.addEventListener('keydown', (event) => {
+  if (!sidebar.classList.contains('is-open') || !window.matchMedia('(max-width: 780px)').matches) return;
+  if (event.key === 'Escape') {
+    setSidebarOpen(false);
+    menuToggle.focus();
+    return;
+  }
+  if (event.key !== 'Tab') return;
+
+  const focusable = [...sidebar.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), summary')]
+    .filter((element) => element.getClientRects().length > 0);
+  const first = focusable[0];
+  const last = focusable.at(-1);
+  if (!first || !last) return;
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});
 
 const quizBox = document.querySelector('#quiz-box');
 const quizFeedback = document.querySelector('#quiz-feedback');

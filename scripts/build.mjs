@@ -106,7 +106,10 @@ for (const file of ['index.html', 'app.js', 'chapter.js', 'motion.js', 'styles.c
   await cp(path.join(root, file), path.join(output, file));
 }
 
-await cp(path.join(root, 'content'), path.join(output, 'content'), { recursive: true });
+await cp(path.join(root, 'content'), path.join(output, 'content'), {
+  recursive: true,
+  filter: (sourcePath) => path.resolve(sourcePath) !== path.join(contentRoot, 'template.html'),
+});
 await cp(path.join(root, 'Materi'), path.join(output, 'Materi'), { recursive: true });
 await cp(practiceRoot, path.join(output, 'praktikum'), {
   recursive: true,

@@ -105,4 +105,5 @@ if (quickLinks.length && 'IntersectionObserver' in window) {
   quickLinks.forEach(({ target }) => sectionObserver.observe(target));
 }
 
+document.documentElement.classList.add('motion-ready');
 registerMotionItems();
