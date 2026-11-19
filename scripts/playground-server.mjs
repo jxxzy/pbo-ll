@@ -70,7 +70,7 @@ async function start(data){
         try{
           const {stdout}=await docker(['port',job.name,'8080/tcp']);
           const match=stdout.match(/127\.0\.0\.1:(\d+)/);
-          if(match){const url='http://127.0.0.1:'+match[1];await fetch(url+(lab.chapter===11?'/api/barangapi':'/'),{signal:AbortSignal.timeout(1000),redirect:'manual'});if(job.running&&!job.stopping){job.url=url+(lab.chapter===11?'/api/barangapi':lab.chapter===8?'/Barang':'/');job.ready=true;job.state='Server berjalan';}}
+          if(match){const url='http://127.0.0.1:'+match[1];const health=await fetch(url+(lab.chapter===11?'/health': lab.chapter===8?'/Barang':'/'),{signal:AbortSignal.timeout(1000),redirect:'manual'});if(!health.ok)throw Error('App not ready');if(job.running&&!job.stopping){job.url=url+(lab.chapter===8?'/Barang':'/');job.ready=true;job.state='Server berjalan';}}
         }catch{}
         await new Promise(r=>setTimeout(r,750));
       }

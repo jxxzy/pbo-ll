@@ -119,8 +119,7 @@ await cp(practiceRoot, path.join(output, 'praktikum'), {
     const segments = relativePath.split(path.sep);
     const fileName = path.basename(sourcePath);
     return !segments.some((segment) => segment === 'bin' || segment === 'obj')
-      && fileName !== 'gudang.db'
-      && !fileName.startsWith('gudang.db-')
+      && !/\.db(?:-wal|-shm|-journal)?$/i.test(fileName)
       && fileName !== 'data_barang.txt';
   },
 });

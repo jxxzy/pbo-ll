@@ -27,7 +27,16 @@ try
         Console.WriteLine(ex.Message);
     }
 
-    var path = Path.Combine(AppContext.BaseDirectory, "data_barang.txt");
+    try
+    {
+        TambahBarang(daftarBarang, new Barang("BRG001", "Duplikat", 1));
+    }
+    catch (KodeDuplikatException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    var path = Path.Combine(Path.GetTempPath(), "data_barang.txt");
     File.WriteAllText(path, "Kode\tNama\tStok" + Environment.NewLine);
     foreach (var barang in daftarBarang)
     {
@@ -49,6 +58,14 @@ finally
     Console.WriteLine("Proses praktikum selesai.");
 }
 
+static void TambahBarang(List<Barang> daftar, Barang barang)
+{
+    if (daftar.Any(item => item.KodeBarang == barang.KodeBarang))
+        throw new KodeDuplikatException("Kode barang sudah digunakan.");
+    daftar.Add(barang);
+}
+
+public sealed class KodeDuplikatException(string message) : Exception(message);
 public sealed class StokNegatifException(string message) : Exception(message);
 
 public sealed class Barang

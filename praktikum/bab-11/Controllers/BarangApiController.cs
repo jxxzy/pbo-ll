@@ -10,8 +10,27 @@ namespace PraktikumBab11.Controllers;
 public sealed class BarangApiController(ApplicationDbContext database) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Barang>>> GetAll() =>
-        await database.Barang.AsNoTracking().OrderBy(barang => barang.Id).ToListAsync();
+    public async Task<ActionResult<IEnumerable<Barang>>> GetAll(
+        [FromQuery] string? search = null, [FromQuery] int? page = null,
+        [FromQuery] int pageSize = 20, [FromQuery] string sort = "id")
+    {
+        if (page is < 1 or > 100000 || pageSize is < 1 or > 100)
+            return BadRequest("Page 1–100000, pageSize 1–100.");
+        if (sort is not ("id" or "nama" or "stok"))
+            return BadRequest("Sort: id, nama, stok.");
+        var query = database.Barang.AsNoTracking();
+        if (!string.IsNullOrWhiteSpace(search))
+            query = query.Where(b => b.KodeBarang.Contains(search) || b.NamaBarang.Contains(search));
+        query = sort switch
+        {
+            "nama" => query.OrderBy(b => b.NamaBarang).ThenBy(b => b.Id),
+            "stok" => query.OrderBy(b => b.JumlahStok).ThenBy(b => b.Id),
+            _ => query.OrderBy(b => b.Id)
+        };
+        if (page is int p)
+            query = query.Skip((p - 1) * pageSize).Take(pageSize);
+        return await query.ToListAsync();
+    }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Barang>> GetById(int id)

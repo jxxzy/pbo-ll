@@ -5,3 +5,9 @@ dist/
 **/gudang.db
 **/gudang.db-*
 **/data_barang.txt
+
+# Local lab data
+**/*.db
+**/*.db-wal
+**/*.db-shm
+**/*.db-journal
