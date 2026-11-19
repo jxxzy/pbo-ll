@@ -1,0 +1,9 @@
+**
+!praktikum/
+!praktikum/**
+praktikum/**/bin/
+praktikum/**/obj/
+praktikum/**/gudang.db*
+praktikum/**/data_barang.txt
+!runner/
+!runner/Dockerfile

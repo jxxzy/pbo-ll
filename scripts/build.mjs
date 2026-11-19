@@ -175,7 +175,7 @@ for (const lesson of lessons) {
   <a class="back" href="../../bab-${lesson.chapter}/">← Kembali ke materi Bab ${chapterId}</a>
   <h1>File Praktikum Bab ${chapterId}</h1>
   <p>${escapeHtml(lesson.title)} · Unduh semua file berikut ke satu folder, lalu ikuti petunjuk di README.md.</p>
-  <ul>${fileLinks}</ul>
+  <p><a href="../../playground/?bab=${lesson.chapter}">▶ Buka Interactive Coding Playground</a></p>\n  <ul>${fileLinks}</ul>
 </body>
 </html>`;
   await writeFile(path.join(practiceDirectory, 'index.html'), page, 'utf8');
@@ -296,3 +296,18 @@ const skippedPdfs = emptyPdfs.length
   ? ` Skipped empty source PDF(s): ${emptyPdfs.join(', ')}.`
   : '';
 console.log(`Built dashboard and ${lessons.filter((lesson) => !lesson.unavailable).length} lesson pages in dist.${skippedPdfs}`);
+
+ // Interactive lab: reuse the copied, filtered original project files.
+await cp(path.join(root, 'playground'), path.join(output, 'playground'), { recursive: true });
+const labs = [];
+for (const lesson of lessons.filter(item => !item.unavailable)) {
+  const id = String(lesson.chapter).padStart(2, '0');
+  const directory = path.join(output, 'praktikum', 'bab-' + id);
+  const files = (await listPracticeFiles(directory)).filter(file => file !== 'index.html').sort();
+  if (!files.some(file => file.endsWith('.csproj')) || !files.includes('Program.cs')) {
+    throw new Error('Incomplete playground project: ' + id);
+  }
+  labs.push({ chapter: lesson.chapter, title: lesson.title, files });
+}
+await writeFile(path.join(output, 'playground', 'manifest.json'), JSON.stringify(labs), 'utf8');
+console.log('Built interactive playground for ' + labs.length + ' projects.');

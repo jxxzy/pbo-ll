@@ -71,3 +71,18 @@ Jalur aset relatif sehingga dapat dipublikasikan di root domain maupun URL repos
 ## Ketersediaan materi
 
 Seluruh PDF Bab 1–11 dapat dibuka dari halaman materi. Bab 6 membahas exception handling dan File I/O; Bab 7 membahas SOLID, Factory Pattern, dan refactoring. Soal pada setiap modul dibahas, termasuk jawaban esai post-test Bab 7.
+
+## Interactive Coding Playground (Bab 1–11)
+
+Buka [Playground GitHub Pages](https://jxxzy.github.io/pbo-ll/playground/) untuk membaca, mengedit, menyimpan draft lokal, menyalin dan mengunduh source asli. GitHub Pages **tidak** menjalankan .NET. Untuk eksekusi nyata gunakan runner lokal (Node.js 22+, Git, Docker Desktop atau Docker Engine dengan Linux containers):
+
+```powershell
+git clone https://github.com/jxxzy/pbo-ll.git
+cd pbo-ll
+docker build -f runner/Dockerfile -t pbo2-lab:net10 .
+npm run playground
+```
+
+Buka http://127.0.0.1:8787/playground/ (gunakan alamat ini, bukan localhost). Image menyiapkan cache paket .NET 10/EF Core. Pilih Bab 1–7, edit C#, masukkan stdin bila perlu dan Run; terminal menunjukkan output asli. Bab 8–10 membuka MVC melalui link preview; Bab 11 menyediakan pengujian GET/POST/PUT/DELETE. File SQLite terisolasi per container dan dihapus ketika dihentikan; unduh perubahan source sebelum menghapus storage browser. File csproj harus asli untuk eksekusi. Tidak ada compiler online publik.
+
+Runner hanya bind ke 127.0.0.1; jangan publish port 8787 atau meneruskan melalui tunnel. Docker membatasi CPU, RAM, proses, waktu dan akses file; console tidak memiliki jaringan, web menggunakan jaringan Docker biasa (dapat mengakses jaringan keluar). Ini alat latihan lokal untuk kode tepercaya, bukan sandbox multi-tenant atau layanan publik. Timeout console 60 detik, web 10 menit. Stop sebelum mengganti bab. Jika runner gagal, cek Docker Desktop dan build image ulang setelah update project.
