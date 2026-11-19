@@ -1,4 +1,4 @@
-import { mkdtemp, rm, mkdir, cp, readdir, stat } from 'node:fs/promises';
+import { mkdtemp, rm, mkdir, cp, readdir, stat, readFile, writeFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -24,6 +24,20 @@ try{
       for(const file of await readdir(source))if(/^(license|licence|thirdparty|notice)/i.test(file)&&(await stat(path.join(source,file))).isFile())await cp(path.join(source,file),path.join(out,file));
     }
     if(name==='wasmsharp'){
+      // WasmBundlerFriendlyBootConfig output imports binary assets for Vite.
+      // Static Pages does not transform these imports. Resolve each asset URL
+      // explicitly, preserving the runtime's own loading and hash metadata.
+      const loader=path.join(out,'dotnet.js');
+      const original=await readFile(loader,'utf8');
+      let count=0;
+      const normalized=original.replace(/^import (\w+) from ["'](\.\/[^"'\r\n]+\.(?:wasm|dll|dat|pdb|blat))["'];[^\S\r\n]*\r?$/gm,(_,binding,asset)=>{
+        count++;
+        return 'const '+binding+' = new URL('+JSON.stringify(asset)+', import.meta.url).href;';
+      });
+      if(!count)throw Error('Expected bundler-style binary imports in pinned WasmSharp loader.');
+      if(/^import\s+.*\.(?:wasm|dll|dat|pdb|blat)["'];/m.test(normalized))throw Error('Unresolved binary module import');
+      await writeFile(loader,normalized,'utf8');
+      console.log('Normalized '+count+' WasmSharp binary asset imports for static browsers');
       const files=await readdir(out);console.log('WasmSharp root module files:',files.filter(f=>/\.m?js$|\.json$/.test(f)).join(', '));
       for(const file of ['initializeWasmSharpModule.js','dotnet.js']){if(!files.includes(file))throw Error('Missing runtime file: '+file);}
     }
