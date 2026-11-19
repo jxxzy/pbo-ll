@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "playground": "npm run build && node scripts/playground-server.mjs"
+    "playground": "npm run build && npm run assets && node scripts/playground-server.mjs",
+    "assets": "node scripts/bundle-vendors.mjs",
+    "test": "node --test tests/site.test.mjs"
   }
 }

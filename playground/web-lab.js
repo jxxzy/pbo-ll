@@ -6,8 +6,11 @@ window.PBOBrowserLab=(()=>{
   const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
   const button=(label,fn)=>{const b=el('button',label);b.type='button';b.onclick=fn;return b;};
   async function open(chapter,root){
-    const SQL=await sql();const db=new SQL.Database();
-    db.run('CREATE TABLE Barang (id INTEGER PRIMARY KEY AUTOINCREMENT, kodeBarang TEXT NOT NULL, namaBarang TEXT NOT NULL, jumlahStok INTEGER NOT NULL CHECK(jumlahStok>=0), kategori TEXT NOT NULL)');
+    const SQL=await sql();let db=new SQL.Database();
+    const storageKey='pbo-sqlite-v2:'+chapter;let restored=false;
+    if(chapter!==8)try{const saved=localStorage.getItem(storageKey);if(saved){const previous=JSON.parse(saved);if(Array.isArray(previous)&&previous.length<=500000){db.close();db=new SQL.Database(Uint8Array.from(previous));restored=true;}}}catch{try{db.close();}catch{}db=new SQL.Database();}
+    function saveDatabase(){if(chapter===8)return;try{const bytes=db.export();if(bytes.length<=500000)localStorage.setItem(storageKey,JSON.stringify(Array.from(bytes)));}catch{}}
+    db.run('CREATE TABLE IF NOT EXISTS Barang (id INTEGER PRIMARY KEY AUTOINCREMENT, kodeBarang TEXT NOT NULL, namaBarang TEXT NOT NULL, jumlahStok INTEGER NOT NULL CHECK(jumlahStok>=0), kategori TEXT NOT NULL)');
     if(chapter===8){db.run("INSERT INTO Barang(kodeBarang,namaBarang,jumlahStok,kategori) VALUES('BRG001','Box Kardus',120,''),('BRG002','Label',75,'')");}
     const columns='id,kodeBarang,namaBarang,jumlahStok,kategori';
     const query=(statement,args=[])=>{const stmt=db.prepare(statement);try{stmt.bind(args);const rows=[];while(stmt.step())rows.push(stmt.getAsObject());return rows;}finally{stmt.free();}};
@@ -26,8 +29,8 @@ window.PBOBrowserLab=(()=>{
     const update=(id,v)=>db.run('UPDATE Barang SET kodeBarang=?,namaBarang=?,jumlahStok=?,kategori=? WHERE id=?',[...normalize(v),id]);
     const remove=id=>db.run('DELETE FROM Barang WHERE id=?',[id]);
     root.replaceChildren();root.hidden=false;
-    root.append(el('h2',['','','','','','','','','MVC — MODEL / VIEW / CONTROLLER','EF CORE — LATIHAN CREATE / READ','CRUD — VALIDASI DAN DATABASE','REST API — LAB DATABASE'][chapter]),el('p','Mode browser: SQLite WebAssembly yang nyata, tetapi alur ASP.NET dan respons API diimplementasikan ulang di JavaScript. Data sementara hilang saat lab ditutup.'));
-    const message=el('p','Database siap.');message.className='lab-message';message.setAttribute('role','status');root.append(message);
+    root.append(el('h2',['','','','','','','','','MVC — MODEL / VIEW / CONTROLLER','EF CORE — LATIHAN CREATE / READ','CRUD — VALIDASI DAN DATABASE','REST API — LAB DATABASE'][chapter]),el('p','Mode browser: SQLite WebAssembly yang nyata, tetapi alur ASP.NET dan respons API diimplementasikan ulang di JavaScript. Data Bab 9–11 tersimpan lokal selama kapasitas browser mencukupi; gunakan export sebagai backup.'));
+    const message=el('p',restored?'Database lokal dipulihkan.':'Database siap.');message.className='lab-message';message.setAttribute('role','status');root.append(message);
     const trace=el('pre','');root.append(trace);
     let editId=null, fields={};
     const form=el('form');form.className='lab-fields';
@@ -44,6 +47,7 @@ window.PBOBrowserLab=(()=>{
     }
     const tableWrap=el('div');tableWrap.className='table-scroll';root.append(tableWrap);
     function render(){
+      saveDatabase();
       const table=el('table'),head=el('thead'),hr=el('tr');for(const h of ['ID','Kode','Nama','Stok','Kategori',...(chapter===10?['Aksi']:[])])hr.append(el('th',h));head.append(hr);table.append(head);
       const tbody=el('tbody');for(const row of all()){const tr=el('tr');for(const k of columns.split(','))tr.append(el('td',String(row[k])));
         if(chapter===10){const td=el('td');td.append(button('Edit',()=>{editId=row.id;for(const k of Object.keys(fields))fields[k].value=row[k];form.querySelector('[type=submit]').textContent='Simpan perubahan';fields.kodeBarang.focus();}),button('Hapus',()=>{if(confirm('Hapus '+row.namaBarang+'?')){remove(row.id);if(editId===row.id){editId=null;form.reset();form.querySelector('[type=submit]').textContent='Tambah barang';}trace.textContent='DELETE FROM Barang WHERE id = '+row.id+';';message.textContent='Barang dihapus.';render();}}));tr.append(td);}tbody.append(tr);}
@@ -52,6 +56,7 @@ window.PBOBrowserLab=(()=>{
     if(chapter===8){trace.textContent='GET /Barang → Controller memilih Model → View menampilkan tabel (alur pembelajaran).';root.append(button('Muat ulang daftar',()=>{render();message.textContent='View diperbarui dari model.';}));}
     else trace.textContent='SELECT '+columns+' FROM Barang ORDER BY id;';
     if(chapter===11)root.append(el('p','Gunakan panel REST API di bawah untuk GET, POST, PUT, dan DELETE.'));
+    if(chapter!==8)root.append(button('Reset database',()=>{if(confirm('Hapus seluruh data bab ini?')){db.run('DELETE FROM Barang');render();message.textContent='Database direset.';}}));
     root.append(button('Unduh database SQLite',()=>{const url=URL.createObjectURL(new Blob([db.export()],{type:'application/x-sqlite3'}));const a=el('a');a.href=url;a.download='bab-'+chapter+'.db';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}));
     render();
     function request({method,path,body}){
