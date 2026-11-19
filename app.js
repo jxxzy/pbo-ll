@@ -108,6 +108,11 @@ function createLessonCard(lesson) {
   const title = document.createElement('h3');
   title.className = 'module-title';
   title.textContent = lesson.title;
+  [marker, kicker, title].forEach((item, index) => {
+    item.classList.add('motion-item');
+    item.dataset.motion = String(51 + (((lesson.chapter - 1) * 3 + index) % 30));
+    item.style.setProperty('--motion-delay', `${((lesson.chapter - 1) % 4) * 55 + (index + 1) * 45}ms`);
+  });
   const summary = document.createElement('p');
   summary.className = 'module-summary';
   summary.textContent = lesson.summary;

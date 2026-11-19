@@ -6,7 +6,7 @@ Situs pembelajaran statis berbahasa Indonesia untuk materi C#, OOP, ASP.NET Core
 
 - Dashboard responsif dengan jalur belajar dan navigasi bab.
 - Navbar responsif dengan shortcut, penanda section aktif, dan indikator progres scroll.
-- 50 animasi masuk bertahap yang menghormati preferensi reduced motion perangkat.
+- 80 animasi masuk bertahap yang menghormati preferensi reduced motion perangkat.
 - Pencarian materi (`/`), filter progres, mode terang/gelap, dan mode fokus.
 - Halaman belajar untuk seluruh Bab 1–11: tujuan, ringkasan materi, contoh kode, langkah praktikum, serta contoh penyelesaian.
 - File project praktikum C# dan ASP.NET Core yang dapat diunduh terpisah pada setiap halaman bab (`praktikum/bab-01/` sampai `praktikum/bab-11/`).
