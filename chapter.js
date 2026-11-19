@@ -246,3 +246,45 @@ async function initRecall(){
   }catch(e){root.textContent='Gagal memuat latihan: '+e.message;}
 }
 void initRecall();
+
+async function initScoredTests(){
+  const root=document.querySelector('#scored-tests');if(!root)return;
+  const make=(tag,text)=>{const el=document.createElement(tag);if(text!==undefined)el.textContent=text;return el;};
+  try{
+    const response=await fetch('../content/chapters/assessment-bank.json');
+    if(!response.ok){root.textContent='Bank pilihan ganda PDF belum tersedia pada build ini; gunakan latihan recall.';return;}
+    const bank=await response.json();
+    for(const [phase,label] of [['pretest','Pre-test pilihan ganda'],['posttest','Post-test pilihan ganda']]){
+      const questions=bank[String(chapterNumber)]?.[phase]||[];
+      if(!questions.length)continue;
+      const section=make('section');section.className='recall-box';
+      const form=make('form'),title=make('h3',label+' • '+questions.length+' soal');
+      const feedback=make('p','');feedback.setAttribute('role','status');
+      const group=[];
+      const resultKey='pbo-mcq-v1:'+chapterNumber+':'+phase;
+      let saved=null;try{saved=JSON.parse(localStorage.getItem(resultKey)||'null');}catch{}
+      if(saved&&Number.isInteger(saved.score)&&saved.total===questions.length)feedback.textContent='Nilai sebelumnya: '+saved.score+'/'+saved.total+' (latihan lokal).';
+      questions.forEach((q,i)=>{
+        const fieldset=make('fieldset');const legend=make('legend',(i+1)+'. '+q.question);fieldset.append(legend);
+        const order=q.options.map((_,j)=>j);
+        for(let k=order.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[order[k],order[j]]=[order[j],order[k]];}
+        for(const index of order){const option=make('label');option.className='scored-option';const radio=make('input');radio.type='radio';radio.name=phase+'-'+i;radio.value=String(index);radio.required=true;option.append(radio,make('span',q.options[index]));fieldset.append(option);}
+        const explanation=make('p');explanation.hidden=true;explanation.className='scored-explanation';fieldset.append(explanation);form.append(fieldset);group.push({fieldset,explanation,q});
+      });
+      const submit=make('button','Periksa semua jawaban');submit.type='submit';submit.className='button button-primary';
+      const reset=make('button','Ulangi');reset.type='button';reset.className='button button-outline';
+      reset.onclick=()=>{form.reset();group.forEach(({explanation})=>{explanation.hidden=true;});feedback.textContent='Jawab semua soal terlebih dahulu.';};
+      form.onsubmit=e=>{
+        e.preventDefault();let score=0;
+        for(const {fieldset,explanation,q} of group){
+          const choice=fieldset.querySelector('input:checked');const correct=choice&&Number(choice.value)===q.answer;if(correct)score++;
+          explanation.hidden=false;explanation.textContent=(correct?'Benar. ':'Belum tepat. ')+'Kunci modul: '+q.options[q.answer]+(q.note?' '+q.note:'');
+        }
+        feedback.textContent='Skor: '+score+'/'+questions.length+' ('+Math.round(score/questions.length*100)+'%). Simulasi latihan, bukan nilai resmi.';
+        try{localStorage.setItem(resultKey,JSON.stringify({score,total:questions.length,at:new Date().toISOString()}));}catch{}
+      };
+      form.append(submit,reset);section.append(title,form,feedback);root.append(section);
+    }
+  }catch(e){root.textContent='Bank soal tidak dapat dimuat: '+e.message;}
+}
+void initScoredTests();

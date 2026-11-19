@@ -18,14 +18,15 @@ try{
     await page.goto(host+'/bab-'+chapter+'/',{waitUntil:'domcontentloaded'});
     await page.locator('a[href*="playground/?bab="]').first().waitFor();
   }
-  await page.goto(host+'/playground/?bab=1');
+  await page.goto(host+'/playground/?bab=1&debug=1');
   await page.locator('#run:enabled').waitFor({timeout:30000});
   await page.locator('#monaco-editor .monaco-editor').waitFor({timeout:30000});
   for(let chapter=1;chapter<=7;chapter++){
     await page.selectOption('#chapter',String(chapter));
     await page.locator('#run:enabled').waitFor({timeout:30000});
     await page.click('#run');
-    await page.locator('#run:enabled').waitFor({timeout:240000});
+    // Fail promptly and print the actual accumulated boot-stage diagnostics.
+    try{await page.locator('#run:enabled').waitFor({timeout:90000});}catch(e){console.error('Compiler startup trace:',await page.locator('#output').textContent());throw e;}
     const state=await page.locator('#state').textContent(), output=await page.locator('#output').textContent();
     assert.match(state,/Eksekusi selesai/,'Bab '+chapter+': '+output);
     assert.ok(output.includes(expected[chapter-1]),'Bab '+chapter+': '+output);

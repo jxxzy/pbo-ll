@@ -134,11 +134,12 @@ function runBrowser(){
   $('output').textContent='Unduhan runtime pertama mungkin membutuhkan waktu.';
   try{
     const workerUrl=new URL('./browser-runner.js',location.href);
-    browserWorker=new Worker(workerUrl,{type:'module'});
+    browserWorker=new Worker(workerUrl);
     const worker=browserWorker;
-    browserTimer=setTimeout(()=>endBrowser('Timeout','Compiler tidak siap dalam 180 detik.'),180000);
+    browserTimer=setTimeout(()=>endBrowser('Timeout','Compiler tidak siap dalam 180 detik.\n'+$('output').textContent),180000);
     worker.onmessage=({data})=>{
       if(browserWorker!==worker)return;
+      if(data.type==='progress'){$('output').textContent+= '\n'+data.message;return;}
       if(data.type==='ready'){
         clearTimeout(browserTimer);browserTimer=setTimeout(()=>endBrowser('Timeout','Eksekusi dihentikan setelah 30 detik.'),30000);
         $('state').textContent='Compile / run (WASM)…';return;
@@ -153,7 +154,7 @@ function runBrowser(){
       }else if(data.type==='error')endBrowser('Eksekusi gagal',data.message);
     };
     worker.onerror=e=>endBrowser('Compiler gagal dimuat',e.message||('Worker gagal: '+(e.filename||workerUrl.href)+':'+(e.lineno||0)));
-    worker.postMessage({code:sources['Program.cs']});controls();
+    worker.postMessage({code:sources['Program.cs'],debug:new URLSearchParams(location.search).has('debug')});controls();
   }catch(e){endBrowser('Compiler tidak tersedia',e.message);}
 }
 $('run').onclick=async()=>{

@@ -630,3 +630,5 @@ html.motion-ready .motion-item.is-visible { animation-duration: .68s; animation-
 }
 
 .recall-box{border:1px solid currentColor;border-color:var(--border,#506073);border-radius:12px;padding:16px;margin:14px 0}.recall-box textarea{width:100%;font:inherit;padding:10px;border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;resize:vertical}.recall-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.recall-actions button:disabled{opacity:.5;cursor:not-allowed}
+
+#scored-tests fieldset{min-width:0;margin:12px 0;border:1px solid var(--border,#536274);border-radius:9px;padding:12px}#scored-tests legend{font-weight:650;padding:0 4px;overflow-wrap:anywhere}.scored-option{display:flex;align-items:start;gap:10px;padding:8px;cursor:pointer}.scored-option input{margin-top:5px;flex:0 0 auto;accent-color:#15967e}.scored-explanation{padding:8px;border-left:3px solid #15967e}#scored-tests button{margin:5px 8px 5px 0}
