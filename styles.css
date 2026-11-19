@@ -628,3 +628,5 @@ html.motion-ready .motion-item.is-visible { animation-duration: .68s; animation-
   html.motion-ready .motion-item:not(.is-visible) { opacity: 1; }
   html.motion-ready .motion-item.is-visible { animation: none !important; }
 }
+
+.recall-box{border:1px solid currentColor;border-color:var(--border,#506073);border-radius:12px;padding:16px;margin:14px 0}.recall-box textarea{width:100%;font:inherit;padding:10px;border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;resize:vertical}.recall-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.recall-actions button:disabled{opacity:.5;cursor:not-allowed}

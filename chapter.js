@@ -211,3 +211,38 @@ function updatePracticeEvidence(){
   try{const record=JSON.parse(localStorage.getItem('pbo-practice-v2:'+chapterNumber)||'null');if(record)target.textContent=record.mode+' · '+new Date(record.at).toLocaleString('id-ID');}catch{}
 }
 updatePracticeEvidence();window.addEventListener('storage',updatePracticeEvidence);window.addEventListener('focus',updatePracticeEvidence);
+
+async function initRecall(){
+  const root=document.querySelector('#recall-tests');if(!root)return;
+  const make=(tag,value)=>{const e=document.createElement(tag);if(value!==undefined)e.textContent=value;return e;};
+  try{
+    const response=await fetch('../content/chapters/chapter-'+chapterNumber+'.json');if(!response.ok)throw Error('Soal belum tersedia');
+    const data=await response.json();
+    for(const [key,label] of [['pretest','Pre-test'],['posttest','Post-test']]){
+      const items=[...(data.assessments[key].multipleChoice||[]),...(data.assessments[key].essay||[])];
+      if(!items.length)continue;
+      const section=make('section');section.className='recall-box';
+      const heading=make('h3',label),status=make('p',''),question=make('p',''),answer=make('textarea'),solution=make('p','');
+      answer.rows=3;answer.setAttribute('aria-label','Jawaban '+label);answer.placeholder='Tulis jawabanmu sebelum melihat kunci';
+      solution.hidden=true;
+      const actions=make('div');actions.className='recall-actions';
+      const reveal=make('button','Lihat kunci'),correct=make('button','Jawaban saya tepat'),retry=make('button','Perlu belajar lagi'),reset=make('button','Ulangi latihan');
+      for(const b of [reveal,correct,retry,reset]){b.type='button';b.className='button button-outline';actions.append(b);}
+      let index=0,score=0,history=[];
+      const store='pbo-recall:'+chapterNumber+':'+key;
+      try{const saved=JSON.parse(localStorage.getItem(store)||'null');if(saved&&Number.isInteger(saved.index)&&saved.index>=0&&saved.index<=items.length&&Number.isInteger(saved.score)&&saved.score>=0&&saved.score<=saved.index){index=saved.index;score=saved.score;history=Array.isArray(saved.history)?saved.history:[];}}catch{}
+      function save(){try{localStorage.setItem(store,JSON.stringify({index,score,history}));}catch{}}
+      function render(){
+        status.textContent=index+' / '+items.length+' soal dijawab · '+score+' dinilai tepat';
+        const done=index>=items.length;question.textContent=done?'Sesi selesai. Ulangi jika ingin berlatih lagi.':items[index].question;
+        answer.value='';answer.hidden=done;solution.hidden=true;solution.textContent='';
+        reveal.disabled=done;correct.disabled=true;retry.disabled=true;
+      }
+      reveal.onclick=()=>{if(index>=items.length)return;if(!answer.value.trim()){status.textContent='Tulis jawabanmu sebelum melihat kunci.';return;}solution.textContent='Kunci: '+items[index].answer+(items[index].explanation?' — '+items[index].explanation:'');solution.hidden=false;correct.disabled=false;retry.disabled=false;reveal.disabled=true;};
+      function next(ok){if(index>=items.length||solution.hidden)return;history.push({question:items[index].question,answer:answer.value,correct:ok});if(ok)score++;index++;save();render();}
+      correct.onclick=()=>next(true);retry.onclick=()=>next(false);reset.onclick=()=>{if(confirm('Ulangi '+label+'?')){index=0;score=0;history=[];save();render();}};
+      section.append(heading,status,question,answer,solution,actions);root.append(section);render();
+    }
+  }catch(e){root.textContent='Gagal memuat latihan: '+e.message;}
+}
+void initRecall();

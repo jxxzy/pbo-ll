@@ -89,15 +89,15 @@ docker build -f runner/Dockerfile -t pbo2-lab:net10 .
 npm run playground
 ```
 
-Buka http://127.0.0.1:8787/playground/ (gunakan alamat ini, bukan localhost). Image menyiapkan cache paket .NET 10/EF Core. Pilih Bab 1–7, edit C#, masukkan stdin bila perlu dan Run; terminal menunjukkan output asli. Bab 8–10 membuka MVC melalui link preview; Bab 11 menyediakan pengujian GET/POST/PUT/DELETE. File SQLite terisolasi per container dan dihapus ketika dihentikan; unduh perubahan source sebelum menghapus storage browser. File csproj harus asli untuk eksekusi. Tidak ada compiler online publik.
+Buka http://127.0.0.1:8787/playground/ (gunakan alamat ini, bukan localhost). Image menyiapkan cache paket .NET 10/EF Core. Pilih Bab 1–7, edit C#, masukkan stdin bila perlu dan Run; terminal menunjukkan output asli. Bab 8–10 membuka MVC melalui link preview; Bab 11 menyediakan pengujian GET/POST/PUT/DELETE. File SQLite runner Docker terisolasi per container dan dihapus ketika dihentikan; database pada mode browser berbeda dan dapat diekspor. File csproj harus asli untuk eksekusi. Tidak ada compiler online publik.
 
 Runner hanya bind ke 127.0.0.1; jangan publish port 8787 atau meneruskan melalui tunnel. Docker membatasi CPU, RAM, proses, waktu dan akses file; console tidak memiliki jaringan, web menggunakan jaringan Docker biasa (dapat mengakses jaringan keluar). Ini alat latihan lokal untuk kode tepercaya, bukan sandbox multi-tenant atau layanan publik. Timeout console 60 detik, web 10 menit. Stop sebelum mengganti bab. Jika runner gagal, cek Docker Desktop dan build image ulang setelah update project.
 
-Compiler browser: [WasmSharp](https://github.com/JakeYallop/WasmSharp), Apache-2.0. Build statis biasa tanpa paket runtime tetap menyediakan editor; GitHub Actions mengemas versi runtime yang dipin.
+Compiler browser: [WasmSharp](https://github.com/JakeYallop/WasmSharp), Apache-2.0. Build statis tanpa assets tetap menyediakan editor fallback; jalankan npm run assets setelah npm run build untuk runtime dan Monaco.
 
 ### Semua bab melalui browser
 
-GitHub Pages: Bab 1–7 menggunakan compiler Roslyn/WASM; Bab 8–11 menyediakan latihan versi browser dengan SQLite WebAssembly (sql.js 1.13.0), alur MVC, Create/Read, CRUD, dan pengujian respons API. Data bersifat sementara, dapat diunduh sebagai file SQLite. **Mode Bab 8–11 tidak mengompilasi source C# atau menjalankan server HTTP sungguhan.** Perubahan source editor tidak memengaruhi lab browser.
+GitHub Pages: Bab 1–7 menggunakan compiler Roslyn/WASM; Bab 8–11 menyediakan latihan versi browser dengan SQLite WebAssembly (sql.js 1.13.0), alur MVC, Create/Read, CRUD, dan pengujian respons API. Data lab SQLite Bab 9–11 tersimpan di browser jika kuota mencukupi dan dapat diunduh untuk backup. **Mode Bab 8–11 tidak mengompilasi source C# atau menjalankan server HTTP sungguhan.** Perubahan source editor tidak memengaruhi lab browser.
 
 Untuk menjalankan project asli Bab 1–11 tanpa instalasi lokal, buka [GitHub Codespaces](https://github.com/codespaces/new?hide_repo_select=true&repo=1463545184&ref=main). Konfigurasi devcontainer menyiapkan .NET 10 dan Node.js 22. Dari terminal:
 
