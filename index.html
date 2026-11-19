@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id" data-theme="dark">
+<html lang="id" data-theme="light">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,10 +7,10 @@
     <meta name="description" content="Ruang belajar Pemrograman Berorientasi Objek II: materi C#, ASP.NET Core MVC, dan REST API dalam satu perjalanan belajar.">
     <title>Belajar PBO II — Pemrograman Berorientasi Objek</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="academy.css">
     <script src="content/chapters/chapters.js" defer></script>
     <script src="motion.js" defer></script>
-    <script src="app.js" defer></script>
+    <script src="app.js" defer></script><script src="academy.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#konten">Lewati ke materi</a>
@@ -38,29 +38,8 @@
         <nav class="sidebar-nav" aria-label="Navigasi utama materi">
           <a class="sidebar-link active" href="#beranda"><span aria-hidden="true">⌂</span> Beranda</a>
           <a class="sidebar-link" href="#peta-belajar"><span aria-hidden="true">⌘</span> Peta belajar</a>
-          <details class="chapter-group" open>
-            <summary><span class="summary-index">01</span><span><strong>Fondasi OOP</strong><small>Bab 1–5 · C#</small></span><span class="summary-arrow">⌄</span></summary>
-            <a href="#lesson-1"><span>01</span> Class &amp; Object</a>
-            <a href="#lesson-2"><span>02</span> Encapsulation</a>
-            <a href="#lesson-3"><span>03</span> Inheritance</a>
-            <a href="#lesson-4"><span>04</span> Abstract &amp; Interface</a>
-            <a href="#lesson-5"><span>05</span> Collection &amp; Generic</a>
-          </details>
-          <details class="chapter-group">
-            <summary><span class="summary-index">02</span><span><strong>C# Lanjutan</strong><small>Bab 6–7 · Desain dan kualitas kode</small></span><span class="summary-arrow">⌄</span></summary>
-            <a href="#lesson-6"><span>06</span> Exception Handling &amp; File I/O</a>
-            <a href="#lesson-7"><span>07</span> Design Pattern &amp; Refactoring</a>
-          </details>
-          <details class="chapter-group">
-            <summary><span class="summary-index">03</span><span><strong>Aplikasi web</strong><small>Bab 8–11 · ASP.NET</small></span><span class="summary-arrow">⌄</span></summary>
-            <a href="#lesson-8"><span>08</span> Struktur MVC</a>
-            <a href="#lesson-9"><span>09</span> Model &amp; EF Core</a>
-            <a href="#lesson-10"><span>10</span> CRUD &amp; validasi</a>
-            <a href="#lesson-11"><span>11</span> REST API</a>
-          </details>
-          <a class="sidebar-link" href="#materi"><span aria-hidden="true">▤</span> Semua materi</a>
-        </nav>
-
+          <div id="academy-chapters"></div><a class="sidebar-link" href="#materi"><span aria-hidden="true">▤</span> Semua materi</a>
+        <p class="sidebar-label">RUANG KERJA</p><a class="sidebar-link" href="./playground/"><span aria-hidden="true">⌨</span> C# Studio</a><a class="sidebar-link" href="./index.html#concept-lab"><span aria-hidden="true">◇</span> Concept Lab</a><a class="sidebar-link" href="./index.html#assessment-center"><span aria-hidden="true">✓</span> Assessment Center</a><a class="sidebar-link" href="./index.html#achievement-center"><span aria-hidden="true">☆</span> Achievement</a><a class="sidebar-link" href="./index.html#study-tools"><span aria-hidden="true">▤</span> Study Tools</a><a class="sidebar-link" href="./index.html#timer"><span aria-hidden="true">◷</span> Timer fokus</a><a class="sidebar-link" href="./index.html#tersimpan"><span aria-hidden="true">⌑</span> Tersimpan</a><a class="sidebar-link" href="./index.html#referensi"><span aria-hidden="true">↗</span> Referensi</a><a class="sidebar-link" href="./index.html#help-center"><span aria-hidden="true">?</span> Pusat bantuan</a></nav><div class="academy-reading"><span>Ukuran teks</span><div><button type="button" data-reading="-1" aria-label="Perkecil teks">A−</button><button type="button" data-reading="0" aria-label="Reset ukuran teks">A</button><button type="button" data-reading="1" aria-label="Perbesar teks">A+</button></div></div>
         <div class="sidebar-bottom">
           <span class="online-dot"></span>
           <p>Belajar mandiri,<br>selangkah demi selangkah.</p>
@@ -96,11 +75,11 @@
             <section class="hero" id="beranda" aria-labelledby="course-title">
               <div class="hero-copy motion-item" data-motion="03">
                 <p class="eyebrow"><span class="status-dot"></span> KELAS PRAKTIKUM · C# &amp; ASP.NET CORE</p>
-                <h1 id="course-title">Belajar berpikir.<br><span>Bangun aplikasimu.</span></h1>
+                <h1 id="course-title">Kuasai OOP.<br><span>Bangun aplikasi nyata.</span></h1>
                 <p class="hero-description">Pahami cara merancang program dengan OOP, susun aplikasi web dengan ASP.NET Core, lalu bawa datamu ke REST API.</p>
                 <div class="hero-actions">
                   <button class="button button-primary hero-continue" type="button" data-continue>Mulai dari Bab 1 <span aria-hidden="true">→</span></button>
-                  <a class="button button-outline" href="#peta-belajar">Lihat peta belajar</a>
+                  <a class="button button-outline" href="./playground/">▶ Buka C# Studio</a>
                 </div>
                 <div class="hero-meta"><span class="avatar-stack" aria-hidden="true"><i>C#</i><i>MVC</i><i>API</i></span><span>11 bab siap belajar</span><span class="meta-separator">•</span><span>Belajar sesuai ritme sendiri</span></div>
               </div>
@@ -175,9 +154,23 @@
 
             <section class="closing-note motion-item" id="praktikum" data-motion="17">
               <span class="closing-mark" aria-hidden="true">✳</span>
-              <div><p class="eyebrow">BELAJAR DENGAN PRAKTIK</p><h2>Satu konsep. Satu aplikasi.</h2><p>Buka editor praktikum Bab 1–11 di browser, jalankan kode dengan runner lokal, dan uji aplikasi MVC serta REST API.</p></div>
+              <div><p class="eyebrow">BELAJAR DENGAN PRAKTIK</p><h2>Satu konsep. Satu aplikasi.</h2><p>Jalankan C# Bab 1–7 langsung di browser, latihan SQLite Bab 8–11, atau gunakan Codespaces untuk project ASP.NET asli.</p></div>
               <a class="button button-primary" href="./playground/">▶ Interactive Coding Playground</a>
             </section>
+          <section class="academy-panel" id="concept-lab"><p class="eyebrow">INTERACTIVE CONCEPT LAB</p><h2>Visualisasikan konsep PBO</h2><p>Eksperimen JavaScript untuk memahami perilaku objek; bukan compiler C#. Jalankan source asli melalui C# Studio.</p><div class="academy-grid">
+          <article class="academy-card"><h3>Class &amp; Object</h3><label>Nama barang<input id="cx-name" value="Karton" maxlength="60"></label><label>Stok awal<input id="cx-stock" type="number" min="0" max="100000" value="12"></label><button id="cx-create" class="button button-primary">Buat objek</button><pre id="cx-object" role="status"></pre></article>
+          <article class="academy-card"><h3>Encapsulation</h3><p>Setter menolak stok negatif dan mempertahankan nilai sebelumnya.</p><label>Stok baru<input type="number" id="cx-new-stock" value="-3"></label><button class="button button-primary" id="cx-update">Uji setter</button><pre id="cx-enc" role="status"></pre></article>
+          <article class="academy-card"><h3>Polymorphism</h3><label>Jenis object<select id="cx-kind"><option value="umum">Barang</option><option value="elektronik">BarangElektronik</option><option value="makanan">BarangMakanan</option></select></label><button class="button button-primary" id="cx-poly">Panggil TampilkanInfo()</button><pre id="cx-poly-out" role="status"></pre></article>
+          <article class="academy-card"><h3>Collection &amp; Exception</h3><label>Kode barang<input id="cx-key" maxlength="24" value="BRG001"></label><button class="button button-primary" id="cx-add">Tambahkan ke Dictionary</button><button class="button button-quiet" id="cx-clear">Reset</button><pre id="cx-dict" role="status"></pre></article>
+          <article class="academy-card"><h3>UML · relasi class</h3><label>Contoh relasi<select id="cx-uml"><option value="inherit">Inheritance</option><option value="interface">Interface</option><option value="mvc">MVC</option></select></label><div id="cx-diagram" class="academy-diagram"></div><p id="cx-diagram-note"></p></article>
+          <article class="academy-card"><h3>REST API lifecycle</h3><label>HTTP method<select id="cx-method"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option></select></label><button id="cx-api" class="button button-primary">Telusuri request</button><pre id="cx-api-out"></pre><a href="./playground/?bab=11">Uji API di C# Studio ↗</a></article></div></section>
+          <section class="academy-panel" id="assessment-center"><p class="eyebrow">ASSESSMENT CENTER</p><h2>Evaluasi semua bab</h2><p>Skor dari bank soal PDF asli dan bukti aktivitas praktikum, tersimpan pada perangkat ini.</p><div class="academy-table"><table><thead><tr><th>Bab</th><th>Pre-test</th><th>Post-test</th><th>Praktikum</th><th>Latihan</th></tr></thead><tbody id="academy-scores"></tbody></table></div></section>
+          <section class="academy-panel" id="achievement-center"><p class="eyebrow">ACHIEVEMENT CENTER</p><h2>Pencapaian belajar</h2><div id="academy-achievements" class="academy-grid"></div></section>
+          <section class="academy-panel" id="study-tools"><p class="eyebrow">YOUR WORKSPACE · LOCAL FIRST</p><h2>Ruang belajar pribadi</h2><div class="academy-grid"><article class="academy-card"><h3>Target harian</h3><label>Menit per hari<input id="academy-goal" type="number" min="5" max="480" value="30"></label><button id="academy-goal-save" class="button button-primary">Simpan target</button><p id="academy-goal-status" role="status"></p><p id="academy-session-total"></p></article><article class="academy-card"><h3>Catatan belajar</h3><label for="academy-note-chapter">Pilih bab</label><select id="academy-note-chapter"></select><textarea id="academy-note" rows="5" maxlength="12000" aria-label="Catatan pribadi"></textarea><button id="academy-note-save" class="button button-primary">Simpan catatan</button><p id="academy-note-status" role="status"></p></article><article class="academy-card"><h3>Backup &amp; restore</h3><p>Ekspor progres, catatan, skor, dan bookmark. Tidak termasuk token, data pribadi di luar PBO, atau kode sesi runner.</p><button id="academy-backup" class="button button-primary">Unduh backup JSON</button><label>Impor backup<input id="academy-restore" type="file" accept=".json,application/json"></label><p id="academy-backup-status" role="status"></p></article></div></section>
+          <section class="academy-panel" id="timer"><p class="eyebrow">FOCUS TIMER</p><h2>Belajar dengan fokus</h2><div class="academy-timer"><div><label>Durasi (menit)<input id="academy-minutes" type="number" min="1" max="120" value="25"></label><div class="timer-display" id="academy-clock" role="timer">25:00</div><p id="academy-timer-status" role="status">Siap mulai</p></div><div><button id="academy-start" class="button button-primary">Mulai / lanjut</button><button id="academy-pause" class="button button-quiet">Jeda</button><button id="academy-reset" class="button button-quiet">Reset</button></div></div></section>
+          <section class="academy-panel" id="tersimpan"><p class="eyebrow">BOOKMARKS</p><h2>Materi tersimpan</h2><label>Simpan bab<select id="academy-bookmark-chapter"></select></label><button id="academy-bookmark-add" class="button button-primary">Simpan bab</button><div id="academy-bookmarks"></div></section>
+          <section class="academy-panel" id="referensi"><p class="eyebrow">DOCUMENTATION</p><h2>Referensi ringkas</h2><div class="academy-grid"><a class="academy-card academy-link" href="https://learn.microsoft.com/dotnet/csharp/" target="_blank" rel="noopener noreferrer"><strong>C#</strong><span>Dokumentasi resmi ↗</span></a><a class="academy-card academy-link" href="https://learn.microsoft.com/dotnet/csharp/fundamentals/object-oriented/" target="_blank" rel="noopener noreferrer"><strong>OOP</strong><span>Dokumentasi resmi ↗</span></a><a class="academy-card academy-link" href="https://learn.microsoft.com/aspnet/core/" target="_blank" rel="noopener noreferrer"><strong>ASP.NET Core</strong><span>Dokumentasi resmi ↗</span></a><a class="academy-card academy-link" href="https://learn.microsoft.com/ef/core/" target="_blank" rel="noopener noreferrer"><strong>Entity Framework Core</strong><span>Dokumentasi resmi ↗</span></a><a class="academy-card academy-link" href="https://learn.microsoft.com/aspnet/core/web-api/" target="_blank" rel="noopener noreferrer"><strong>REST API</strong><span>Dokumentasi resmi ↗</span></a><a class="academy-card academy-link" href="https://docs.github.com/codespaces" target="_blank" rel="noopener noreferrer"><strong>GitHub Codespaces</strong><span>Dokumentasi resmi ↗</span></a></div></section>
+          <section class="academy-panel" id="help-center"><p class="eyebrow">HELP CENTER</p><h2>Butuh bantuan?</h2><details><summary>Bagaimana menjalankan C# di browser?</summary><p>Buka C# Studio, pilih Bab 1–7, lalu Run. Runtime Roslyn/WebAssembly dikemas di situs.</p></details><details><summary>Bagaimana menjalankan ASP.NET asli?</summary><p>Gunakan GitHub Codespaces dan <code>bash scripts/run-cloud-lab.sh 11</code> (ganti nomor sesuai bab), lalu buka port private. Untuk IDE privat seluruh bab, gunakan launcher <code>bash scripts/start-private-ide.sh</code> setelah rebuild devcontainer.</p></details><details><summary>Apakah data tersinkron antar perangkat?</summary><p>Tidak. Gunakan backup dan restore Study Tools untuk memindahkan progres lokal.</p></details><details><summary>Pintasan keyboard</summary><p>/ mencari materi, Ctrl+Enter menjalankan kode melalui editor Monaco. Gunakan tombol tema di header.</p></details></section>
           </div>
           <footer class="footer motion-item" data-motion="18"><a class="brand footer-brand" href="#beranda"><span class="brand-mark" aria-hidden="true">&lt;/&gt;</span><span><strong>Belajar PBO II</strong><small>Pemrograman Berorientasi Objek</small></span></a><p>Belajar mandiri, selangkah demi selangkah.</p><a href="#beranda">Kembali ke atas ↑</a></footer>
         </main>

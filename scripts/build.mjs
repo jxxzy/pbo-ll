@@ -65,24 +65,11 @@ function renderAssessments(assessments = {}, isSupplementary = false) {
   return `<section class="assessment-section" id="pembahasan-soal"><p class="eyebrow">KUNCI DAN PEMBAHASAN</p><h2>${heading}</h2><p class="assessment-intro">${introduction}</p>${pretest}${posttest}</section>`;
 }
 
-function renderSidebar(lessons, currentChapter) {
-  const groups = [
-    { title: 'Fondasi OOP', subtitle: 'Bab 1–5 · C#', chapters: [1, 2, 3, 4, 5] },
-    { title: 'C# Lanjutan', subtitle: 'Bab 6–7 · Desain dan kualitas kode', chapters: [6, 7] },
-    { title: 'Aplikasi web', subtitle: 'Bab 8–11 · ASP.NET', chapters: [8, 9, 10, 11] },
-  ];
-
-  return `<a class="sidebar-link" href="../index.html#peta-belajar"><span aria-hidden="true">⌘</span> Peta belajar</a>${groups.map((group, groupIndex) => {
-    const links = group.chapters.map((chapterNumber) => {
-      const lesson = lessons.find((item) => item.chapter === chapterNumber);
-      if (lesson.unavailable) {
-        return `<a class="chapter-unavailable" href="../index.html#lesson-${chapterNumber}"><span>${String(chapterNumber).padStart(2, '0')}</span> Bab ${chapterNumber} · belum tersedia</a>`;
-      }
-      const active = lesson.chapter === currentChapter ? ' aria-current="page"' : '';
-      return `<a${active} href="../bab-${lesson.chapter}/"><span>${String(lesson.chapter).padStart(2, '0')}</span> ${escapeHtml(lesson.title)}</a>`;
-    }).join('');
-    return `<details class="chapter-group"${group.chapters.includes(currentChapter) ? ' open' : ''}><summary><span class="summary-index">${String(groupIndex + 1).padStart(2, '0')}</span><span><strong>${escapeHtml(group.title)}</strong><small>${escapeHtml(group.subtitle)}</small></span><span class="summary-arrow">⌄</span></summary>${links}</details>`;
-  }).join('')}<a class="sidebar-link" href="../index.html#materi"><span aria-hidden="true">▤</span> Semua materi</a>`;
+function renderSidebar(lessons,currentChapter) {
+  return '<a class="sidebar-link" href="../index.html#peta-belajar"><span aria-hidden="true">⌘</span> Peta belajar</a>'+lessons.map(lesson=>{
+    const n=lesson.chapter, active=n===currentChapter, prefix=active?'':'../bab-'+n+'/';
+    return '<details class="chapter-group academy-nav-chapter"'+(active?' open':'')+'><summary><span class="summary-index">'+String(n).padStart(2,'0')+'</span><span><strong>Bab '+n+'</strong><small>'+escapeHtml(lesson.title)+'</small></span><span class="summary-arrow">⌄</span></summary><a href="'+(active?'#konten':prefix)+'"'+(active?' aria-current="page"':'')+'>Ikhtisar bab</a><a href="'+prefix+'#praktikum">Praktikum</a><a href="'+prefix+'#latihan-mandiri">Evaluasi</a><a href="../playground/?bab='+n+'">C# Studio ↗</a></details>';
+  }).join('')+'<a class="sidebar-link" href="../index.html#materi"><span aria-hidden="true">▤</span> Semua materi</a>';
 }
 
 function renderPracticeSteps(steps) {
@@ -103,7 +90,7 @@ function replaceTemplate(template, values) {
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 
-for (const file of ['index.html', 'app.js', 'chapter.js', 'motion.js', 'styles.css', 'favicon.svg', '.nojekyll']) {
+for (const file of ['index.html', 'app.js', 'chapter.js', 'motion.js', 'styles.css', 'academy.css', 'academy.js', 'favicon.svg', '.nojekyll']) {
   await cp(path.join(root, file), path.join(output, file));
 }
 

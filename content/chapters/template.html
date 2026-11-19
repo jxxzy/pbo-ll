@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id" data-theme="dark">
+<html lang="id" data-theme="light">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,10 +7,10 @@
     <meta name="description" content="{{SUMMARY}}">
     <title>{{TITLE}} · Belajar PBO II</title>
     <link rel="icon" href="../favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../styles.css"><link rel="stylesheet" href="../academy.css">
     <script src="../content/chapters/chapters.js" defer></script>
     <script src="../motion.js" defer></script>
-    <script src="../chapter.js" defer></script>
+    <script src="../chapter.js" defer></script><script src="../academy.js" defer></script>
   </head>
   <body data-chapter="{{CHAPTER}}">
     <a class="skip-link" href="#konten">Lewati ke materi</a>
@@ -29,7 +29,7 @@
         <nav class="sidebar-nav" aria-label="Navigasi utama materi">
           <a class="sidebar-link" href="../index.html#beranda"><span aria-hidden="true">⌂</span> Beranda</a>
           {{SIDEBAR_NAV}}
-        </nav>
+        <p class="sidebar-label">RUANG KERJA</p><a class="sidebar-link" href="../playground/"><span aria-hidden="true">⌨</span> C# Studio</a><a class="sidebar-link" href="../index.html#concept-lab"><span aria-hidden="true">◇</span> Concept Lab</a><a class="sidebar-link" href="../index.html#assessment-center"><span aria-hidden="true">✓</span> Assessment Center</a><a class="sidebar-link" href="../index.html#achievement-center"><span aria-hidden="true">☆</span> Achievement</a><a class="sidebar-link" href="../index.html#study-tools"><span aria-hidden="true">▤</span> Study Tools</a><a class="sidebar-link" href="../index.html#timer"><span aria-hidden="true">◷</span> Timer fokus</a><a class="sidebar-link" href="../index.html#tersimpan"><span aria-hidden="true">⌑</span> Tersimpan</a><a class="sidebar-link" href="../index.html#referensi"><span aria-hidden="true">↗</span> Referensi</a><a class="sidebar-link" href="../index.html#help-center"><span aria-hidden="true">?</span> Pusat bantuan</a></nav><div class="academy-reading"><span>Ukuran teks</span><div><button type="button" data-reading="-1" aria-label="Perkecil teks">A−</button><button type="button" data-reading="0" aria-label="Reset ukuran teks">A</button><button type="button" data-reading="1" aria-label="Perbesar teks">A+</button></div></div>
         <div class="sidebar-bottom">
           <span class="online-dot"></span>
           <p>Belajar mandiri,<br>selangkah demi selangkah.</p>
@@ -69,7 +69,7 @@
                 <span>Praktikum · ±{{DURATION_HOURS}} jam</span>
                 <span class="meta-separator">•</span>
                 <span>Studi kasus sistem gudang</span>
-                {{PDF_HERO_LINK}}
+                {{PDF_HERO_LINK}}<button type="button" id="academy-bookmark-this" class="button button-quiet">☆ Simpan bab</button>
               </div>
             </section>
 
@@ -127,7 +127,7 @@
                   <p class="eyebrow">DALAM BAB INI</p>
                   <nav aria-label="Daftar isi bab">{{TOC_ITEMS}}</nav>
                 </section>
-                <section class="lesson-index-card lesson-progress-card">
+                <section class="lesson-index-card"><p class="eyebrow">RUANG PRAKTIKUM</p><a class="button button-primary" href="../playground/?bab={{CHAPTER}}">▶ C# Studio</a><p><a href="../index.html#assessment-center">Assessment Center ↗</a></p></section><section class="lesson-index-card lesson-progress-card">
                   <p class="eyebrow">PROGRES BAB</p>
                   <strong id="chapter-status">Belum selesai</strong>
                   <p>Progres tersimpan otomatis di browser ini.</p>
