@@ -74,6 +74,12 @@ Seluruh PDF Bab 1–11 dapat dibuka dari halaman materi. Bab 6 membahas exceptio
 
 ## Interactive Coding Playground (Bab 1–11)
 
+### Windows: jalankan dengan satu klik
+
+Setelah menginstal Node.js 22+ dan Docker Desktop (Linux containers), buka Docker Desktop hingga engine siap. Klik dua kali `START-PLAYGROUND.bat` di root repository atau jalankan dari terminal. Launcher memeriksa versi Node.js, npm, dan Docker, membangun image .NET 10 menggunakan cache Docker bila tersedia, menginstal dependensi, lalu menjalankan server dan menampilkan alamat playground. Buka http://127.0.0.1:8787/playground/; pertahankan jendela terminal selama menggunakan playground. Tekan Ctrl+C untuk berhenti. Launcher tidak mengubah branch atau melakukan git pull otomatis.
+
+### Cara manual
+
 Buka [Playground GitHub Pages](https://jxxzy.github.io/pbo-ll/playground/) untuk membaca, mengedit, menyimpan draft lokal, menyalin dan mengunduh source asli. GitHub Pages **tidak** menjalankan .NET. Untuk eksekusi nyata gunakan runner lokal (Node.js 22+, Git, Docker Desktop atau Docker Engine dengan Linux containers):
 
 ```powershell
