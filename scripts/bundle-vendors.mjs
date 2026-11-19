@@ -23,6 +23,10 @@ try{
       for(const sub of selected){const target=name==='sqljs'?path.join(out,path.basename(sub)):path.join(out,sub);await mkdir(path.dirname(target),{recursive:true});await cp(path.join(source,sub),target,{recursive:true});}
       for(const file of await readdir(source))if(/^(license|licence|thirdparty|notice)/i.test(file)&&(await stat(path.join(source,file))).isFile())await cp(path.join(source,file),path.join(out,file));
     }
+    if(name==='wasmsharp'){
+      const files=await readdir(out);console.log('WasmSharp root module files:',files.filter(f=>/\.m?js$|\.json$/.test(f)).join(', '));
+      for(const file of ['initializeWasmSharpModule.js','dotnet.js']){if(!files.includes(file))throw Error('Missing runtime file: '+file);}
+    }
     console.log('Bundled '+spec);
   }
 }finally{await rm(temp,{recursive:true,force:true});}

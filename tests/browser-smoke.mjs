@@ -7,8 +7,12 @@ const server=spawn('python3',['-m','http.server','8765','--bind','127.0.0.1','--
 let browser;
 try{
   for(let i=0;i<50;i++){try{if((await fetch(host)).ok)break;}catch{}await new Promise(r=>setTimeout(r,200));}
-  browser=await chromium.launch({headless:true});
+  browser=await chromium.launch({headless:true,...(process.env.PBO_CHROME?{executablePath:process.env.PBO_CHROME}:{})});
   const page=await browser.newPage({viewport:{width:1440,height:900}});
+  page.on('console',m=>{if(m.type()==='error'||m.type()==='warning')console.log('BROWSER',m.type(),m.text());});
+  page.on('pageerror',e=>console.log('PAGE ERROR',e.message));
+  page.on('requestfailed',req=>console.log('REQUEST FAILED',req.url(),req.failure()?.errorText));
+  page.on('response',r=>{if(r.status()>=400)console.log('HTTP ERROR',r.status(),r.url());});
   const expected=['Karton','Validasi berhasil','Biskuit','Risiko:','Dictionary:','Kode barang sudah digunakan','Pemindai Barcode'];
   for(let chapter=1;chapter<=11;chapter++){
     await page.goto(host+'/bab-'+chapter+'/',{waitUntil:'domcontentloaded'});

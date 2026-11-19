@@ -44,7 +44,11 @@ jobs:
       - name: Install isolated browser test dependency
         run: |
           npm install --no-save --package-lock=false playwright@1.56.1
-          npx playwright install --with-deps chromium
+          if command -v google-chrome >/dev/null; then
+            echo "PBO_CHROME=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          else
+            npx playwright install chromium
+          fi
       - name: Runtime and responsive browser tests
         run: node tests/browser-smoke.mjs
       - name: Upload validated site artifact
