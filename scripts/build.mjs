@@ -102,7 +102,7 @@ function replaceTemplate(template, values) {
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 
-for (const file of ['index.html', 'app.js', 'chapter.js', 'styles.css', 'favicon.svg', '.nojekyll']) {
+for (const file of ['index.html', 'app.js', 'chapter.js', 'motion.js', 'styles.css', 'favicon.svg', '.nojekyll']) {
   await cp(path.join(root, file), path.join(output, file));
 }
 

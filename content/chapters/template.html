@@ -9,6 +9,7 @@
     <link rel="icon" href="../favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="../styles.css">
     <script src="../content/chapters/chapters.js" defer></script>
+    <script src="../motion.js" defer></script>
     <script src="../chapter.js" defer></script>
   </head>
   <body data-chapter="{{CHAPTER}}">
@@ -19,7 +20,7 @@
           <span class="brand-mark" aria-hidden="true">&lt;/&gt;</span>
           <span><strong>Belajar PBO II</strong><small>C# · ASP.NET Core</small></span>
         </a>
-        <div class="sidebar-progress">
+        <div class="sidebar-progress motion-item" data-motion="19">
           <div class="sidebar-progress-heading"><span>Progres materi</span><strong id="progress-label">0%</strong></div>
           <div class="progress-track" id="overall-progress-track" role="progressbar" aria-label="Progres materi selesai" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="overall-progress"></span></div>
           <p><span id="completed-count">0 dari 11 bab</span> selesai</p>
@@ -37,16 +38,24 @@
       </aside>
       <button class="sidebar-backdrop" id="sidebar-backdrop" type="button" aria-label="Tutup navigasi" hidden></button>
       <div class="app-main">
-        <header class="main-topbar">
+        <header class="main-topbar motion-item" data-motion="01">
           <div class="topbar-leading">
             <button class="icon-button mobile-menu" id="menu-toggle" type="button" aria-label="Buka navigasi" aria-controls="sidebar" aria-expanded="false">☰</button>
+            <a class="topbar-brand motion-item" data-motion="02" href="../index.html#beranda" aria-label="Belajar PBO II, beranda"><span aria-hidden="true">&lt;/&gt;</span><strong>Belajar PBO <i>II</i></strong></a>
             <a class="button button-quiet" href="../index.html#materi"><span aria-hidden="true">←</span> Semua materi</a>
             <div class="breadcrumb"><span>Kursus</span><span aria-hidden="true">/</span><strong>Bab {{CHAPTER}}</strong></div>
           </div>
+          <nav class="topbar-nav" aria-label="Navigasi cepat">
+            <a class="topbar-link" href="../index.html#beranda">Beranda</a>
+            <a class="topbar-link" href="../index.html#peta-belajar">Peta belajar</a>
+            <a class="topbar-link" href="../index.html#materi">11 bab</a>
+            <a class="topbar-link" href="#praktikum">Praktikum</a>
+          </nav>
           <div class="topbar-actions">
             <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Aktifkan mode terang" title="Ganti tampilan">☼</button>
             <button class="button button-quiet focus-toggle" id="focus-toggle" type="button" aria-pressed="false"><span aria-hidden="true">◎</span> Mode fokus</button>
           </div>
+          <span class="topbar-scroll-progress" id="topbar-scroll-progress" aria-hidden="true"></span>
         </header>
 
         <main id="konten">

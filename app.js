@@ -65,6 +65,7 @@ function renderLessons() {
   });
 
   moduleList.replaceChildren(...visible.map(createLessonCard));
+  window.registerMotionItems(moduleList);
   moduleCount.textContent = `${visible.length} dari ${lessons.length} bab`;
   emptyState.hidden = visible.length > 0;
   updateOverview();
@@ -75,6 +76,9 @@ function createLessonCard(lesson) {
   const card = document.createElement(lesson.unavailable ? 'article' : 'a');
   card.id = `lesson-${lesson.chapter}`;
   card.className = `module-card${isComplete ? ' is-complete' : ''}${lesson.unavailable ? ' is-unavailable' : ''}`;
+  card.classList.add('motion-item');
+  card.dataset.motion = String(19 + lesson.chapter).padStart(2, '0');
+  card.style.setProperty('--motion-delay', `${((lesson.chapter - 1) % 4) * 55}ms`);
   if (!lesson.unavailable) {
     card.href = `bab-${lesson.chapter}/`;
     card.setAttribute('aria-label', `Buka detail Bab ${lesson.chapter}: ${lesson.title}`);

@@ -99,16 +99,31 @@ a { color: inherit; text-decoration: none; }
 .sidebar-backdrop { display: none; }
 
 .app-main { min-height: 100vh; margin-left: 264px; }
-.main-topbar { position: sticky; z-index: 15; top: 0; height: 66px; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(22px, 4vw, 52px); border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--page) 91%, transparent); backdrop-filter: blur(16px); }
+.main-topbar { position: sticky; z-index: 15; top: 0; height: 68px; display: flex; align-items: center; justify-content: space-between; gap: clamp(12px, 2vw, 28px); padding: 0 clamp(22px, 4vw, 52px); border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--page) 88%, transparent); backdrop-filter: blur(18px); transition: background .2s ease, box-shadow .2s ease; }
+.main-topbar.is-scrolled { background: color-mix(in srgb, var(--surface) 92%, transparent); box-shadow: 0 12px 32px rgba(0, 0, 0, .14); }
 .topbar-leading, .topbar-actions { display: flex; align-items: center; gap: 12px; }
+.topbar-brand { display: flex; align-items: center; gap: 9px; white-space: nowrap; }
+.topbar-brand > span { display: grid; width: 31px; height: 31px; place-items: center; border: 1px solid rgba(164,170,255,.28); border-radius: 10px; background: var(--accent-soft); color: var(--accent); font: 700 10px 'DM Mono', monospace; transition: transform .24s ease, background .24s ease; }
+.topbar-brand strong { font: 750 11px 'Manrope', sans-serif; letter-spacing: -.3px; }
+.topbar-brand i { color: var(--accent); font-style: normal; }
+.topbar-brand:hover > span { transform: rotate(-8deg) scale(1.06); background: var(--surface-soft); }
+.topbar-nav { display: flex; align-items: center; align-self: stretch; gap: 4px; }
+.topbar-link { position: relative; display: inline-flex; align-items: center; padding: 0 12px; color: var(--muted); font-size: 10px; font-weight: 600; transition: color .18s ease, transform .18s ease; }
+.topbar-link::after { position: absolute; right: 12px; bottom: 0; left: 12px; height: 2px; border-radius: 3px 3px 0 0; background: var(--accent); content: ''; transform: scaleX(0); transform-origin: left; transition: transform .2s ease; }
+.topbar-link:hover { color: var(--text); transform: translateY(-1px); }
+.topbar-link.active { color: var(--accent); }
+.topbar-link.active::after { transform: scaleX(1); }
+.topbar-scroll-progress { position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: linear-gradient(90deg, var(--accent-strong), var(--violet), var(--green)); transform: scaleX(0); transform-origin: left; }
 .breadcrumb { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 10px; }
 .breadcrumb strong { color: var(--text-soft); font-weight: 500; }
 .topbar-actions { gap: 8px; }
 .icon-button { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text-soft); cursor: pointer; }
-.icon-button:hover { border-color: var(--line-strong); color: var(--accent); }
+.icon-button { transition: transform .18s ease, border-color .18s ease, color .18s ease, background .18s ease; }
+.icon-button:hover { transform: translateY(-2px) rotate(-4deg); border-color: var(--line-strong); background: var(--accent-soft); color: var(--accent); }
 .mobile-menu { display: none; }
 .button { min-height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 12px; border: 1px solid transparent; border-radius: 7px; cursor: pointer; font-size: 9px; font-weight: 700; transition: transform .16s ease, background .16s ease, border-color .16s ease; }
 .button:hover { transform: translateY(-1px); }
+.top-continue:hover > span { display: inline-block; animation: nav-arrow-hop .38s ease; }
 .button-primary { background: var(--accent); color: #17192a; }
 .button-primary:hover { background: #bac0ff; }
 .button-quiet { border-color: var(--line); background: var(--surface); color: var(--text-soft); }
@@ -215,6 +230,7 @@ h1 span { color: var(--accent); }
 .module-summary { margin: 0; overflow: hidden; color: var(--muted); font-size: 8px; line-height: 1.45; text-overflow: ellipsis; white-space: nowrap; }
 .module-action { display: grid; justify-items: end; gap: 5px; color: var(--muted); font-size: 7px; text-align: right; }
 .module-open { color: var(--accent); font-size: 12px; }
+.module-card:hover .module-open { animation: nav-arrow-hop .38s ease; }
 .is-unavailable .module-title, .is-unavailable .module-summary, .is-unavailable .module-action { color: var(--muted); }
 .is-unavailable .module-tag { background: rgba(143,147,165,.12); color: var(--muted); }
 .empty-state { padding: 30px 16px; border: 1px dashed var(--line-strong); border-radius: 8px; color: var(--muted); text-align: center; font-size: 10px; }
@@ -255,6 +271,7 @@ h1 span { color: var(--accent); }
 .toast.show { opacity: 1; transform: translateY(0); }
 .focus-mode .sidebar, .focus-mode .hero, .focus-mode .path-section, .focus-mode .overview-grid, .focus-mode .closing-note, .focus-mode .footer { display: none; }
 .focus-mode .main-topbar .breadcrumb, .focus-mode .main-topbar .theme-toggle, .focus-mode .main-topbar .top-continue { display: none; }
+.focus-mode .main-topbar .topbar-nav { display: none; }
 .focus-mode .app-main { margin-left: 0; }
 .focus-mode .dashboard-shell { width: min(960px, calc(100% - 48px)); margin-top: 40px; }
 
@@ -345,6 +362,11 @@ h1 span { color: var(--accent); }
 @media (max-width: 1100px) {
   .sidebar { width: 238px; }
   .app-main { margin-left: 238px; }
+  .main-topbar { gap: 10px; padding-inline: 16px; }
+  .topbar-leading { gap: 8px; }
+  .topbar-link { padding-inline: 8px; font-size: 9px; }
+  .topbar-link::after { right: 8px; left: 8px; }
+  .breadcrumb { display: none; }
   .dashboard-shell, .footer { width: calc(100% - 48px); }
   .lesson-layout { grid-template-columns: minmax(0, 1fr) 190px; gap: 16px; }
   .hero { grid-template-columns: 1fr .85fr; padding-inline: 30px; }
@@ -357,7 +379,12 @@ h1 span { color: var(--accent); }
   .sidebar-backdrop:not([hidden]) { position: fixed; z-index: 35; inset: 0; display: block; border: 0; background: rgba(4, 6, 15, .64); }
   .app-main { margin-left: 0; }
   .mobile-menu { display: grid; }
-  .main-topbar { height: 58px; padding-inline: 16px; }
+  .main-topbar { height: 62px; padding-inline: 16px; }
+  .topbar-nav { display: none; }
+  .topbar-brand { display: flex; }
+  .topbar-brand strong { font-size: 10px; }
+  .main-topbar .topbar-leading > .button { display: none; }
+  .main-topbar .breadcrumb { display: flex; }
   .focus-toggle { display: none; }
   .dashboard-shell, .footer { width: calc(100% - 32px); }
   .dashboard-shell { margin-top: 16px; }
@@ -381,7 +408,11 @@ h1 span { color: var(--accent); }
 @media (max-width: 520px) {
   .main-topbar { padding-inline: 12px; }
   .topbar-leading, .topbar-actions { gap: 7px; }
-  .breadcrumb { gap: 6px; font-size: 9px; }
+  .topbar-brand { gap: 6px; }
+  .topbar-brand > span { width: 29px; height: 29px; }
+  .topbar-brand strong { font-size: 9px; }
+  .breadcrumb { gap: 6px; font-size: 8px; }
+  body:not([data-chapter]) .main-topbar .breadcrumb { display: none; }
   .icon-button { width: 33px; height: 33px; }
   .top-continue { min-height: 33px; padding-inline: 9px; font-size: 8px; }
   .focus-mode .focus-toggle { display: inline-flex; }
@@ -427,6 +458,73 @@ h1 span { color: var(--accent); }
   .footer > p { display: none; }
   .footer > a:last-child { margin-left: auto; }
 }
+@keyframes motion-01 { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes motion-02 { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes motion-03 { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-04 { from { opacity: 0; transform: translateX(18px) scale(.97); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes motion-05 { from { opacity: 0; transform: translateY(-12px) rotate(-4deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
+@keyframes motion-06 { from { opacity: 0; transform: translateY(12px) rotate(4deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
+@keyframes motion-07 { from { opacity: 0; transform: translateX(-12px) skewX(-2deg); } to { opacity: 1; transform: translateX(0) skewX(0); } }
+@keyframes motion-08 { from { opacity: 0; transform: translateY(12px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-09 { from { opacity: 0; transform: translateY(16px); } 72% { transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes motion-10 { from { opacity: 0; transform: translateX(14px) scale(.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes motion-11 { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-12 { from { opacity: 0; transform: translateY(10px) rotate(-1deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
+@keyframes motion-13 { from { opacity: 0; transform: translateY(10px) rotate(1deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
+@keyframes motion-14 { from { opacity: 0; transform: translateX(-14px); } 70% { transform: translateX(2px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes motion-15 { from { opacity: 0; transform: translateY(-10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-16 { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes motion-17 { from { opacity: 0; transform: translateY(12px) scale(.99); } 75% { transform: translateY(-1px) scale(1); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-18 { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes motion-19 { from { opacity: 0; transform: translateY(10px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-20 { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-21 { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes motion-22 { from { opacity: 0; transform: translateY(12px) rotate(-.5deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
+@keyframes motion-23 { from { opacity: 0; transform: translateY(14px); } 68% { transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes motion-24 { from { opacity: 0; transform: translateX(12px) scale(.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes motion-25 { from { opacity: 0; transform: translateY(-10px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-26 { from { opacity: 0; transform: translateX(-10px) scale(.99); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes motion-27 { from { opacity: 0; transform: translateY(11px) rotate(.5deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
+@keyframes motion-28 { from { opacity: 0; transform: translateY(13px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-29 { from { opacity: 0; transform: translateX(10px); } 70% { transform: translateX(-1px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes motion-30 { from { opacity: 0; transform: translateY(9px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes nav-arrow-hop { 50% { transform: translate(2px, -2px); } }
+
+.motion-item:not(.is-visible) { opacity: 0; }
+.motion-item.is-visible { animation-duration: .68s; animation-timing-function: cubic-bezier(.2, .75, .25, 1); animation-delay: var(--motion-delay, 0ms); animation-fill-mode: both; }
+.motion-item[data-motion="01"].is-visible { animation-name: motion-01; }
+.motion-item[data-motion="02"].is-visible { animation-name: motion-02; }
+.motion-item[data-motion="03"].is-visible { animation-name: motion-03; }
+.motion-item[data-motion="04"].is-visible { animation-name: motion-04; }
+.motion-item[data-motion="05"].is-visible { animation-name: motion-05; }
+.motion-item[data-motion="06"].is-visible { animation-name: motion-06; }
+.motion-item[data-motion="07"].is-visible { animation-name: motion-07; }
+.motion-item[data-motion="08"].is-visible { animation-name: motion-08; }
+.motion-item[data-motion="09"].is-visible { animation-name: motion-09; }
+.motion-item[data-motion="10"].is-visible { animation-name: motion-10; }
+.motion-item[data-motion="11"].is-visible { animation-name: motion-11; }
+.motion-item[data-motion="12"].is-visible { animation-name: motion-12; }
+.motion-item[data-motion="13"].is-visible { animation-name: motion-13; }
+.motion-item[data-motion="14"].is-visible { animation-name: motion-14; }
+.motion-item[data-motion="15"].is-visible { animation-name: motion-15; }
+.motion-item[data-motion="16"].is-visible { animation-name: motion-16; }
+.motion-item[data-motion="17"].is-visible { animation-name: motion-17; }
+.motion-item[data-motion="18"].is-visible { animation-name: motion-18; }
+.motion-item[data-motion="19"].is-visible { animation-name: motion-19; }
+.motion-item[data-motion="20"].is-visible { animation-name: motion-20; }
+.motion-item[data-motion="21"].is-visible { animation-name: motion-21; }
+.motion-item[data-motion="22"].is-visible { animation-name: motion-22; }
+.motion-item[data-motion="23"].is-visible { animation-name: motion-23; }
+.motion-item[data-motion="24"].is-visible { animation-name: motion-24; }
+.motion-item[data-motion="25"].is-visible { animation-name: motion-25; }
+.motion-item[data-motion="26"].is-visible { animation-name: motion-26; }
+.motion-item[data-motion="27"].is-visible { animation-name: motion-27; }
+.motion-item[data-motion="28"].is-visible { animation-name: motion-28; }
+.motion-item[data-motion="29"].is-visible { animation-name: motion-29; }
+.motion-item[data-motion="30"].is-visible { animation-name: motion-30; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+  .motion-item:not(.is-visible) { opacity: 1; }
+  .motion-item.is-visible { animation: none !important; }
 }
