@@ -1,6 +1,8 @@
 'use strict';
 const $ = id => document.getElementById(id);
 let labs=[], current=null, sources={}, originals={}, activeFile='', connected=false, busy=false, loading=false, job=null, generation=0;
+let browserAvailable=false, browserWorker=null, browserTimer=null;
+const canBrowser=()=>browserAvailable&&current?.chapter<=7;
 const key = chapter => 'pbo2-playground-v1:'+chapter;
 const local = location.origin === 'http://127.0.0.1:8787';
 const endpoint = path => '/lab-api/'+path;
@@ -11,8 +13,10 @@ async function request(path, data) {
   return result;
 }
 function controls(){
-  $('run').disabled=!connected||busy||loading||!current;
-  $('stop').disabled=!connected||!busy;
+  $('run').disabled=(!connected&&!canBrowser())||busy||loading||!current;
+  $('stdin-label').hidden=!current||current.chapter>7||(!connected&&canBrowser());
+  $('run').title=connected?'Jalankan dengan Docker lokal':canBrowser()?'Jalankan C# melalui WebAssembly':'Bab ini memerlukan runner lokal';
+  $('stop').disabled=(!connected&&!browserWorker)||!busy;
   $('chapter').disabled=busy||loading||!labs.length;
   for(const id of ['reset','copy','download','editor']) $(id).disabled=loading||!activeFile;
   $('send').disabled=!(current?.chapter===11&&job?.ready&&job?.running);
@@ -40,7 +44,8 @@ async function load(chapter){
     for(const file of next.files){const b=document.createElement('button');b.type='button';b.textContent=file;b.dataset.file=file;b.onclick=()=>showFile(file);$('files').append(b);}
     $('lesson').href='../bab-'+chapter+'/'; $('api').hidden=chapter!==11; $('stdin-label').hidden=chapter>7;
     $('chapter').value=String(chapter);history.replaceState(null,'','?bab='+chapter);
-    showFile('Program.cs'); $('state').textContent='Siap';
+    showFile('Program.cs');
+    $('state').textContent=connected?'Siap • Docker lokal':canBrowser()?'Siap • Compiler browser (WASM)':chapter>=8?'ASP.NET Core memerlukan runner lokal':'Compiler browser belum tersedia';
   }catch(e){current=null;activeFile='';$('files').replaceChildren();$('editor').value='';$('output').textContent=e.message;}
   finally{loading=false;controls();}
 }
@@ -62,19 +67,55 @@ async function poll(g){
     controls();if(busy)setTimeout(()=>poll(g),600);
   }catch(e){$('state').textContent='Koneksi runner terputus: '+e.message;busy=false;job=null;controls();}
 }
+function endBrowser(state,output){
+  clearTimeout(browserTimer);browserWorker?.terminate();browserWorker=null;
+  busy=false;$('state').textContent=state;
+  if(output!==undefined)$('output').textContent=output;
+  controls();
+}
+function runBrowser(){
+  busy=true;$('preview').hidden=true;$('state').textContent='Memuat compiler WebAssembly…';
+  $('output').textContent='Unduhan runtime pertama mungkin membutuhkan waktu.';
+  try{
+    browserWorker=new Worker(new URL('./browser-runner.js',location.href),{type:'module'});
+    const worker=browserWorker;
+    browserTimer=setTimeout(()=>endBrowser('Timeout','Compiler tidak siap dalam 180 detik.'),180000);
+    worker.onmessage=({data})=>{
+      if(browserWorker!==worker)return;
+      if(data.type==='ready'){
+        clearTimeout(browserTimer);browserTimer=setTimeout(()=>endBrowser('Timeout','Eksekusi dihentikan setelah 30 detik.'),30000);
+        $('state').textContent='Compile / run (WASM)…';return;
+      }
+      if(data.type==='result'){
+        const result=data.result;
+        const diagnostics=(result.diagnostics||[]).map(d=>d.id+' '+d.severity+': '+d.message).join('\n');
+        endBrowser(result.success?'Eksekusi selesai (WASM)':'Kompilasi gagal',[result.stdOut,result.stdErr,diagnostics].filter(Boolean).join('\n')||'(Tidak ada output)');
+      }else if(data.type==='error')endBrowser('Eksekusi gagal',data.message);
+    };
+    worker.onerror=e=>endBrowser('Compiler gagal dimuat',e.message||'Buka ulang halaman dan periksa jaringan.');
+    worker.postMessage({code:sources['Program.cs']});controls();
+  }catch(e){endBrowser('Compiler tidak tersedia',e.message);}
+}
 $('run').onclick=async()=>{
+  if(!connected&&canBrowser()){runBrowser();return;}
   busy=true;const g=++generation;controls();$('preview').hidden=true;$('output').textContent='Mengirim source ke Docker…';
   try{await request('run',{chapter:current.chapter,files:sources,stdin:$('stdin').value});await poll(g);}
   catch(e){busy=false;$('state').textContent='Gagal';$('output').textContent=e.message;controls();}
 };
-$('stop').onclick=async()=>{try{await request('stop',{});}catch(e){$('state').textContent=e.message;}};
+$('stop').onclick=async()=>{if(browserWorker){endBrowser('Dihentikan','Eksekusi browser dihentikan.');return;}try{await request('stop',{});}catch(e){$('state').textContent=e.message;}};
 $('send').onclick=async()=>{try{const method=$('method').value;const result=await request('api',{method,path:$('endpoint').value,body:['POST','PUT'].includes(method)?$('body').value:undefined});$('response').textContent='HTTP '+result.status+'\n'+result.body;}catch(e){$('response').textContent=e.message;}};
 (async()=>{
   try{const r=await fetch('manifest.json');if(!r.ok)throw Error('Manifest belum dibangun. Jalankan npm run build.');labs=await r.json();
     for(const lab of labs){const o=document.createElement('option');o.value=lab.chapter;o.textContent='Bab '+lab.chapter+' — '+lab.title;$('chapter').append(o);}
     if(local){try{const health=await request('health');connected=health.available;$('connection').textContent=connected?'Runner lokal terhubung • Docker siap':'Runner lokal aktif, tetapi image Docker belum tersedia';}catch(e){$('connection').textContent='Runner lokal tidak tersedia: '+e.message;}}
-    else $('connection').textContent='Mode GitHub Pages: editor tersedia • eksekusi membutuhkan runner lokal.';
-    $('setup').open=!connected;
+    if(!connected){
+      try{
+        const asset=await fetch('./vendor/wasmsharp/index.js',{method:'HEAD',cache:'no-store'});
+        browserAvailable=asset.ok&&!(asset.headers.get('content-type')||'').includes('text/html')&&typeof Worker!=='undefined'&&typeof WebAssembly!=='undefined';
+      }catch{}
+      $('connection').textContent=browserAvailable?'Mode online: Bab 1–7 menggunakan compiler C# WebAssembly. Bab 8–11 menggunakan runner lokal.':'Editor tersedia; compiler browser belum tersedia pada build ini. Runner lokal diperlukan.';
+    }
+    $('setup').open=!connected&&!browserAvailable;
     const selection=Number(new URLSearchParams(location.search).get('bab'));await load(labs.some(l=>l.chapter===selection)?selection:labs[0].chapter);
   }catch(e){$('connection').textContent=e.message;controls();}
 })();

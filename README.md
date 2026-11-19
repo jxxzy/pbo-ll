@@ -80,7 +80,7 @@ Setelah menginstal Node.js 22+ dan Docker Desktop (Linux containers), buka Docke
 
 ### Cara manual
 
-Buka [Playground GitHub Pages](https://jxxzy.github.io/pbo-ll/playground/) untuk membaca, mengedit, menyimpan draft lokal, menyalin dan mengunduh source asli. GitHub Pages **tidak** menjalankan .NET. Untuk eksekusi nyata gunakan runner lokal (Node.js 22+, Git, Docker Desktop atau Docker Engine dengan Linux containers):
+Buka [Playground GitHub Pages](https://jxxzy.github.io/pbo-ll/playground/) untuk membaca, mengedit, menyimpan draft lokal, menyalin dan mengunduh source asli. GitHub Pages dapat menjalankan C# console Bab 1–7 di browser melalui Roslyn/WebAssembly (WasmSharp 0.10.2 yang dikemas saat deploy). Runtime dimuat dalam dedicated Web Worker yang dihentikan saat Stop atau timeout; file sementara Bab 6 mengikuti filesystem virtual browser. Mode ini belum mendukung stdin, custom csproj, atau server ASP.NET Core. Jangan menjalankan source yang tidak dipercaya. Untuk seluruh fitur dan Bab 8–11 gunakan runner lokal (Node.js 22+, Git, Docker Desktop atau Docker Engine dengan Linux containers):
 
 ```powershell
 git clone https://github.com/jxxzy/pbo-ll.git
@@ -92,3 +92,5 @@ npm run playground
 Buka http://127.0.0.1:8787/playground/ (gunakan alamat ini, bukan localhost). Image menyiapkan cache paket .NET 10/EF Core. Pilih Bab 1–7, edit C#, masukkan stdin bila perlu dan Run; terminal menunjukkan output asli. Bab 8–10 membuka MVC melalui link preview; Bab 11 menyediakan pengujian GET/POST/PUT/DELETE. File SQLite terisolasi per container dan dihapus ketika dihentikan; unduh perubahan source sebelum menghapus storage browser. File csproj harus asli untuk eksekusi. Tidak ada compiler online publik.
 
 Runner hanya bind ke 127.0.0.1; jangan publish port 8787 atau meneruskan melalui tunnel. Docker membatasi CPU, RAM, proses, waktu dan akses file; console tidak memiliki jaringan, web menggunakan jaringan Docker biasa (dapat mengakses jaringan keluar). Ini alat latihan lokal untuk kode tepercaya, bukan sandbox multi-tenant atau layanan publik. Timeout console 60 detik, web 10 menit. Stop sebelum mengganti bab. Jika runner gagal, cek Docker Desktop dan build image ulang setelah update project.
+
+Compiler browser: [WasmSharp](https://github.com/JakeYallop/WasmSharp), Apache-2.0. Build statis biasa tanpa paket runtime tetap menyediakan editor; GitHub Actions mengemas versi runtime yang dipin.
