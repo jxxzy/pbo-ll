@@ -116,3 +116,7 @@ Codespaces: `bash scripts/start-cloud-studio.sh` menjalankan empat server asli B
 ### Verifikasi dan release gate
 
 `npm run build && npm test` memeriksa struktur build, `python3 tests/native-smoke.py` menguji runtime .NET 11 bab, dan workflow Pages menjalankan Playwright pada compiler asli dan lab SQLite. Deployment terbaru menunggu semua job tersebut lulus. Lihat [release gates](docs/RELEASE-GATES.md) dan [security policy](SECURITY.md). Bukti aktivitas praktikum di browser ditampilkan terpisah dari nilai kuis; bukan sertifikasi nilai.
+
+### Private full-source browser IDE in Codespaces
+
+The static GitHub Pages lab remains a different environment. To compile and run the actual edited C# / Razor project files for all 11 chapters in one browser IDE, create a fresh private Codespace or rebuild its dev container (the Docker-in-Docker feature is required). Run `bash scripts/start-private-ide.sh`. Open forwarded port 8787, enter the private session code printed in the terminal, choose a chapter and press Run. ASP.NET preview uses separate private port 5080; the server API tester forwards only the fixed inventory routes. Do not make either port public. Stop the running lab before changing chapter. This is a single-user, trusted-code environment, not a public execution sandbox. The Docker build and Codespaces launch must be verified on the actual Codespace. GitHub quotas may apply.

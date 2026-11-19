@@ -4,13 +4,16 @@
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22"
-    }
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
   "forwardPorts": [
     5008,
     5009,
     5010,
-    5011
+    5011,
+    8787,
+    5080
   ],
   "portsAttributes": {
     "5008": {
@@ -27,6 +30,14 @@
     },
     "5011": {
       "label": "Bab 11 REST API",
+      "onAutoForward": "notify"
+    },
+    "5080": {
+      "label": "Private app preview",
+      "onAutoForward": "notify"
+    },
+    "8787": {
+      "label": "Private PBO IDE",
       "onAutoForward": "notify"
     }
   },

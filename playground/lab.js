@@ -11,6 +11,12 @@ function closeWebLab(){
 }
 const key = chapter => 'pbo2-playground-v1:'+chapter;
 const local = location.origin === 'http://127.0.0.1:8787';
+const privateCloud=/^https:\/\/[a-z0-9-]+-8787\.app\.github\.dev$/.test(location.origin);
+let sessionCode='';
+try{sessionCode=sessionStorage.getItem('pbo-private-session')||'';}catch{}
+$('private-session').hidden=!privateCloud;
+$('session-code').value=sessionCode;
+$('session-connect').onclick=()=>{sessionCode=$('session-code').value.trim();try{sessionStorage.setItem('pbo-private-session',sessionCode);}catch{}location.reload();};
 function recordPractice(mode){try{localStorage.setItem('pbo-practice-v2:'+current.chapter,JSON.stringify({mode,at:new Date().toISOString()}));}catch{}}
 function updateCloudLink(){
   const name=$('cloud-name').value.trim().toLowerCase();
@@ -43,7 +49,9 @@ try{const theme=localStorage.getItem('ruang-kelas-theme');if(['light','dark'].in
 window.addEventListener('pbo:editor-ready',()=>{if(activeFile)window.PBOEditor.show(activeFile,sources[activeFile],current.chapter);controls();window.PBOEditor.theme(document.documentElement.dataset.theme||'dark');});
 const endpoint = path => '/lab-api/'+path;
 async function request(path, data) {
-  const res=await fetch(endpoint(path),data===undefined?{cache:'no-store'}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+  const headers=privateCloud?{'X-PBO-Session':sessionCode}:{};
+  if(data!==undefined)headers['Content-Type']='application/json';
+  const res=await fetch(endpoint(path),data===undefined?{cache:'no-store',headers}:{method:'POST',headers,body:JSON.stringify(data)});
   const result=await res.json();
   if(!res.ok) throw Error(result.error||'HTTP '+res.status);
   return result;
@@ -56,7 +64,7 @@ function controls(){
   $('restore-snapshot').disabled=!current||loading||busy;
   $('run').disabled=(!connected&&!canBrowser()&&!canWebLab())||busy||loading||!current;
   $('stdin-label').hidden=!current||current.chapter>7||(!connected&&canBrowser());
-  $('run').title=connected?'Jalankan dengan Docker lokal':canBrowser()?'Jalankan C# melalui WebAssembly':canWebLab()?'Buka praktikum browser (bukan kompilasi ASP.NET)':'Runner tidak tersedia';
+  $('run').title=connected?'Jalankan project .NET asli dengan Docker':canBrowser()?'Jalankan C# melalui WebAssembly':canWebLab()?'Buka praktikum browser (bukan kompilasi ASP.NET)':'Runner tidak tersedia';
   $('stop').disabled=!webLab&&((!connected&&!browserWorker)||!busy);
   $('chapter').disabled=busy||loading||!labs.length;
   for(const id of ['reset','copy','download','editor']) $(id).disabled=loading||!activeFile;
@@ -92,7 +100,7 @@ async function load(chapter){
     $('cloud-command').textContent='bash scripts/run-cloud-lab.sh '+chapter;
     $('cloud-preview').hidden=chapter<8;updateCloudLink();
     try{$('notes').value=localStorage.getItem('pbo-notes-v2:'+chapter)||'';}catch{$('notes').value='';}
-    $('state').textContent=connected?'Siap • Docker lokal':canBrowser()?'Siap • Compiler browser (WASM)':canWebLab()?'Siap • Lab web interaktif (SQLite WASM)':'Runner belum tersedia';
+    $('state').textContent=connected?(privateCloud?'Siap • Codespaces privat':'Siap • Docker lokal'):canBrowser()?'Siap • Compiler browser (WASM)':canWebLab()?'Siap • Lab web interaktif (SQLite WASM)':'Runner belum tersedia';
   }catch(e){current=null;activeFile='';$('files').replaceChildren();$('editor').value='';window.PBOEditor?.show('','',chapter);$('output').textContent=e.message;}
   finally{loading=false;controls();}
 }
@@ -138,8 +146,9 @@ function runBrowser(){
         const result=data.result;
         const diagnostics=(result.diagnostics||[]).map(d=>d.id+' '+d.severity+': '+d.message).join('\n');
         window.PBOEditor?.diagnostics('Program.cs',result.diagnostics||[],current.chapter,data.prefixLength||0);
-        if(result.success)recordPractice('C# WASM: program selesai');
-        endBrowser(result.success?'Eksekusi selesai (WASM)':'Kompilasi gagal',[result.stdOut,result.stdErr,diagnostics].filter(Boolean).join('\n')||'(Tidak ada output)');
+        const success=result.success&&!result.stdErr?.trim();
+        if(success)recordPractice('C# WASM: program selesai');
+        endBrowser(success?'Eksekusi selesai (WASM)':result.success?'Runtime error / stderr':'Kompilasi gagal',[result.stdOut,result.stdErr,diagnostics].filter(Boolean).join('\n')||'(Tidak ada output)');
       }else if(data.type==='error')endBrowser('Eksekusi gagal',data.message);
     };
     worker.onerror=e=>endBrowser('Compiler gagal dimuat',e.message||'Buka ulang halaman dan periksa jaringan.');
@@ -165,16 +174,19 @@ $('send').onclick=async()=>{try{const method=$('method').value;const payload={me
 (async()=>{
   try{const r=await fetch('manifest.json');if(!r.ok)throw Error('Manifest belum dibangun. Jalankan npm run build.');labs=await r.json();
     for(const lab of labs){const o=document.createElement('option');o.value=lab.chapter;o.textContent='Bab '+lab.chapter+' — '+lab.title;$('chapter').append(o);}
-    if(local){try{const health=await request('health');connected=health.available;$('connection').textContent=connected?'Runner lokal terhubung • Docker siap':'Runner lokal aktif, tetapi image Docker belum tersedia';}catch(e){$('connection').textContent='Runner lokal tidak tersedia: '+e.message;}}
+    if(local||privateCloud){try{const health=await request('health');connected=health.available;$('connection').textContent=connected?(privateCloud?'Codespaces privat • runtime .NET asli':'Runner lokal terhubung • Docker siap'):'Runner aktif, tetapi image Docker belum tersedia';if(connected)$('private-session').hidden=true;}catch(e){$('connection').textContent='Runner tidak tersedia: '+e.message;}}
     if(!connected){
       try{
         const asset=await fetch('./vendor/wasmsharp/index.js',{method:'HEAD',cache:'no-store'});
         browserAvailable=asset.ok&&!(asset.headers.get('content-type')||'').includes('text/html')&&typeof Worker!=='undefined'&&typeof WebAssembly!=='undefined';
       }catch{}
       webAvailable=typeof window.initSqlJs==='function'&&!!window.PBOBrowserLab;
-      $('connection').textContent='Mode online: '+(browserAvailable?'Bab 1–7 compiler C# WASM. ':'Compiler C# belum tersedia. ')+(webAvailable?'Bab 8–11 lab web interaktif SQLite WASM. ':'Lab web belum tersedia. ')+'Eksekusi ASP.NET asli melalui Codespaces atau runner lokal.';
+      if(!privateCloud)$('connection').textContent='Mode online: '+(browserAvailable?'Bab 1–7 compiler C# WASM. ':'Compiler C# belum tersedia. ')+(webAvailable?'Bab 8–11 lab web interaktif SQLite WASM. ':'Lab web belum tersedia. ')+'Eksekusi ASP.NET asli melalui Codespaces atau runner lokal.';
     }
     $('setup').open=!connected&&!browserAvailable;
-    const selection=Number(new URLSearchParams(location.search).get('bab'));await load(labs.some(l=>l.chapter===selection)?selection:labs[0].chapter);
+    const selection=Number(new URLSearchParams(location.search).get('bab'));
+    let running=null;if(connected)try{running=await request('status');}catch{}
+    const selected=running?.running&&labs.some(l=>l.chapter===running.chapter)?running.chapter:labs.some(l=>l.chapter===selection)?selection:labs[0].chapter;
+    await load(selected);if(running?.running){busy=true;controls();await poll(++generation);}
   }catch(e){$('connection').textContent=e.message;controls();}
 })();
