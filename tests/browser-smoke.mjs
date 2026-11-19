@@ -57,7 +57,8 @@ try{
   }
   await page.setViewportSize({width:390,height:844});await page.reload();
   await page.locator('#run:enabled').waitFor();
-  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),'Mobile horizontal overflow');
+  const overflow=await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:window.innerWidth,elements:[...document.querySelectorAll('body *')].filter(el=>!el.closest('.monaco-editor,.table-scroll')&&el.getBoundingClientRect().right>window.innerWidth+2).slice(0,12).map(el=>({tag:el.tagName,id:el.id,cls:String(el.className).slice(0,80),width:Math.round(el.getBoundingClientRect().width)}))}));
+  assert.ok(overflow.width<=overflow.viewport+2,'Mobile horizontal overflow: '+JSON.stringify(overflow));
   console.log('PASS mobile smoke');
   assert.equal(failures.length,0,failures.join('\n'));
 }finally{await browser?.close();server.kill();}

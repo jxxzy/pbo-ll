@@ -8,7 +8,7 @@
   "sections": [
     {
       "title": "List<T> menyimpan daftar dinamis",
-      "body": "List<T> bertipe, ukurannya dapat bertambah, dan menyediakan operasi seperti Add, Remove, serta Find. T menentukan jenis object yang disimpan.",
+      "body": "List<T> bertipe, ukurannya dapat bertambah, dan menyediakan operasi seperti Add, Remove, serta Find. T menentukan jenis object yang disimpan. Pada playground WebAssembly yang dipangkas, project runnable memakai FindIndex dan mengambil elemen berdasarkan indeks; Find() tetap merupakan API .NET penuh.",
       "codeTitle": "Program.cs",
       "code": [
         "var daftarBarang = new List<Barang>",
@@ -96,34 +96,110 @@
   "assessments": {
     "pretest": {
       "multipleChoice": [
-        { "question": "Apa perbedaan List<T> dengan array?", "answer": "C — List berukuran dinamis dan memiliki method bantu.", "explanation": "List<T> dapat bertambah atau berkurang saat runtime, dengan tetap menjaga tipe elemennya." },
-        { "question": "Apa peran T dalam List<T>?", "answer": "C — Placeholder tipe generik yang ditentukan saat digunakan.", "explanation": "Contoh List<Barang> berarti T diganti dengan Barang." },
-        { "question": "Apa beda List<T> dan Dictionary<K,V>?", "answer": "C — List menyimpan urutan nilai; Dictionary menyimpan pasangan kunci-nilai.", "explanation": "Dictionary memungkinkan pencarian berdasarkan key yang unik." },
-        { "question": "Namespace apa yang menyediakan List dan Dictionary?", "answer": "D — System.Collections.Generic.", "explanation": "Tambahkan using namespace itu jika implicit usings project tidak aktif." },
-        { "question": "Method List apa yang mencari elemen berdasarkan predicate?", "answer": "C — Find().", "explanation": "Find menerima Predicate<T> dan mengembalikan elemen pertama yang cocok atau default/null." },
-        { "question": "Bagaimana notasi tipe generic ditulis?", "answer": "D — Dengan tanda kurung sudut, misalnya <T>.", "explanation": "T adalah nama parameter tipe." },
-        { "question": "Apa keuntungan utama method generic?", "answer": "B — Dapat digunakan ulang untuk berbagai tipe data.", "explanation": "Satu implementasi tetap type-safe untuk tipe yang diberikan saat pemanggilan." },
-        { "question": "Apa kegunaan Dictionary<string, Barang>?", "answer": "C — Mengakses object Barang berdasarkan kode unik.", "explanation": "Kode menjadi key, sementara value menyimpan object Barang." }
+        {
+          "question": "Apa perbedaan List<T> dengan array?",
+          "answer": "C — List berukuran dinamis dan memiliki method bantu.",
+          "explanation": "List<T> dapat bertambah atau berkurang saat runtime, dengan tetap menjaga tipe elemennya."
+        },
+        {
+          "question": "Apa peran T dalam List<T>?",
+          "answer": "C — Placeholder tipe generik yang ditentukan saat digunakan.",
+          "explanation": "Contoh List<Barang> berarti T diganti dengan Barang."
+        },
+        {
+          "question": "Apa beda List<T> dan Dictionary<K,V>?",
+          "answer": "C — List menyimpan urutan nilai; Dictionary menyimpan pasangan kunci-nilai.",
+          "explanation": "Dictionary memungkinkan pencarian berdasarkan key yang unik."
+        },
+        {
+          "question": "Namespace apa yang menyediakan List dan Dictionary?",
+          "answer": "D — System.Collections.Generic.",
+          "explanation": "Tambahkan using namespace itu jika implicit usings project tidak aktif."
+        },
+        {
+          "question": "Method List apa yang mencari elemen berdasarkan predicate?",
+          "answer": "C — Find().",
+          "explanation": "Find menerima Predicate<T> dan mengembalikan elemen pertama yang cocok atau default/null."
+        },
+        {
+          "question": "Bagaimana notasi tipe generic ditulis?",
+          "answer": "D — Dengan tanda kurung sudut, misalnya <T>.",
+          "explanation": "T adalah nama parameter tipe."
+        },
+        {
+          "question": "Apa keuntungan utama method generic?",
+          "answer": "B — Dapat digunakan ulang untuk berbagai tipe data.",
+          "explanation": "Satu implementasi tetap type-safe untuk tipe yang diberikan saat pemanggilan."
+        },
+        {
+          "question": "Apa kegunaan Dictionary<string, Barang>?",
+          "answer": "C — Mengakses object Barang berdasarkan kode unik.",
+          "explanation": "Kode menjadi key, sementara value menyimpan object Barang."
+        }
       ],
       "essay": [
-        { "question": "Bedakan List<T> dan Dictionary<K,V> untuk gudang.", "answer": "List<Barang> menyimpan rangkaian barang dan cocok untuk iterasi atau urutan. Dictionary<string, Barang> mengindeks barang dengan KodeBarang dan cocok untuk lookup langsung berdasarkan kode unik." },
-        { "question": "Bagaimana method generic meningkatkan fleksibilitas?", "answer": "Method seperti `static T? AmbilPertama<T>(List<T> list) => list.Count == 0 ? default : list[0];` bekerja pada List<Barang>, List<int>, atau tipe lain tanpa menyalin implementasi." }
+        {
+          "question": "Bedakan List<T> dan Dictionary<K,V> untuk gudang.",
+          "answer": "List<Barang> menyimpan rangkaian barang dan cocok untuk iterasi atau urutan. Dictionary<string, Barang> mengindeks barang dengan KodeBarang dan cocok untuk lookup langsung berdasarkan kode unik."
+        },
+        {
+          "question": "Bagaimana method generic meningkatkan fleksibilitas?",
+          "answer": "Method seperti `static T? AmbilPertama<T>(List<T> list) => list.Count == 0 ? default : list[0];` bekerja pada List<Barang>, List<int>, atau tipe lain tanpa menyalin implementasi."
+        }
       ]
     },
     "posttest": {
       "multipleChoice": [
-        { "question": "Apa akibat tidak mengimpor System.Collections.Generic saat implicit usings tidak aktif?", "answer": "C — Compiler tidak mengenali nama List<T> dan Dictionary<K,V> tanpa nama lengkap.", "explanation": "Tambahkan using yang benar atau tulis nama namespace lengkap." },
-        { "question": "Apa hasil Find() jika tidak ada elemen yang cocok?", "answer": "C — Nilai default tipe; untuk class biasanya null.", "explanation": "Periksa null sebelum memakai object yang dikembalikan." },
-        { "question": "Mengapa Dictionary efisien untuk pencarian?", "answer": "C — Lookup menggunakan key.", "explanation": "Hash lookup biasanya mendekati O(1), bukan memeriksa setiap elemen seperti pencarian linear." },
-        { "question": "Apa arti T pada generic class/method?", "answer": "C — Placeholder tipe yang dipilih saat generic digunakan.", "explanation": "Tipe konkret mempertahankan pemeriksaan tipe saat compile." },
-        { "question": "Struktur terbaik untuk mencari Barang dari KodeBarang?", "answer": "D — Dictionary<string, Barang>.", "explanation": "Kode unik cocok menjadi key dictionary." },
-        { "question": "Apa manfaat generic class?", "answer": "C — Satu class dapat dipakai untuk berbagai tipe data.", "explanation": "Contoh List<T> menyimpan berbagai jenis T secara type-safe." },
-        { "question": "Apa yang dibutuhkan method Find() pada List<T>?", "answer": "C — Lambda expression atau Predicate<T>.", "explanation": "Predicate menentukan kriteria elemen yang dicari." },
-        { "question": "Apa manfaat List<Barang> pada praktikum?", "answer": "C — Menyimpan banyak object Barang secara fleksibel dan dinamis.", "explanation": "Koleksi bertipe ini dapat bertambah tanpa menetapkan ukuran awal tetap." }
+        {
+          "question": "Apa akibat tidak mengimpor System.Collections.Generic saat implicit usings tidak aktif?",
+          "answer": "C — Compiler tidak mengenali nama List<T> dan Dictionary<K,V> tanpa nama lengkap.",
+          "explanation": "Tambahkan using yang benar atau tulis nama namespace lengkap."
+        },
+        {
+          "question": "Apa hasil Find() jika tidak ada elemen yang cocok?",
+          "answer": "C — Nilai default tipe; untuk class biasanya null.",
+          "explanation": "Periksa null sebelum memakai object yang dikembalikan."
+        },
+        {
+          "question": "Mengapa Dictionary efisien untuk pencarian?",
+          "answer": "C — Lookup menggunakan key.",
+          "explanation": "Hash lookup biasanya mendekati O(1), bukan memeriksa setiap elemen seperti pencarian linear."
+        },
+        {
+          "question": "Apa arti T pada generic class/method?",
+          "answer": "C — Placeholder tipe yang dipilih saat generic digunakan.",
+          "explanation": "Tipe konkret mempertahankan pemeriksaan tipe saat compile."
+        },
+        {
+          "question": "Struktur terbaik untuk mencari Barang dari KodeBarang?",
+          "answer": "D — Dictionary<string, Barang>.",
+          "explanation": "Kode unik cocok menjadi key dictionary."
+        },
+        {
+          "question": "Apa manfaat generic class?",
+          "answer": "C — Satu class dapat dipakai untuk berbagai tipe data.",
+          "explanation": "Contoh List<T> menyimpan berbagai jenis T secara type-safe."
+        },
+        {
+          "question": "Apa yang dibutuhkan method Find() pada List<T>?",
+          "answer": "C — Lambda expression atau Predicate<T>.",
+          "explanation": "Predicate menentukan kriteria elemen yang dicari."
+        },
+        {
+          "question": "Apa manfaat List<Barang> pada praktikum?",
+          "answer": "C — Menyimpan banyak object Barang secara fleksibel dan dinamis.",
+          "explanation": "Koleksi bertipe ini dapat bertambah tanpa menetapkan ukuran awal tetap."
+        }
       ],
       "essay": [
-        { "question": "Buat method generic AmbilPertama<T>(List<T> list).", "answer": "Contoh: `static T? AmbilPertama<T>(List<T> list) { return list.Count > 0 ? list[0] : default; }`. Untuk T bertipe reference, null menandakan list kosong; gunakan nullable annotations yang sesuai." },
-        { "question": "Apa kelebihan Dictionary<K,V> untuk akses berdasarkan kode unik?", "answer": "Key memberi akses langsung dan biasanya cepat, menegaskan keunikan kode, serta menghindari loop pencarian berulang. Gunakan TryGetValue untuk menangani key yang tidak ada." }
+        {
+          "question": "Buat method generic AmbilPertama<T>(List<T> list).",
+          "answer": "Contoh: `static T? AmbilPertama<T>(List<T> list) { return list.Count > 0 ? list[0] : default; }`. Untuk T bertipe reference, null menandakan list kosong; gunakan nullable annotations yang sesuai."
+        },
+        {
+          "question": "Apa kelebihan Dictionary<K,V> untuk akses berdasarkan kode unik?",
+          "answer": "Key memberi akses langsung dan biasanya cepat, menegaskan keunikan kode, serta menghindari loop pencarian berulang. Gunakan TryGetValue untuk menangani key yang tidak ada."
+        }
       ]
     }
   },

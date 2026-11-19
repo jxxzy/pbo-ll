@@ -5,8 +5,10 @@ var daftar = new List<Barang>
     new("BRG003", "Pemindai", "Elektronik", 8)
 };
 
-var barangDicari = daftar.Find(barang => barang.KodeBarang == "BRG002");
-Console.WriteLine($"Hasil Find: {barangDicari?.NamaBarang ?? "Barang tidak ditemukan"}");
+// FindIndex juga tersedia di runtime WebAssembly yang dipangkas.
+var posisi = daftar.FindIndex(barang => barang.KodeBarang == "BRG002");
+var barangDicari = posisi >= 0 ? daftar[posisi] : null;
+Console.WriteLine($"Hasil FindIndex: {barangDicari?.NamaBarang ?? "Barang tidak ditemukan"}");
 
 var indeks = daftar.ToDictionary(barang => barang.KodeBarang);
 Console.WriteLine($"Dictionary: {indeks["BRG001"].NamaBarang}");

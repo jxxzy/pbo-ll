@@ -7,7 +7,7 @@ Source PDFs were extracted from the published repository artifact. Eleven PDFs h
 | 1 | 12 | 5 | Class, field, object, constructors, status and array present; interactive input and physical Models separation still need matching. |
 | 2 | 9 | 4 | Getter/setter and negative stock rejection; native code throws instead of silently ignoring invalid inputs. |
 | 3 | 7 | 3 | Inheritance, base, virtual/override, array; extra BarangMakanan example. |
-| 4 | 7 | 3 | Abstract item, chemical and food, interface check; DateOnly used instead of DateTime contract. |
+| 4 | 7 | 3 | Abstract item, chemical and food, interface check; DateTime contract aligned with source PDF. |
 | 5 | 11 | 5 | List, dictionary, predicate and generic search; implicit usings change the old missing-using question. |
 | 6 | 13 | 5 | FormatException, stock and duplicate-code exceptions, temporary file read/write. |
 | 7 | 13 | 5 | Factory, validation helper, printer interface; physical file separation and input service still needed. |
@@ -21,3 +21,5 @@ Original MCQ counts, verified by parsing PDF text: (pre/post) 1 5/5, 2 2/1, 3 2/
 - Kompatibilitas browser: Bab 3–4 memakai `DateTime`, sesuai kontrak modul Bab 4, karena runtime WebAssembly yang dipangkas tidak menyediakan konstruktor `DateOnly(year, month, day)` lengkap. Format tanggal menggunakan `ToString` eksplisit.
 
 - Bab 6: contoh eksekusi memakai `File.Exists`/`Delete`/`AppendAllText` dan `StreamReader.ReadLine` untuk operasi penulisan dan pembacaan berkas nyata di runtime browser yang dipangkas; `WriteAllText` dan `ReadAllLines` adalah alternatif API pada SDK .NET penuh.
+
+- Bab 5: `FindIndex` + lookup (or null if not found) demonstrates the same predicate search as `List.Find`, which is absent in the trimmed WASM runtime. Original `Find()` questions and SDK examples are preserved.
