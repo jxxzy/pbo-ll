@@ -1,4 +1,7 @@
 // Dedicated worker: real Roslyn runtime, never evaluate JavaScript as C#.
+// dotnet/runtime#114918: identify this as the hosting sidecar, not a managed pthread.
+// Set before importing dotnet.js even when an onmessage handler is already attached.
+self.dotnetSidecar=true;
 self.onmessage=async ({data})=>{
   const progress=message=>self.postMessage({type:'progress',message});
   try{

@@ -126,3 +126,5 @@ Browser runtime packaging normalizes WasmSharp's bundler-specific binary import 
 ### Assessment bank from original PDFs
 
 The build pipeline extracts the original multiple-choice options and keys from all 11 of the original PDFs using Poppler. `python3 scripts/extract-assessments.py` after `npm run build` (requires `pdftotext`). The generated assessment bank is checked against the source question counts. Browser quizzes shuffle answer options, compute a local score and show the source key. Essays retain the self-assessment mode. This is study feedback, not an official academic grade.
+
+WASM worker boot compatibility: .NET runtime issue [#114918](https://github.com/dotnet/runtime/issues/114918) documents a hang when the host worker has its own message handler. The worker sets `dotnetSidecar=true` before importing the runtime, and the static packaging limits concurrent runtime downloads to avoid the related Chrome asset race. The pinned vendor code is transformed at build time rather than committed as a 60 MB blob.

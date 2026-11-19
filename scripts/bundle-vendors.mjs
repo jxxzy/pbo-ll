@@ -37,6 +37,11 @@ try{
       if(!count)throw Error('Expected bundler-style binary imports in pinned WasmSharp loader.');
       if(/^import\s+.*\.(?:wasm|dll|dat|pdb|blat)["'];/m.test(normalized))throw Error('Unresolved binary module import');
       await writeFile(loader,normalized,'utf8');
+      const init=path.join(out,'initializeWasmSharpModule.js');
+      const initSource=await readFile(init,'utf8');
+      const patched=initSource.replace('disableIntegrityCheck: true,','disableIntegrityCheck: true,\n        maxParallelDownloads: 1,');
+      if(patched===initSource)throw Error('Pinned loader config changed; review runtime initialization.');
+      await writeFile(init,patched,'utf8');
       console.log('Normalized '+count+' WasmSharp binary asset imports for static browsers');
       const files=await readdir(out);console.log('WasmSharp root module files:',files.filter(f=>/\.m?js$|\.json$/.test(f)).join(', '));
       for(const file of ['initializeWasmSharpModule.js','dotnet.js']){if(!files.includes(file))throw Error('Missing runtime file: '+file);}
