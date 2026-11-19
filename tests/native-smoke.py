@@ -114,7 +114,7 @@ def main():
             print(f"PASS MVC/SQLite Bab {n}", flush=True)
         with running(11, tmp/"11.db") as base:
             assert "Warehouse API Studio" in request(plain, base, "/")
-            assert "Swagger" in request(plain, base, "/swagger/index.html")
+            assert "swagger-ui" in request(plain, base, "/swagger/index.html").lower()
             spec = json.loads(request(plain, base, "/openapi/v1.json"))
             assert "/api/BarangApi".lower() in [p.lower() for p in spec["paths"]]
             assert json.loads(request(plain, base, "/health"))["status"] == "healthy"
