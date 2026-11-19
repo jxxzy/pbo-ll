@@ -37,14 +37,18 @@ try
     }
 
     var path = Path.Combine(Path.GetTempPath(), "data_barang.txt");
-    File.WriteAllText(path, "Kode\tNama\tStok" + Environment.NewLine);
+    // Mulai berkas baru, kompatibel dengan runtime .NET WebAssembly yang dipangkas.
+    if (File.Exists(path)) File.Delete(path);
+    File.AppendAllText(path, "Kode\tNama\tStok" + Environment.NewLine);
     foreach (var barang in daftarBarang)
     {
         File.AppendAllText(path, $"{barang.KodeBarang}\t{barang.NamaBarang}\t{barang.JumlahStok}{Environment.NewLine}");
     }
 
     Console.WriteLine($"Catatan barang disimpan di {path}");
-    foreach (var baris in File.ReadAllLines(path))
+    using var pembaca = new StreamReader(path);
+    string? baris;
+    while ((baris = pembaca.ReadLine()) != null)
     {
         Console.WriteLine(baris);
     }

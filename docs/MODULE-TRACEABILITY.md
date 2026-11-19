@@ -19,3 +19,5 @@ Source PDFs were extracted from the published repository artifact. Eleven PDFs h
 Original MCQ counts, verified by parsing PDF text: (pre/post) 1 5/5, 2 2/1, 3 2/1, 4 2/1, 5 8/8, 6 8/8, 7 8/0, 8 4/2, 9 4/2, 10 4/2, 11 3/2. Total 82. Bab 7 post-test is essay-only. Preserve PDF wording and answer keys; contextual notes are included where framework assumptions changed.
 
 - Kompatibilitas browser: Bab 3–4 memakai `DateTime`, sesuai kontrak modul Bab 4, karena runtime WebAssembly yang dipangkas tidak menyediakan konstruktor `DateOnly(year, month, day)` lengkap. Format tanggal menggunakan `ToString` eksplisit.
+
+- Bab 6: contoh eksekusi memakai `File.Exists`/`Delete`/`AppendAllText` dan `StreamReader.ReadLine` untuk operasi penulisan dan pembacaan berkas nyata di runtime browser yang dipangkas; `WriteAllText` dan `ReadAllLines` adalah alternatif API pada SDK .NET penuh.
