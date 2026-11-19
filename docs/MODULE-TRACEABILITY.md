@@ -17,3 +17,5 @@ Source PDFs were extracted from the published repository artifact. Eleven PDFs h
 | 11 | 11 | 4 | Five REST operations and JSON; DELETE uses HTTP 204 rather than original 200, API DTO prevents overposting. Added Swagger and native API studio. |
 
 Original MCQ counts, verified by parsing PDF text: (pre/post) 1 5/5, 2 2/1, 3 2/1, 4 2/1, 5 8/8, 6 8/8, 7 8/0, 8 4/2, 9 4/2, 10 4/2, 11 3/2. Total 82. Bab 7 post-test is essay-only. Preserve PDF wording and answer keys; contextual notes are included where framework assumptions changed.
+
+- Kompatibilitas browser: Bab 3–4 memakai `DateTime`, sesuai kontrak modul Bab 4, karena runtime WebAssembly yang dipangkas tidak menyediakan konstruktor `DateOnly(year, month, day)` lengkap. Format tanggal menggunakan `ToString` eksplisit.

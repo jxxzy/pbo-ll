@@ -21,7 +21,9 @@ try{
   await page.goto(host+'/playground/?bab=1&debug=1');
   await page.locator('#run:enabled').waitFor({timeout:30000});
   await page.locator('#monaco-editor .monaco-editor').waitFor({timeout:30000});
+  const failures=[];
   for(let chapter=1;chapter<=7;chapter++){
+    try{
     await page.selectOption('#chapter',String(chapter));
     await page.locator('#run:enabled').waitFor({timeout:30000});
     await page.click('#run');
@@ -30,7 +32,9 @@ try{
     const state=await page.locator('#state').textContent(), output=await page.locator('#output').textContent();
     assert.match(state,/Eksekusi selesai/,'Bab '+chapter+': '+output);
     assert.ok(output.includes(expected[chapter-1]),'Bab '+chapter+': '+output);
+    if(chapter===6)assert.ok(output.includes('BRG002\tLabel\t75'),'Bab 6: file read/write not demonstrated');
     console.log('PASS browser C# Bab '+chapter);
+    }catch(e){failures.push('Bab '+chapter+': '+e.message);console.error('FAIL browser C#',chapter,e.message);await page.goto(host+'/playground/?bab='+chapter);await page.locator('#run:enabled').waitFor({timeout:30000});}
   }
   for(let chapter=8;chapter<=11;chapter++){
     await page.selectOption('#chapter',String(chapter));
@@ -55,4 +59,5 @@ try{
   await page.locator('#run:enabled').waitFor();
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2),'Mobile horizontal overflow');
   console.log('PASS mobile smoke');
+  assert.equal(failures.length,0,failures.join('\n'));
 }finally{await browser?.close();server.kill();}

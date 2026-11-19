@@ -1,7 +1,7 @@
 ItemGudang[] daftar =
 [
     new BarangKimia("KIM001", "Pembersih Industri", 2),
-    new BarangMakanan("MKN001", "Susu UHT", new DateOnly(2027, 4, 30))
+    new BarangMakanan("MKN001", "Susu UHT", new DateTime(2027, 4, 30))
 ];
 
 foreach (var item in daftar)
@@ -11,7 +11,7 @@ foreach (var item in daftar)
 
     if (item is IPeriksaKadaluarsa dapatDiperiksa)
     {
-        Console.WriteLine($"Kadaluarsa: {dapatDiperiksa.PeriksaKadaluarsa(DateOnly.FromDateTime(DateTime.Today))}");
+        Console.WriteLine($"Kadaluarsa: {dapatDiperiksa.PeriksaKadaluarsa(DateTime.Today)}");
     }
 }
 
@@ -39,17 +39,17 @@ public sealed class BarangKimia(string kode, string nama, int tingkatBahaya) : I
 
 public interface IPeriksaKadaluarsa
 {
-    string PeriksaKadaluarsa(DateOnly tanggalHariIni);
+    string PeriksaKadaluarsa(DateTime tanggalHariIni);
 }
 
-public sealed class BarangMakanan(string kode, string nama, DateOnly tanggalKadaluarsa)
+public sealed class BarangMakanan(string kode, string nama, DateTime tanggalKadaluarsa)
     : ItemGudang(kode, nama), IPeriksaKadaluarsa
 {
     public override string EvaluasiRisiko() =>
-        tanggalKadaluarsa <= DateOnly.FromDateTime(DateTime.Today.AddDays(30))
+        tanggalKadaluarsa <= DateTime.Today.AddDays(30)
             ? "Perlu pemeriksaan masa simpan."
             : "Masa simpan masih aman.";
 
-    public string PeriksaKadaluarsa(DateOnly tanggalHariIni) =>
+    public string PeriksaKadaluarsa(DateTime tanggalHariIni) =>
         tanggalKadaluarsa < tanggalHariIni ? "Sudah kedaluwarsa" : "Belum kedaluwarsa";
 }
