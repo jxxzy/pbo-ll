@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'dist');
 const contentRoot = path.join(root, 'content', 'chapters');
+const practiceRoot = path.join(root, 'praktikum');
 
 function escapeHtml(value) {
   return String(value)
@@ -107,6 +108,18 @@ for (const file of ['index.html', 'app.js', 'chapter.js', 'styles.css', 'favicon
 
 await cp(path.join(root, 'content'), path.join(output, 'content'), { recursive: true });
 await cp(path.join(root, 'Materi'), path.join(output, 'Materi'), { recursive: true });
+await cp(practiceRoot, path.join(output, 'praktikum'), {
+  recursive: true,
+  filter: (sourcePath) => {
+    const relativePath = path.relative(practiceRoot, sourcePath);
+    const segments = relativePath.split(path.sep);
+    const fileName = path.basename(sourcePath);
+    return !segments.some((segment) => segment === 'bin' || segment === 'obj')
+      && fileName !== 'gudang.db'
+      && !fileName.startsWith('gudang.db-')
+      && fileName !== 'data_barang.txt';
+  },
+});
 const emptyPdfs = [];
 for (const file of await readdir(path.join(output, 'Materi'))) {
   const filePath = path.join(output, 'Materi', file);
@@ -119,6 +132,50 @@ for (const file of await readdir(path.join(output, 'Materi'))) {
 
 const lessons = JSON.parse(await readFile(path.join(contentRoot, 'chapters.json'), 'utf8'));
 const template = await readFile(path.join(contentRoot, 'template.html'), 'utf8');
+
+async function listPracticeFiles(directory, relativeDirectory = '') {
+  const files = [];
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const relativePath = path.join(relativeDirectory, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...await listPracticeFiles(path.join(directory, entry.name), relativePath));
+    } else if (entry.isFile()) {
+      files.push(relativePath.split(path.sep).join('/'));
+    }
+  }
+  return files;
+}
+
+for (const lesson of lessons) {
+  if (lesson.unavailable) continue;
+
+  const chapterId = String(lesson.chapter).padStart(2, '0');
+  const practiceDirectory = path.join(output, 'praktikum', `bab-${chapterId}`);
+  const files = await listPracticeFiles(practiceDirectory);
+  const fileLinks = files
+    .map((file) => `<li><a href="${encodeURI(file)}" download>${escapeHtml(file)}</a></li>`)
+    .join('');
+  const page = `<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>File Praktikum Bab ${chapterId} · ${escapeHtml(lesson.title)}</title>
+  <style>
+    body{max-width:760px;margin:40px auto;padding:0 20px;font:16px/1.6 system-ui,sans-serif;color:#172222}
+    h1{line-height:1.25}a{color:#087f68}li{margin:8px 0}
+    .back{display:inline-block;margin-bottom:16px}
+  </style>
+</head>
+<body>
+  <a class="back" href="../../bab-${lesson.chapter}/">← Kembali ke materi Bab ${chapterId}</a>
+  <h1>File Praktikum Bab ${chapterId}</h1>
+  <p>${escapeHtml(lesson.title)} · Unduh semua file berikut ke satu folder, lalu ikuti petunjuk di README.md.</p>
+  <ul>${fileLinks}</ul>
+</body>
+</html>`;
+  await writeFile(path.join(practiceDirectory, 'index.html'), page, 'utf8');
+}
 
 for (const lesson of lessons) {
   if (lesson.unavailable) continue;
@@ -201,6 +258,7 @@ for (const lesson of lessons) {
     PRACTICE_TITLE: escapeHtml(lessonContent.practice.title),
     PRACTICE_STEPS: renderPracticeSteps(lessonContent.practice.steps),
     DELIVERABLE: escapeHtml(lessonContent.practice.deliverable),
+    PRACTICE_DOWNLOAD_LINK: `<a class="button button-primary" href="../praktikum/bab-${String(lesson.chapter).padStart(2, '0')}/">Unduh file praktikum Bab ${String(lesson.chapter).padStart(2, '0')} <span aria-hidden="true">↓</span></a>`,
     PRACTICE_SOLUTION: renderSolution(lessonContent.practice.solutions),
     ASSESSMENT_SOLUTIONS: renderAssessments(lessonContent.assessments, lesson.sourceMissing),
     ANSWER: String(quiz.answer),

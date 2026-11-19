@@ -301,6 +301,7 @@ h1 span { color: var(--accent); }
 .deliverable { padding: 12px; margin-top: 17px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface-raised); }
 .deliverable strong { color: var(--green); font-size: 9px; }
 .deliverable p { margin: 5px 0 0; color: var(--text-soft); font-size: 9px; line-height: 1.6; }
+.practice-download { margin: 14px 0 0; }
 .solution-details, .assessment-details { margin-top: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-raised); }
 .solution-details summary, .assessment-details summary { padding: 12px 14px; color: var(--accent); cursor: pointer; font-size: 10px; font-weight: 700; }
 .solution-content, .assessment-content { display: grid; gap: 14px; padding: 0 14px 14px; }

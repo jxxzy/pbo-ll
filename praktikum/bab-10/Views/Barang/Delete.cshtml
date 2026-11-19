@@ -1,0 +1,10 @@
+@model Barang
+@{
+    ViewData["Title"] = "Hapus Barang";
+}
+<h1>Hapus barang?</h1>
+<p>Yakin ingin menghapus @Model.NamaBarang (@Model.KodeBarang)?</p>
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <button type="submit">Ya, hapus</button>
+    <a asp-action="Index">Batal</a>
+</form>

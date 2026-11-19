@@ -1,0 +1,20 @@
+@model BarangViewModel
+@{
+    ViewData["Title"] = "Tambah Barang";
+}
+<h1>Tambah Barang</h1>
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly"></div>
+    <label asp-for="KodeBarang"></label>
+    <input asp-for="KodeBarang" />
+    <span asp-validation-for="KodeBarang"></span>
+    <label asp-for="NamaBarang"></label>
+    <input asp-for="NamaBarang" />
+    <span asp-validation-for="NamaBarang"></span>
+    <label asp-for="JumlahStok"></label>
+    <input asp-for="JumlahStok" type="number" />
+    <span asp-validation-for="JumlahStok"></span>
+    <label asp-for="Kategori"></label>
+    <input asp-for="Kategori" />
+    <button type="submit">Simpan</button>
+</form>

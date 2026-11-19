@@ -7,6 +7,7 @@ Situs pembelajaran statis berbahasa Indonesia untuk materi C#, OOP, ASP.NET Core
 - Dashboard responsif dengan jalur belajar dan navigasi bab.
 - Pencarian materi (`/`), filter progres, mode terang/gelap, dan mode fokus.
 - Halaman belajar untuk seluruh Bab 1–11: tujuan, ringkasan materi, contoh kode, langkah praktikum, serta contoh penyelesaian.
+- File project praktikum C# dan ASP.NET Core yang dapat diunduh terpisah pada setiap halaman bab (`praktikum/bab-01/` sampai `praktikum/bab-11/`).
 - Pembahasan pre-test, post-test, esai, dan tugas dari seluruh 11 PDF.
 - Kuis interaktif, navigasi antar bab, salin kode, tautan PDF, serta progres lokal yang tersimpan di browser.
 - Workflow GitHub Actions untuk build dan deploy otomatis ke GitHub Pages.
@@ -19,6 +20,8 @@ content/
     chapters.json          Metadata dan daftar materi
     chapter-N.json         Materi, praktikum, solusi, kuis, dan pembahasan soal
     template.html          Template halaman belajar
+praktikum/
+  bab-N/                   Source project praktikum yang dapat diunduh
 Materi/                    Modul praktikum PDF
 scripts/build.mjs          Build situs statis ke dist/
 .github/workflows/         Workflow GitHub Pages
@@ -42,6 +45,17 @@ python -m http.server 8000 --directory dist
 Buka `http://localhost:8000`.
 
 Build menghasilkan dashboard dan sebelas halaman bab di `dist/`, termasuk seluruh modul PDF Bab 1–11.
+
+## Menjalankan file praktikum
+
+Setiap halaman bab memiliki tautan **Unduh file praktikum**. Unduh file dalam satu folder dan jalankan petunjuk pada `README.md` di folder tersebut. Praktikum Bab 1–7 adalah console app; Bab 8–10 adalah aplikasi MVC; Bab 11 adalah REST API. Project menggunakan .NET 8, dan Bab 9–11 memulihkan paket EF Core/SQLite saat pertama kali dijalankan.
+
+Contoh menjalankan project:
+
+```powershell
+dotnet run --project praktikum/bab-01/PraktikumBab01.csproj
+dotnet run --project praktikum/bab-08/PraktikumBab08.csproj
+```
 
 ## Deploy ke GitHub Pages
 

@@ -1,2 +1,7 @@
 node_modules/
 dist/
+**/bin/
+**/obj/
+**/gudang.db
+**/gudang.db-*
+**/data_barang.txt

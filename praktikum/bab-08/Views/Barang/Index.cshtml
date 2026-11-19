@@ -1,0 +1,14 @@
+@model IReadOnlyList<PraktikumBab08.Models.BarangRingkas>
+@{
+    ViewData["Title"] = "Daftar Barang";
+}
+<h1>Daftar Barang</h1>
+<table>
+    <thead><tr><th>Kode</th><th>Nama</th><th>Stok</th></tr></thead>
+    <tbody>
+    @foreach (var barang in Model)
+    {
+        <tr><td>@barang.Kode</td><td>@barang.Nama</td><td>@barang.Stok</td></tr>
+    }
+    </tbody>
+</table>
