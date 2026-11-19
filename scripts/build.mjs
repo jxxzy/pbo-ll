@@ -20,14 +20,15 @@ function renderCode(title, lines) {
   return `<div class="code-block"><div class="code-block-top"><span>${escapeHtml(title)}</span><button class="copy-code" type="button" data-copy-code>Salin kode</button></div><pre><code>${escapeHtml(lines.join('\n'))}</code></pre></div>`;
 }
 
-function renderSection(section, index) {
+function renderSection(section, index, chapter) {
+  const motion = 31 + (((chapter - 1) * 4 + index) % 20);
   const bullets = section.bullets?.length
     ? `<ul class="lesson-bullets">${section.bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
     : '';
   const code = section.code?.length ? renderCode(section.codeTitle, section.code) : '';
   const note = section.note ? `<p class="lesson-note">${escapeHtml(section.note)}</p>` : '';
 
-  return `<section class="lesson-section" id="topik-${index + 1}"><p class="eyebrow">${String(index + 1).padStart(2, '0')} · MATERI</p><h2>${escapeHtml(section.title)}</h2><p>${escapeHtml(section.body)}</p>${bullets}${code}${note}</section>`;
+  return `<section class="lesson-section motion-item" data-motion="${motion}" id="topik-${index + 1}"><p class="eyebrow">${String(index + 1).padStart(2, '0')} · MATERI</p><h2>${escapeHtml(section.title)}</h2><p>${escapeHtml(section.body)}</p>${bullets}${code}${note}</section>`;
 }
 
 function renderSolution(solutions = []) {
@@ -236,7 +237,9 @@ for (const lesson of lessons) {
   const nextLink = next
     ? `<a class="pagination-link next" href="../bab-${next.chapter}/"><span>Bab berikutnya →</span><strong>${escapeHtml(next.title)}</strong></a>`
     : `<a class="pagination-link next" href="../index.html#materi"><span>Selesai</span><strong>Kembali ke dashboard ↑</strong></a>`;
-  const sectionList = lessonContent.sections.map(renderSection).join('');
+  const sectionList = lessonContent.sections
+    .map((section, index) => renderSection(section, index, lesson.chapter))
+    .join('');
   const toc = lessonContent.sections.map((section, index) => `<a href="#topik-${index + 1}">${escapeHtml(section.title)}</a>`).join('');
   const pdfHeroLink = lesson.file
     ? `<a class="button button-outline" href="../${escapeHtml(lesson.file)}" target="_blank" rel="noopener">Buka modul PDF <span aria-hidden="true">↗</span></a>`

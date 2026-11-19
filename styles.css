@@ -488,6 +488,26 @@ h1 span { color: var(--accent); }
 @keyframes motion-28 { from { opacity: 0; transform: translateY(13px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes motion-29 { from { opacity: 0; transform: translateX(10px); } 70% { transform: translateX(-1px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes motion-30 { from { opacity: 0; transform: translateY(9px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes motion-31 { from { opacity: 0; transform: translateY(-24px) rotate(2deg) scale(.96); } 72% { transform: translateY(3px) rotate(-.5deg); } to { opacity: 1; transform: translateY(0) rotate(0) scale(1); } }
+@keyframes motion-32 { from { opacity: 0; transform: translateX(-28px) scale(.94); filter: blur(3px); } to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); } }
+@keyframes motion-33 { from { opacity: 0; transform: translate(26px, 12px) scale(.95); } to { opacity: 1; transform: translate(0, 0) scale(1); } }
+@keyframes motion-34 { from { opacity: 0; transform: translateY(18px); clip-path: inset(0 0 100% 0); } to { opacity: 1; transform: translateY(0); clip-path: inset(0 0 0 0); } }
+@keyframes motion-35 { from { opacity: 0; transform: scale(.72) rotate(-3deg); } 76% { transform: scale(1.025) rotate(.4deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+@keyframes motion-36 { from { opacity: 0; transform: translateY(10px); filter: blur(10px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+@keyframes motion-37 { from { opacity: 0; transform: perspective(700px) rotateX(-20deg) translateY(16px); } to { opacity: 1; transform: perspective(700px) rotateX(0) translateY(0); } }
+@keyframes motion-38 { from { opacity: 0; transform: perspective(700px) rotateX(18deg) translateY(-14px); } to { opacity: 1; transform: perspective(700px) rotateX(0) translateY(0); } }
+@keyframes motion-39 { from { opacity: 0; transform: perspective(650px) rotateY(-36deg) translateX(-12px); } to { opacity: 1; transform: perspective(650px) rotateY(0) translateX(0); } }
+@keyframes motion-40 { from { opacity: 0; transform: perspective(650px) rotateY(36deg) translateX(12px); } to { opacity: 1; transform: perspective(650px) rotateY(0) translateX(0); } }
+@keyframes motion-41 { from { opacity: 0; transform: scale(.9); clip-path: circle(0 at 50% 50%); } to { opacity: 1; transform: scale(1); clip-path: circle(75% at 50% 50%); } }
+@keyframes motion-42 { from { opacity: 0; transform: translateY(16px); clip-path: circle(0 at 50% 100%); } to { opacity: 1; transform: translateY(0); clip-path: circle(80% at 50% 100%); } }
+@keyframes motion-43 { from { opacity: 0; transform: translateX(-18px); clip-path: inset(0 100% 0 0); } to { opacity: 1; transform: translateX(0); clip-path: inset(0 0 0 0); } }
+@keyframes motion-44 { from { opacity: 0; transform: translateX(18px); clip-path: inset(0 0 0 100%); } to { opacity: 1; transform: translateX(0); clip-path: inset(0 0 0 0); } }
+@keyframes motion-45 { from { opacity: 0; transform: translateX(-16px) skewX(-7deg); } to { opacity: 1; transform: translateX(0) skewX(0); } }
+@keyframes motion-46 { from { opacity: 0; transform: translateX(16px) skewX(7deg); } to { opacity: 1; transform: translateX(0) skewX(0); } }
+@keyframes motion-47 { from { opacity: 0; transform-origin: 50% 100%; transform: translateY(12px) scaleY(.72); } to { opacity: 1; transform-origin: 50% 100%; transform: translateY(0) scaleY(1); } }
+@keyframes motion-48 { from { opacity: 0; transform-origin: 50% 0; transform: translateY(-12px) scaleY(.72); } to { opacity: 1; transform-origin: 50% 0; transform: translateY(0) scaleY(1); } }
+@keyframes motion-49 { from { opacity: 0; transform: translate(-18px, 12px) rotate(-2deg); } 70% { transform: translate(2px, -1px) rotate(.3deg); } to { opacity: 1; transform: translate(0, 0) rotate(0); } }
+@keyframes motion-50 { from { opacity: 0; transform: translateY(18px) scale(1.08); } 65% { transform: translateY(-2px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes nav-arrow-hop { 50% { transform: translate(2px, -2px); } }
 
 html.motion-ready .motion-item:not(.is-visible) { opacity: 0; }
@@ -522,6 +542,26 @@ html.motion-ready .motion-item.is-visible { animation-duration: .68s; animation-
 .motion-item[data-motion="28"].is-visible { animation-name: motion-28; }
 .motion-item[data-motion="29"].is-visible { animation-name: motion-29; }
 .motion-item[data-motion="30"].is-visible { animation-name: motion-30; }
+.motion-item[data-motion="31"].is-visible { animation-name: motion-31; }
+.motion-item[data-motion="32"].is-visible { animation-name: motion-32; }
+.motion-item[data-motion="33"].is-visible { animation-name: motion-33; }
+.motion-item[data-motion="34"].is-visible { animation-name: motion-34; }
+.motion-item[data-motion="35"].is-visible { animation-name: motion-35; }
+.motion-item[data-motion="36"].is-visible { animation-name: motion-36; }
+.motion-item[data-motion="37"].is-visible { animation-name: motion-37; }
+.motion-item[data-motion="38"].is-visible { animation-name: motion-38; }
+.motion-item[data-motion="39"].is-visible { animation-name: motion-39; }
+.motion-item[data-motion="40"].is-visible { animation-name: motion-40; }
+.motion-item[data-motion="41"].is-visible { animation-name: motion-41; }
+.motion-item[data-motion="42"].is-visible { animation-name: motion-42; }
+.motion-item[data-motion="43"].is-visible { animation-name: motion-43; }
+.motion-item[data-motion="44"].is-visible { animation-name: motion-44; }
+.motion-item[data-motion="45"].is-visible { animation-name: motion-45; }
+.motion-item[data-motion="46"].is-visible { animation-name: motion-46; }
+.motion-item[data-motion="47"].is-visible { animation-name: motion-47; }
+.motion-item[data-motion="48"].is-visible { animation-name: motion-48; }
+.motion-item[data-motion="49"].is-visible { animation-name: motion-49; }
+.motion-item[data-motion="50"].is-visible { animation-name: motion-50; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
