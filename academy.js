@@ -11,6 +11,24 @@ const bind=(id,fn)=>{const el=$(id);if(el)el.addEventListener('click',fn)};
 const books=()=>{const v=read(marksKey,[]);return Array.isArray(v)?v.filter(n=>L.some(x=>x.chapter===n)):[]};
 const chapterList=$('academy-chapters');
 if(chapterList){for(const l of L){const d=make('details',undefined,'chapter-group academy-nav-chapter'),s=make('summary'),num=make('span',String(l.chapter).padStart(2,'0'),'summary-index'),names=make('span');names.append(make('strong','Bab '+l.chapter),make('small',l.title));s.append(num,names,make('span','⌄','summary-arrow'));d.append(s,link('Ikhtisar bab','./bab-'+l.chapter+'/'),link('Praktikum','./bab-'+l.chapter+'/#praktikum'),link('Evaluasi','./bab-'+l.chapter+'/#latihan-mandiri'),link('C# Studio ↗','./playground/?bab='+l.chapter));chapterList.append(d)}}
+const searchInput=$('academy-search')||$('search-input'),results=$('academy-search-results');
+if(searchInput&&results){
+  let searchIndex=null,seq=0;
+  const normalize=v=>String(v??'').toLocaleLowerCase('id').normalize('NFKD');
+  const loadIndex=()=>searchIndex||(searchIndex=Promise.all(L.map(async l=>{
+    try{const res=await fetch(root+'content/chapters/chapter-'+l.chapter+'.json');if(!res.ok)throw Error('HTTP '+res.status);const data=await res.json();return {l,full:normalize(JSON.stringify(data))}}
+    catch{return {l,full:''}}
+  })));
+  searchInput.addEventListener('input',async()=>{
+    const q=normalize(searchInput.value.trim()),id=++seq;results.replaceChildren();results.hidden=!q;if(!q)return;
+    results.append(make('p','Mencari materi…'));
+    const entries=await loadIndex();if(id!==seq)return;
+    const found=entries.filter(({l,full})=>normalize(l.title+' '+l.summary+' '+l.topics.join(' ')+' bab '+l.chapter).includes(q)||full.includes(q));
+    results.replaceChildren();if(!found.length){results.append(make('p','Tidak ada hasil.'));return}
+    for(const {l} of found){const a=link('Bab '+l.chapter+' · '+l.title,root+'bab-'+l.chapter+'/');results.append(a)}
+  });
+  if(chapter)document.addEventListener('keydown',e=>{if(e.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)&&!document.activeElement.isContentEditable){e.preventDefault();searchInput.focus()}});
+}
 let reading=Number(raw('pbo-academy-reading','0'));if(![-1,0,1,2].includes(reading))reading=0;document.documentElement.dataset.reading=reading;
 document.querySelectorAll('[data-reading]').forEach(b=>b.onclick=()=>{const n=Number(b.dataset.reading);reading=n===0?0:Math.max(-1,Math.min(2,reading+n));document.documentElement.dataset.reading=reading;saveRaw('pbo-academy-reading',String(reading))});
 function updateBookmark(){const b=$('academy-bookmark-this');if(b){const saved=books().includes(chapter);b.textContent=saved?'★ Bab tersimpan':'☆ Simpan bab';b.setAttribute('aria-pressed',String(saved))}}

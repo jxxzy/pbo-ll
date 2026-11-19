@@ -27,7 +27,7 @@ try{
   await page.selectOption('#academy-note-chapter','11');await page.fill('#academy-note','CI note');await page.click('#academy-note-save');assert.equal(await page.evaluate(()=>localStorage.getItem('pbo-notes-v2:11')),'CI note');
   assert.equal(await page.locator('#academy-scores tr').count(),11);
   await page.click('#academy-start');await page.click('#academy-pause');assert.match(await page.locator('#academy-timer-status').textContent(),/Dijeda/);
-  await page.goto(host+'/bab-11/');await page.locator('#academy-bookmark-this').waitFor();assert.match(await page.locator('#academy-bookmark-this').textContent(),/tersimpan/);
+  await page.goto(host+'/bab-11/');await page.locator('#academy-search').fill('REST API');await page.locator('#academy-search-results a').first().waitFor();assert.match(await page.locator('#academy-search-results').textContent(),/Bab 11/);await page.locator('#academy-bookmark-this').waitFor();assert.match(await page.locator('#academy-bookmark-this').textContent(),/tersimpan/);
   console.log('PASS academy navigation, concept lab, bookmarks, notes, assessment and timer');
   await page.goto(host+'/playground/?bab=1&debug=1');
   await page.locator('#run:enabled').waitFor({timeout:30000});

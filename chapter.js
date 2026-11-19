@@ -85,7 +85,7 @@ function applyTheme(theme) {
 
 try {
   const savedTheme = window.localStorage.getItem('ruang-kelas-theme');
-  if (savedTheme === 'light' || savedTheme === 'dark') applyTheme(savedTheme);
+  applyTheme(savedTheme === 'dark' ? 'dark' : 'light');
 } catch {
   showToast('Preferensi tampilan tidak dapat dibaca dari browser.');
 }
